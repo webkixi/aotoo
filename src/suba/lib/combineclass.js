@@ -59,6 +59,7 @@ function AotooHoc(oriReactClass, actions, inst) {
   class AotooClass extends oriReactClass {
     constructor(props){
       super(props)
+      this.props = this.props || props
 
       forEach(evts, (ii, evt) => {
         this[evt] = inst::inst[evt]
@@ -307,7 +308,7 @@ export class CombineClass extends Aee {
   
       if (isClient) {
         this.config.container = id
-        return browserRender(id, X, this.config)
+        return browserRender(id, X, _props, this.config)
       } else {
         return <X {..._props} />
       }
@@ -315,8 +316,8 @@ export class CombineClass extends Aee {
   }
 }
 
-function browserRender(id, X, config) {
-  const props = config.props
+function browserRender(id, X, props, config) {
+  // const props = config.props
   if (isString(id)) {
     if (document.getElementById(id)) {
       ReactDom.render(<X {...props} />, document.getElementById(id))
