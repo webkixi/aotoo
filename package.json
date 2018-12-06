@@ -1,6 +1,6 @@
 {
   "name": "@aotoo/aotoo",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "aotoo is a react library, for simpler development of react components, it is like a lightweight redux that but more better, you can use aotoo in",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

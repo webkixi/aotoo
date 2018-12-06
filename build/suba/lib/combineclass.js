@@ -59,6 +59,8 @@ function AotooHoc(oriReactClass, actions, inst) {
 
       var _this = _possibleConstructorReturn(this, (AotooClass.__proto__ || Object.getPrototypeOf(AotooClass)).call(this, props));
 
+      _this.props = _this.props || props;
+
       (0, _util.forEach)(evts, function (ii, evt) {
         _this[evt] = inst[evt].bind(inst);
       });
@@ -341,7 +343,7 @@ var CombineClass = exports.CombineClass = function (_Aee) {
 
         if (_util.isClient) {
           this.config.container = id;
-          return browserRender(id, X, this.config);
+          return browserRender(id, X, _props, this.config);
         } else {
           return React.createElement(X, _props);
         }
@@ -352,8 +354,8 @@ var CombineClass = exports.CombineClass = function (_Aee) {
   return CombineClass;
 }(_aotooeventemitter2.default);
 
-function browserRender(id, X, config) {
-  var props = config.props;
+function browserRender(id, X, props, config) {
+  // const props = config.props
   if ((0, _util.isString)(id)) {
     if (document.getElementById(id)) {
       ReactDom.render(React.createElement(X, props), document.getElementById(id));
