@@ -1,6 +1,6 @@
 # aotoo
-aotoo is a react library, Able to instantiate react components for js
-一个react的封装库，将react组件js实例化
+aotoo is a react library, Able to instantiate react components for js  
+一个react的封装库，将react组件js实例化  
 
 # INSTALL
 ```bash
@@ -88,6 +88,12 @@ setTimeout(() => {
 
 ReactDOM.render(<test.UI />, document.getElementById('root'))
 ```
+
+## 基础DEMO
+https://codesandbox.io/s/aotoo6basedemo-li0jq?file=/src/App.js  
+https://codesandbox.io/s/aotoo6basedemo-forked-3ikdp?file=/src/demos/basecomponent.js  
+
+
 ### 通用属性
 | 属性      |    类型 | 说明  |
 | :-------- | :--------: | :-- |
@@ -144,6 +150,11 @@ function changeTitle(e){
 
 const JSX = <UI_item title='标题' onClick={changeTitle}/>
 ```  
+
+### item组件DEMO
+https://codesandbox.io/s/aotoo6basedemo1-forked-bxcs9?file=/src/App.js    
+https://codesandbox.io/s/aotoo6itembase1-cpdvt  
+
 
 ### item属性
 | 属性      |    类型 | 说明  |
@@ -266,6 +277,11 @@ const tree = ui_list(listConfig)
 
 ReactDOM.render(<tree.UI />, document.getElementById('root'))
 ```
+
+### list组件DEMO
+https://codesandbox.io/s/aotoo6listbase-6kmkb  
+https://codesandbox.io/s/aotoo6listbase1-xltew  
+[tree](https://codesandbox.io/s/aotoo6listbase1-forked-cyte9)  
 
 > 空格不是必须的，为展现数据层次  
 

@@ -187,7 +187,7 @@ function Li(_props) {
   // let props = (_props.data || _props)
   let state = _props.state || {}
   let property = _props.property || {}
-  let liClass = state.liClass || property.liClass || ''
+  let liClass = props.liClass || state.liClass || property.liClass || ''
   let liStyle = state.liStyle || property.liStyle || undefined
   
   if (lib.isArray(props)) {

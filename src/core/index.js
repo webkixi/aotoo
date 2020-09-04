@@ -147,7 +147,7 @@ function getReactComponentClass(_data, parent, template, splitProps) {
           //   parent[ky] = val
           // }
         }
-        events = bindEvents(events, this)
+        events = bindEvents(events, parent)
         
         return Object.assign($state, events)
       }
@@ -233,10 +233,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
     // 在render之后调用，state已更新
     // snapshot 为getSnapshotBeforeUpdate方法返回的值
     componentDidUpdate(prevProps, prevState, snapshot) {
-      if (lib.isFunction(parent.componentDidUpdate)) {
-        parent.componentDidUpdate && parent.componentDidUpdate(prevProps, prevState, snapshot)
-        parent.didUpdate(prevProps, prevState, snapshot)
-      }
+      parent.componentDidUpdate && parent.componentDidUpdate(prevProps, prevState, snapshot)
+      parent.didUpdate(prevProps, prevState, snapshot)
     }
 
     componentWillUnmount() {
@@ -293,7 +291,7 @@ function _ready_(params) {
 }
 
 function _setData_(param = {}, cb) {
-  if (this.reactComponentInstance) {
+  if (this.reactComponentInstance && this.hasMounted) {
     this.reactComponentInstance.setSelfState(param, cb);
   } else {
     // created生命周期中
@@ -480,7 +478,7 @@ class baseClass {
   }
 
   reset(param){
-    this.reactComponentInstance.reset(param)
+    this.reactComponentInstance && this.reactComponentInstance.reset(param)
   }
 
   show(){

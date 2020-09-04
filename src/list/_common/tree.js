@@ -67,6 +67,7 @@ function valideClassName(clsname, level) {
 		}
 		return clsname
 	}
+	return myLevelCls
 }
 
 function subTree(item, dataAry, deep){
@@ -77,6 +78,7 @@ function subTree(item, dataAry, deep){
 		var _clsName = son.itemClass || son.className
 		son.itemClass = valideClassName(_clsName, deep)
 		if (son.idf && idrecode.indexOf(son.idf) == -1) {
+			son.liClass = 'itemroot'
 			idrecode.push(son.idf)
 			nsons = nsons.concat([subTree(son, dataAry, ++deep)])
 			--deep
@@ -86,6 +88,7 @@ function subTree(item, dataAry, deep){
 	})
 	if (nsons.length) {
 		item.li = nsons
+		item.liClass = 'itemroot'
 	}
 	return item
 }
@@ -122,7 +125,7 @@ export default function transTree(dataAry, state){
 
 			if (item.idf && !item.parent && idrecode.indexOf(item.idf) == -1) {
 				let clsName = item.itemClass || item.className
-				item.itemClass = clsName ? clsName.indexOf('level0') == -1 ? clsName + ' level0' : clsName : 'level0'
+				item.itemClass = clsName ? clsName.indexOf('level0') == -1 ? clsName + ' itemroot level0' : clsName : 'itemroot level0'
 				menus.push(subTree(item, dataAry))
 			} else if (!item.idf && !item.parent) {
 				menus.push(item)

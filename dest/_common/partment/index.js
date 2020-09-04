@@ -204,7 +204,7 @@ function Li(_props) {
 
   var state = _props.state || {};
   var property = _props.property || {};
-  var liClass = state.liClass || property.liClass || '';
+  var liClass = props.liClass || state.liClass || property.liClass || '';
   var liStyle = state.liStyle || property.liStyle || undefined;
 
   if (lib.isArray(props)) {

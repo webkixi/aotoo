@@ -227,7 +227,7 @@ function getReactComponentClass(_data, parent, template, splitProps) {
 
           }
 
-          events = (0, _index.bindEvents)(events, _this2);
+          events = (0, _index.bindEvents)(events, parent);
           return Object.assign($state, events);
         };
 
@@ -282,10 +282,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
     }, {
       key: "componentDidUpdate",
       value: function componentDidUpdate(prevProps, prevState, snapshot) {
-        if (lib.isFunction(parent.componentDidUpdate)) {
-          parent.componentDidUpdate && parent.componentDidUpdate(prevProps, prevState, snapshot);
-          parent.didUpdate(prevProps, prevState, snapshot);
-        }
+        parent.componentDidUpdate && parent.componentDidUpdate(prevProps, prevState, snapshot);
+        parent.didUpdate(prevProps, prevState, snapshot);
       }
     }, {
       key: "componentWillUnmount",
@@ -388,7 +386,7 @@ function _setData_() {
   var param = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var cb = arguments.length > 1 ? arguments[1] : undefined;
 
-  if (this.reactComponentInstance) {
+  if (this.reactComponentInstance && this.hasMounted) {
     this.reactComponentInstance.setSelfState(param, cb);
   } else {
     // created生命周期中
@@ -606,7 +604,7 @@ var baseClass = /*#__PURE__*/function () {
   }, {
     key: "reset",
     value: function reset(param) {
-      this.reactComponentInstance.reset(param);
+      this.reactComponentInstance && this.reactComponentInstance.reset(param);
     }
   }, {
     key: "show",
