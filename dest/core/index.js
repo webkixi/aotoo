@@ -310,7 +310,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
 
           if (lib.isFunction(JSX.then)) {
             return /*#__PURE__*/React.createElement(ReturnPromiseComponent, {
-              content: JSX
+              content: JSX,
+              loadingClass: state.loadingClass || ''
             });
           }
 

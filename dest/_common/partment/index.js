@@ -414,9 +414,7 @@ var globalComponent = {
   },
   'ui-list': function uiList(props) {
     var list = ui_list(props);
-    return /*#__PURE__*/React.createElement(list.UI, {
-      key: key
-    }, props.children);
+    return /*#__PURE__*/React.createElement(list.UI, null, props.children);
   }
 };
 var context = lib.curContext();

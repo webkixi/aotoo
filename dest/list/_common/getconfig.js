@@ -47,6 +47,7 @@ function getConfig(opts, context) {
   var attr = {};
   var config = {};
   var itemMethod = {};
+  var itemClass = '';
   var re = /\@[\w]+/g;
   Object.keys(opts).forEach(function (k) {
     var v = opts[k];
