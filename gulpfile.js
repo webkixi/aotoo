@@ -1,30 +1,33 @@
-var gulp=require("gulp"),
-  pump = require('pump'),
-  uglify = require('gulp-uglify'),
-  sourcemaps = require('gulp-sourcemaps'),
-  babel = require("gulp-babel"),
-  es2015 = require("babel-preset-es2015"),
-  stage0 = require('babel-preset-stage-0'),
-  breact = require("babel-preset-react");
+// import gulp from 'gulp';
+// import babel from 'gulp-babel';
+// import uglify from 'gulp-uglify';
+// import del from 'del';
 
-const srcs = [
-  './src/**/*.js'
-]
+const gulp = require('gulp')
+const babel = require('gulp-babel')
+const uglify = require('gulp-uglify')
+const del = require('del')
 
-gulp.task('default', function () {
-  pump([
-      gulp.src(srcs),
-      sourcemaps.init(),
-      babel({presets:[breact, es2015, stage0]}),
-      // uglify(),
-      sourcemaps.write('./maps'),
-      gulp.dest('./build')
-    ]
-  );
-});
+const paths = {
+  scripts: {
+    src: 'src/**/*.js',
+    dest: 'dest/'
+  }
+};
 
-// gulp.task('default', function(){
-//   gulp.src('./src/**/*.js')
-//   .pipe(babel({presets:[breact, es2015, stage0]}))
-//   .pipe(gulp.dest('./build'))
-// })
+const clean = () => del(['dest']);
+
+function scripts() {
+  return gulp.src(paths.scripts.src, {
+    sourcemaps: true
+  })
+  .pipe(babel())
+  // .pipe(uglify())
+  .pipe(gulp.dest(paths.scripts.dest));
+}
+
+const build = gulp.series(clean, gulp.parallel(scripts));
+/*
+ * Export a default task
+ */
+exports.default = build;
