@@ -1,6 +1,5 @@
 import * as lib from "../../lib";
 
-
 /**
  * 
  * 模板中现存在太多的clone，虽然是浅层克隆，但还是会有点影响新能
@@ -303,7 +302,7 @@ const globalComponent = {
   'ui-list'(props){
     let list = ui_list(props)
     return (
-      <list.UI key={key}>
+      <list.UI>
         {props.children}
       </list.UI>
     )

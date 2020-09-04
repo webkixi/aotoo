@@ -259,7 +259,7 @@ function getReactComponentClass(_data, parent, template, splitProps) {
         let JSX = template.call(parent, state, props, this.ref)
         if (lib.isFunction(JSX.then)) {
           return (
-            <ReturnPromiseComponent content={JSX} />
+            <ReturnPromiseComponent content={JSX} loadingClass={state.loadingClass||''} />
           )
         }
         if (lib.isString(JSX.type)) {

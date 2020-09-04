@@ -23,6 +23,7 @@ export default function getConfig(opts, context) {
   let attr = {}
   let config = {}
   let itemMethod = {}
+  let itemClass = ''
   let re = /\@[\w]+/g
 
   Object.keys(opts).forEach(k => {
