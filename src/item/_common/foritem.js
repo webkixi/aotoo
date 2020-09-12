@@ -155,8 +155,21 @@ function formatUrl(props, context) {
 }
 
 export function resetItem(data, context, loop, ky) {
-  if (typeof data == 'string' || typeof data == 'number' || typeof data == 'boolean') return data
-  if (React.isValidElement(data)) return data
+  if (typeof data == 'string' || 
+    typeof data == 'number' || 
+    typeof data == 'boolean' || 
+    React.isValidElement(data)
+  ) {
+    return data
+    // if (context.$$is === 'list') {
+    //   data = { 
+    //     title: data,
+    //     itemClass: context.data.itemClass||''
+    //   }
+    // } else {
+    //   return data
+    // }
+  }
 
   if (isObject(data)) {
     let methods = data.methods
@@ -171,6 +184,10 @@ export function resetItem(data, context, loop, ky) {
 
     data.fromComponent = context.data.fromComponent || data.fromComponent || context.data.uniqId || context.uniqId
     data.__fromParent = context.data.__fromParent
+
+    if ((ky && ky.indexOf('@') === 0) || isPlainObject(data)) {
+      data.__key = lib.uniqueId('innerComponent_')
+    }
 
     if (!blockKeys.includes(ky)) {
       if (ky !== 'url' && data.url) {
@@ -300,7 +317,9 @@ export function resetItem(data, context, loop, ky) {
           /** 不去污染内部的父级链，只做表层 */
         }
         else {
-          data[attr] = resetItem(sonItem, context, true, attr)
+          if (!React.isValidElement(sonItem)) {
+            data[attr] = resetItem(sonItem, context, true, attr)
+          }
         }
       }
     }
@@ -322,4 +341,69 @@ export function resetItem(data, context, loop, ky) {
   }
 
   return data
+}
+
+
+export function addClass(data, cls, cb) {
+  if (cls) {
+    cls = cls.replace(/\./g, '')
+    cls = lib.isString(cls) ? cls.split(' ') : []
+    let $itemClass = data.itemClass && data.itemClass.split(' ') || []
+    cls = cls.filter(c => $itemClass.indexOf(c) == -1)
+    $itemClass = $itemClass.concat(cls).join(' ')
+    return $itemClass
+    // this.update({
+    //   itemClass: $itemClass.join(' ')
+    // }, cb)
+  }
+}
+
+export function removeClass(data, cls, cb) {
+  if (cls) {
+    cls = cls.replace(/\./g, '')
+    cls = lib.isString(cls) ? cls.split(' ') : []
+    let $itemClass = data.itemClass && data.itemClass.split(' ') || []
+    let _cls = $itemClass.filter(c => c.indexOf(cls) === -1)
+    $itemClass = _cls.join(' ')||' '
+    return $itemClass
+    // this.update({
+    //   itemClass: ($itemClass.join(' ') || ' ')
+    // }, cb)
+  }
+}
+
+export function hasClass(data, cls) {
+  if (cls) {
+    cls = cls.replace(/\./g, '')
+    cls = lib.isString(cls) ? cls.split(' ') : []
+    let len = cls.length
+    let $itemClass = data.itemClass && data.itemClass.split(' ') || []
+    cls = cls.filter(c => $itemClass.indexOf(c) !== -1)
+    return len === cls.length ? true : false
+  }
+}
+
+export function css(data, params, cb) {
+  if (!lib.isPlainObject(params)) {
+    console.warn('不符合react的内联样式格式');
+    return
+  }
+
+  let itemStyle = Object.assign({}, (data.itemStyle||{}), params)
+  return itemStyle
+  // this.update({ itemStyle }, cb)
+}
+
+export function toggleClass(cls, cb) {
+  if (cls) {
+    let clsAry = lib.isString(cls) ? cls.split(' ') : []
+    if (clsAry.length) {
+      cls = clsAry[0]
+      if (this.hasClass(cls)) {
+        this.removeClass(cls, cb)
+      } else {
+        this.addClass(cls, cb)
+      }
+    }
+  }
 }

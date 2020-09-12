@@ -9,7 +9,7 @@ export const attrKey = [
   
 
   'src', 'type', 'typeOptions', 'data', 'mode', 'attr',
-  'fromComponent', 'rootComponent', '__fromParent', 'uniqId', '__sort',
+  'fromComponent', 'rootComponent', '__fromParent', 'uniqId', '__sort', '__key', 'key',
   'methods', 'itemMethod'
 ]
 

@@ -1,7 +1,7 @@
 import react from 'react'
 import reactDom from 'react-dom'
 import elementsCollection from './elements'
-import hocClass from './wrap'
+import hocClass from './hoc'
 import {extendsTemplate} from '../_common/partment'
 import * as lib from "../lib";
 import {attrKey, accessKey, eventName, internalKeys, isEvents, bindEvents} from '../_common/index'
@@ -316,14 +316,14 @@ class baseClass {
     let _property = _param;
     this.config = _param
     
-    this.uniqId = lib.uniqueId('base_')
+    this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_')
     
     let defaultData = {
       // alwaysSyncProps: false
     }
 
     this.alwaysSyncProps = this.config.alwaysSyncProps || false  // 是否持续更新props(任何时候)
-    this.__showStat = _data.show || true
+    this.__showStat = _data.hasOwnProperty('show') ? _data.show : true
     this.id = _data.id
     this.dom = null  // 真实dom实例，最外层的容器
     this.hasMounted = false;
@@ -391,7 +391,11 @@ class baseClass {
   }
 
   created(){
-    const that = this
+    this.tasks = [] // setData的更新任务
+    this.taskData = this.getData()
+    this.taskStat = true // setData的更新状态
+    this.taskTimmer = null
+
     let config = this.config
     let $data = this.data
     let events = {}
@@ -430,7 +434,10 @@ class baseClass {
   }
 
   getData(){
-    return this.data
+    if (this.tasks.length || this.taskTimmer) {
+      return lib.cloneDeep(this.taskData)
+    }
+    return lib.cloneDeep(this.data)
   }
 
   parent(indentify) {
@@ -493,6 +500,8 @@ class baseClass {
     if (this.$$id) {
       _elements[this.$$id] = null
     }
+    this.reactComponentInstance = null
+    this.hasMounted = false
     this.isINmemery = false
     this.UI = null
     this.dom = null
@@ -507,7 +516,52 @@ class baseClass {
     }
   }
 
-  _setData(param = {}, cb) {
+  _setData(param, cb){
+    clearTimeout(this.taskTimmer)
+    let that = this
+
+    if (!this.tasks.length) {
+      this.taskData = this.getData()
+    }
+    if (param){
+      this.tasks.push([param, cb])
+    }
+
+    // 方案一
+    if (this.hasMounted === 'component_init_set_state') {
+      this.__setData(param, cb)
+      return
+    }
+
+
+    function *tmp(opt) {
+      let p = opt[0]
+      let callback = opt[1]
+      lib.forEach(p, (val, ii, ky)=>{
+        lib.set(that.taskData, ky, val)
+      })
+      if (lib.isFunction(callback)) callback()
+      yield 
+      return function () {
+        that.taskTimmer = setTimeout(() => {
+          that.__setData(that.taskData, callback)
+        }, 51);
+      }
+    }
+
+    let task = this.tasks.shift()
+    let gen = tmp(task)
+    gen.next()
+    if (!this.tasks.length) {
+      let res = gen.next()
+      let fun = res.value
+      fun()
+    }
+    // 方案一结束
+  }
+
+  // 真实setData，可以直接调用
+  __setData(param = {}, cb) {
     if (!lib.isPlainObject(param)) return;
     let result = this.hooks.emit('before-setdata', param, this)
     if (result && result[0]) {
@@ -544,6 +598,20 @@ export function extTemplate(params={}){
   extendsTemplate(params)
 }
 
+function setUniqKey(param){
+  if (param.key || (param.data && param.data.key)) {
+    let key = param.key || (param.data && param.data.key)
+    param.__key = key
+  }
+
+  if (param.__key || (param.data && param.data.__key)) {
+    let key = param.__key || (param.data && param.data.__key)
+    param.__key = key
+  }
+
+  return param
+}
+
 /**
  * 
  * @param {Object} param param.data = state，param的其它参数作为实例属性
@@ -554,11 +622,19 @@ export default function(param, template, splitProps=true) {
   if (lib.isFunction(param)) {
     if (lib.isClass(param)) {
       let options = template
+      options = setUniqKey(options)
+      if (options.__key && $$(options.__key)) {
+        return $$(options.__key)
+      }
       return new hocClass(param, options, splitProps)
     }
     template = param
     param = {}
     return new baseClass(param, template, splitProps)
+  }
+  param = setUniqKey(param)
+  if (param.__key && $$(param.__key)) {
+    return $$(param.__key)
   }
   return new baseClass(param, template, splitProps)
 }

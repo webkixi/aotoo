@@ -1,7 +1,7 @@
 import * as lib from '../../lib'
 import {attrKey, accessKey, eventName, isEvents} from '../../_common'
 
-export function attachItem(pay) {
+export function attachItem(pay, context) {
   let payload = []
   pay = [].concat(pay)
   pay.forEach(it => {
@@ -9,6 +9,9 @@ export function attachItem(pay) {
       it = { title: it }
     }
     if (lib.isPlainObject(it)) {
+      let cClass = context.data.itemClass||''
+      let iClass = it.itemClass||''
+      it.itemClass = iClass ? cClass+' '+iClass : cClass
       it['__key'] = lib.uniqueId('list_item_')
       payload.push(it)
     }
@@ -67,7 +70,7 @@ export default function getConfig(opts, context) {
   }
 
   if (mydata.itemClass) {
-    let itmClass = mydata.itemClass; delete mydata.itemClass
+    let itmClass = mydata.itemClass;
     itemClass = itmClass
   }
 

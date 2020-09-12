@@ -1,5 +1,5 @@
 import createComponet, {$$, lib} from '../core'
-import { resetItem } from "./_common/foritem";
+import { resetItem, addClass, removeClass, hasClass, css, toggleClass } from "./_common/foritem";
 import {attrKey, accessKey, eventName} from '../_common'
 import getConfig from "./_common/getconfig";
 
@@ -103,68 +103,86 @@ let defaultBehavior = {
   },
 
   addClass(cls, cb){
-    if (cls) {
-      cls = cls.replace(/\./g, '')
-      cls = lib.isString(cls) ? cls.split(' ') : []
-      let $item = this.getData()
-      let $itemClass = $item.itemClass && $item.itemClass.split(' ') || []
-      cls = cls.filter(cls => $itemClass.indexOf(cls) == -1)
-      $itemClass = $itemClass.concat(cls)
-      this.update({
-        itemClass: $itemClass.join(' ')
-      }, cb)
-    }
+    let data = this.getData()
+    let $itemClass = addClass(data, cls, cb)
+
+    this.update({
+      itemClass: $itemClass
+    }, cb)
+
+    // if (cls) {
+    //   cls = cls.replace(/\./g, '')
+    //   cls = lib.isString(cls) ? cls.split(' ') : []
+    //   let $item = this.getData()
+    //   let $itemClass = $item.itemClass && $item.itemClass.split(' ') || []
+    //   cls = cls.filter(cls => $itemClass.indexOf(cls) == -1)
+    //   $itemClass = $itemClass.concat(cls)
+    //   this.update({
+    //     itemClass: $itemClass.join(' ')
+    //   }, cb)
+    // }
   },
 
   removeClass(cls, cb) {
-    if (cls) {
-      cls = cls.replace(/\./g, '')
-      cls = lib.isString(cls) ? cls.split(' ') : []
-      let $item = this.getData()
-      let $itemClass = $item.itemClass && $item.itemClass.split(' ') || []
-      let _cls = $itemClass.filter(c => c.indexOf(cls) === -1)
-      $itemClass = _cls
-      this.update({
-        itemClass: ($itemClass.join(' ') || ' ')
-      }, cb)
-    }
+    let data = this.getData()
+    let $itemClass = removeClass(data, cls, cb)
+    this.update({
+      itemClass: ($itemClass || ' ')
+    }, cb)
+    // if (cls) {
+    //   cls = cls.replace(/\./g, '')
+    //   cls = lib.isString(cls) ? cls.split(' ') : []
+    //   let $item = this.getData()
+    //   let $itemClass = $item.itemClass && $item.itemClass.split(' ') || []
+    //   let _cls = $itemClass.filter(c => c.indexOf(cls) === -1)
+    //   $itemClass = _cls
+    //   this.update({
+    //     itemClass: ($itemClass.join(' ') || ' ')
+    //   }, cb)
+    // }
   },
 
   hasClass(cls) {
-    if (cls) {
-      cls = cls.replace(/\./g, '')
-      cls = lib.isString(cls) ? cls.split(' ') : []
-      let len = cls.length
-      let $item = this.getData()
-      let $itemClass = $item.itemClass && $item.itemClass.split(' ') || []
-      cls = cls.filter(c => $itemClass.indexOf(c) !== -1)
-      return len === cls.length ? true : false
-    }
+    let data = this.getData()
+    return hasClass(data, cls)
+    // if (cls) {
+    //   cls = cls.replace(/\./g, '')
+    //   cls = lib.isString(cls) ? cls.split(' ') : []
+    //   let len = cls.length
+    //   let $item = this.getData()
+    //   let $itemClass = $item.itemClass && $item.itemClass.split(' ') || []
+    //   cls = cls.filter(c => $itemClass.indexOf(c) !== -1)
+    //   return len === cls.length ? true : false
+    // }
   },
 
   css(params, cb) {
-    if (!lib.isPlainObject(params)) {
-      console.warn('不符合react的内联样式格式');
-      return
-    }
-
-    let $item = this.getData()
-    let itemStyle = Object.assign({}, ($item.itemStyle||{}), params)
+    let data = this.getData()
+    let itemStyle = css(data, params, cb)
     this.update({ itemStyle }, cb)
+    // if (!lib.isPlainObject(params)) {
+    //   console.warn('不符合react的内联样式格式');
+    //   return
+    // }
+
+    // let $item = this.getData()
+    // let itemStyle = Object.assign({}, ($item.itemStyle||{}), params)
+    // this.update({ itemStyle }, cb)
   }, 
 
   toggleClass(cls, cb){
-    if (cls) {
-      let clsAry = lib.isString(cls) ? cls.split(' ') : []
-      if (clsAry.length) {
-        cls = clsAry[0]
-        if (this.hasClass(cls)) {
-          this.removeClass(cls, cb)
-        } else {
-          this.addClass(cls, cb)
-        }
-      }
-    }
+    toggleClass.call(this, cls, cb)
+    // if (cls) {
+    //   let clsAry = lib.isString(cls) ? cls.split(' ') : []
+    //   if (clsAry.length) {
+    //     cls = clsAry[0]
+    //     if (this.hasClass(cls)) {
+    //       this.removeClass(cls, cb)
+    //     } else {
+    //       this.addClass(cls, cb)
+    //     }
+    //   }
+    // }
   },
 
   siblings(indentify) {

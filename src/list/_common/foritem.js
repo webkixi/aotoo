@@ -1,1 +1,1 @@
-export { resetItem } from "../../item/_common/foritem";
+export { resetItem, addClass, removeClass, hasClass, css, toggleClass } from "../../item/_common/foritem";

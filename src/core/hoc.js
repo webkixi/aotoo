@@ -197,26 +197,33 @@ function _ready_(params) {
 }
 
 function _setData_(param = {}, cb) {
-  this.reactComponentInstance.setSelfState(param, cb);
+  if (this.reactComponentInstance && this.hasMounted) {
+    this.reactComponentInstance.setSelfState(param, cb);
+  } else {
+    // created生命周期中
+    this.data = Object.assign({}, this.data, param)
+  }
 }
 
 class CombineClass {
   constructor(oriClass, config={}, splitProps){
-    let _param = config;
+    let _param = lib.cloneDeep(config);;
     let _data = _param.data||{}; delete _param.data;
     let _property = _param;
-    this.data = _data
     this.config = _param
-    this.uniqId = lib.uniqueId('base_')
+    
+    this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_')
+    
     let defaultData = {
       // alwaysSyncProps: false
     }
-
+    
     this.alwaysSyncProps = this.config.alwaysSyncProps || false  // 是否持续更新props(任何时候)
-    this.__showStat = _data.show || true
+    this.__showStat = _data.hasOwnProperty('show') ? _data.show : true
     this.id = _data.id
     this.dom = null  // 真实dom实例，最外层的容器
     this.hasMounted = false;
+    this.data = Object.assign({uniqId: this.uniqId}, defaultData, _data);
     this.hooks = lib.hooks(lib.uniqueId('baseClass_'))
     this.children = []
     this.events = null  // data中的event合集
@@ -280,10 +287,30 @@ class CombineClass {
   }
 
   created(){
+    this.tasks = [] // setData的更新任务
+    this.taskData = this.getData()
+    this.taskStat = true // setData的更新状态
+    this.taskTimmer = null
+
     let config = this.config
+    let $data = this.data
+    let events = {}
+    lib.forEach($data, (val, ii, ky) => {
+      if (isEvents(ky)) {
+        if (['item', 'list'].indexOf(this.$$is) === -1) {
+          events[ky] = val
+        }
+      } else {
+        if (lib.isFunction(val)) {
+          this[ky] = val
+        }
+      }
+    })
+    events = bindEvents(events, this)
     if (lib.isFunction(config.created)) {
       config.created.call(this) 
     }
+    this.data = Object.assign($data, events)
   }
 
   attached(props){
@@ -302,8 +329,11 @@ class CombineClass {
     }
   }
 
-  getData(){
-    return this.data
+  getData() {
+    if (this.tasks.length || this.taskTimmer) {
+      return lib.cloneDeep(this.taskData)
+    }
+    return lib.cloneDeep(this.data)
   }
 
   parent(indentify) {
@@ -351,7 +381,7 @@ class CombineClass {
   }
 
   reset(param){
-    this.reactComponentInstance.reset(param)
+    this.reactComponentInstance && this.reactComponentInstance.reset(param)
   }
 
   show(){
@@ -366,13 +396,76 @@ class CombineClass {
     if (this.$$id) {
       _elements[this.$$id] = null
     }
+    this.reactComponentInstance = null
+    this.hasMounted = false
     this.isINmemery = false
     this.UI = null
     this.dom = null
     this.hooks = null
   }
 
-  setData(param = {}, cb) {
+  setData() {
+    if (this.config.setData) {
+      this.config.setData.apply(this, arguments)
+    } else {
+      this._setData.apply(this, arguments)
+    }
+  }
+
+  _setData(param, cb) {
+    clearTimeout(this.taskTimmer)
+    let that = this
+
+    if (!this.tasks.length) {
+      this.taskData = this.getData()
+    }
+
+    // created
+    if (!this.hasMounted) {
+      this.__setData(param, cb)
+      return
+    }
+
+    // attached/onload
+    // 插入任务前转走
+    if (this.hasMounted === 'component_init_set_state') {
+      this.__setData(param, cb)
+      return
+    }
+
+    if (param) {
+      this.tasks.push([param, cb])
+    }
+
+    // 方案一
+    function* tmp(opt) {
+      let p = opt[0]
+      let callback = opt[1]
+      lib.forEach(p, (val, ii, ky) => {
+        lib.set(that.taskData, ky, val)
+      })
+      if (lib.isFunction(callback)) callback()
+      yield
+      return function () {
+        that.taskTimmer = setTimeout(() => {
+          that.__setData(that.taskData, callback)
+        }, 51);
+      }
+    }
+
+    let task = this.tasks.shift()
+    let gen = tmp(task)
+    gen.next()
+    if (!this.tasks.length) {
+      let res = gen.next()
+      let fun = res.value
+      fun()
+    }
+    // 方案一结束
+  }
+
+  // 真实setData，可以直接调用
+  __setData(param = {}, cb) {
     if (!lib.isPlainObject(param)) return;
     let result = this.hooks.emit('before-setdata', param, this)
     if (result && result[0]) {
