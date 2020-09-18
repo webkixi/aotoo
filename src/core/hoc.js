@@ -19,6 +19,7 @@ function combineComponent(ORIClass, options, parent, splitProps) {
       this.oriState = lib.cloneDeep(this.state)
       this.id = props.id || this.state.id
       if (props.id) parent.id = this.id
+      this.uiCount = parent.uiCount
       
       this.ref = React.createRef()
       this.env = parent
@@ -26,8 +27,9 @@ function combineComponent(ORIClass, options, parent, splitProps) {
       parent.reactComponentInstance = this;
       this.setSelfState = this.setSelfState.bind(this)
       this.reset = this.reset.bind(this)
-      this.syncParentData = this.syncParentData.bind(this)
-      if (!parent.isINmemery) {
+      this.syncParentData = this.syncParentData.bind(this) 
+      if (parent.isINmemery === undefined) {
+      // if (!parent.isINmemery) {
         parent._onload_(this.props)
       }
       this.syncParentData();
@@ -171,6 +173,7 @@ function combineComponent(ORIClass, options, parent, splitProps) {
     }
 
     componentWillUnmount() {
+      if (this.uiCount !== parent.uiCount) return
       parent.hasMounted = false
       parent.isINmemery = true
       super.componentWillUnmount && super.componentWillUnmount()
@@ -271,6 +274,9 @@ class CombineClass {
     // react dom销毁后，实例是否仍驻内存
     Object.defineProperty(this, "isINmemery", lib.protectProperty());
 
+    // 组件的被渲染次数
+    Object.defineProperty(this, "uiCount", lib.protectProperty(0));
+
     // 渲染过后把jsx存储在本地
     Object.defineProperty(this, "jsx", lib.protectProperty());
     
@@ -293,15 +299,21 @@ class CombineClass {
     // 批量设置实例属性
     Object.keys(_property).forEach((ky) => {
       if (internalKeys.indexOf(ky) === -1) {
-        this[ky] = _property[ky];
+        let val = _property[ky];
+        if (lib.isFunction(val)) {
+          val = val.bind(this)
+        }
+        this[ky] = val
       }
     });
 
     this.created() // 小程序组件生命周期 created
     let UI = combineComponent(oriClass, config, this, splitProps);
     this.UI = function(props) {
-      that.jsx = that.jsx || <UI {...props} />
-      return that.jsx
+      return <UI {...props} />
+      // that.jsx = that.jsx || <UI {...props} />
+      // // that.jsx = that.jsx ? React.cloneElement(that.jsx, props) : <UI {...props} />
+      // return that.jsx
     }
   }
 
@@ -417,7 +429,7 @@ class CombineClass {
     }
     this.reactComponentInstance = null
     this.hasMounted = false
-    this.isINmemery = false
+    this.isINmemery = undefined
     this.UI = null
     this.dom = null
     this.hooks = null

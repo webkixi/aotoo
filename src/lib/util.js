@@ -29,7 +29,11 @@ export function protectProperty(value, opts) {
   if (isObject(opts)) {
     d = merge(d, opts)
   }
-  d.value = value || undefined;
+  if (value || value === 0) {
+    d.value = value
+  } else {
+    d.value = undefined
+  }
   return d;
 }
 

@@ -121,9 +121,8 @@ export function bindEvents(events, context) {
       let {url, query, hasQuery} = lib.urlTOquery(evt)
       let functionName = url
       let evtFun = eventFunction(funKey, functionName, query)
-      evtFun.bind(context)
       evtFun.funKey = funKey
-      events[ky] = evtFun
+      events[ky] = evtFun.bind(context)
     }
   })
   return events
