@@ -140,7 +140,12 @@ function protectProperty(value, opts) {
     d = (0, _lodash.merge)(d, opts);
   }
 
-  d.value = value || undefined;
+  if (value || value === 0) {
+    d.value = value;
+  } else {
+    d.value = undefined;
+  }
+
   return d;
 }
 

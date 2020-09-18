@@ -71,6 +71,7 @@ function combineComponent(ORIClass, options, parent, splitProps) {
       _this.oriState = lib.cloneDeep(_this.state);
       _this.id = props.id || _this.state.id;
       if (props.id) parent.id = _this.id;
+      _this.uiCount = parent.uiCount;
       _this.ref = React.createRef();
       _this.env = parent;
       parent.ref = _this.ref;
@@ -79,7 +80,8 @@ function combineComponent(ORIClass, options, parent, splitProps) {
       _this.reset = _this.reset.bind(_assertThisInitialized(_this));
       _this.syncParentData = _this.syncParentData.bind(_assertThisInitialized(_this));
 
-      if (!parent.isINmemery) {
+      if (parent.isINmemery === undefined) {
+        // if (!parent.isINmemery) {
         parent._onload_(_this.props);
       }
 
@@ -206,6 +208,7 @@ function combineComponent(ORIClass, options, parent, splitProps) {
     }, {
       key: "componentWillUnmount",
       value: function componentWillUnmount() {
+        if (this.uiCount !== parent.uiCount) return;
         parent.hasMounted = false;
         parent.isINmemery = true;
         _get(_getPrototypeOf(CComponent.prototype), "componentWillUnmount", this) && _get(_getPrototypeOf(CComponent.prototype), "componentWillUnmount", this).call(this);
@@ -363,7 +366,9 @@ var CombineClass = /*#__PURE__*/function () {
 
     Object.defineProperty(this, "reactComponentInstance", lib.protectProperty(null)); // react dom销毁后，实例是否仍驻内存
 
-    Object.defineProperty(this, "isINmemery", lib.protectProperty()); // 渲染过后把jsx存储在本地
+    Object.defineProperty(this, "isINmemery", lib.protectProperty()); // 组件的被渲染次数
+
+    Object.defineProperty(this, "uiCount", lib.protectProperty(0)); // 渲染过后把jsx存储在本地
 
     Object.defineProperty(this, "jsx", lib.protectProperty()); // 小程序组件生命周期 attached, page生命周期 onLoad
 
@@ -384,7 +389,13 @@ var CombineClass = /*#__PURE__*/function () {
 
     Object.keys(_property).forEach(function (ky) {
       if (_index.internalKeys.indexOf(ky) === -1) {
-        _this3[ky] = _property[ky];
+        var val = _property[ky];
+
+        if (lib.isFunction(val)) {
+          val = val.bind(_this3);
+        }
+
+        _this3[ky] = val;
       }
     });
     this.created(); // 小程序组件生命周期 created
@@ -392,8 +403,9 @@ var CombineClass = /*#__PURE__*/function () {
     var UI = combineComponent(oriClass, config, this, splitProps);
 
     this.UI = function (props) {
-      that.jsx = that.jsx || /*#__PURE__*/React.createElement(UI, props);
-      return that.jsx;
+      return /*#__PURE__*/React.createElement(UI, props); // that.jsx = that.jsx || <UI {...props} />
+      // // that.jsx = that.jsx ? React.cloneElement(that.jsx, props) : <UI {...props} />
+      // return that.jsx
     };
   }
 
@@ -533,7 +545,7 @@ var CombineClass = /*#__PURE__*/function () {
 
       this.reactComponentInstance = null;
       this.hasMounted = false;
-      this.isINmemery = false;
+      this.isINmemery = undefined;
       this.UI = null;
       this.dom = null;
       this.hooks = null;

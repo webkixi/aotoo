@@ -82,9 +82,8 @@ function bindEvents(events, context) {
 
       var functionName = url;
       var evtFun = eventFunction(funKey, functionName, query);
-      evtFun.bind(context);
       evtFun.funKey = funKey;
-      events[ky] = evtFun;
+      events[ky] = evtFun.bind(context);
     }
   });
 
