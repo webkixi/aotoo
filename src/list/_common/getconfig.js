@@ -12,7 +12,7 @@ export function attachItem(pay, context) {
       let cClass = context.data.itemClass||''
       let iClass = it.itemClass||''
       it.itemClass = iClass ? cClass+' '+iClass : cClass
-      it['__key'] = lib.uniqueId('list_item_')
+      it['__key'] = it['__key'] || lib.uniqueId('list_item_')
       payload.push(it)
     }
   })

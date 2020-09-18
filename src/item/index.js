@@ -185,14 +185,60 @@ let defaultBehavior = {
     // }
   },
 
+  disable() {
+    this.addClass('disabled _disabled')
+  },
+
+  enable() {
+    this.removeClass('disabled _disabled')
+  },
+
   siblings(indentify) {
     if (this.parentInst) {
       let allChilds = this.parentInst.children
-      broChilds = allChilds.filter(child=>child.uniqId!==this.uniqId)
+      let broChilds = allChilds.filter(child=>child.uniqId!==this.uniqId)
       if (indentify) {
         broChilds = broChilds.filter(child=>child.hasClass(indentify))
       }
-      return broChilds
+
+      let obj = {}
+      obj = {...broChilds}
+      obj.length = broChilds.length
+      Object.setPrototypeOf(obj, {
+        forEach: [].forEach,
+        addClass(){
+          this.forEach(it => it.addClass.apply(it, arguments))
+        },
+        removeClass(){
+          this.forEach(it => it.removeClass.apply(it, arguments))
+        },
+        toggleClass(){
+          this.forEach(it => it.toggleClass.apply(it, arguments))
+        },
+        hasClass(){},
+        show(){
+          this.forEach(it => it.show())
+        },
+        hide(){
+          this.forEach(it => it.hide())
+        },
+        reset(){
+          this.forEach(it => it.reset.apply(it, arguments))
+        },
+        disable(){
+          this.forEach(it => it.disable.apply(it, arguments))
+        },
+        enable(){
+          this.forEach(it => it.enable.apply(it, arguments))
+        },
+        css(){
+          this.forEach(it => it.css.apply(it, arguments))
+        },
+        attr(){
+          this.forEach(it => it.attr.apply(it, arguments))
+        }
+      })
+      return obj
     }
   },
 }

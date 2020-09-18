@@ -1,5 +1,5 @@
 import * as lib from "../lib";
-import {attrKey, accessKey, eventName, internalKeys, isEvents} from '../_common/index'
+import {attrKey, accessKey, eventName, internalKeys, isEvents, bindEvents} from '../_common/index'
 
 import elementsCollection from './elements'
 let _elements = elementsCollection('core')
@@ -33,8 +33,12 @@ function combineComponent(ORIClass, options, parent, splitProps) {
       this.syncParentData();
     }
 
+    // 组件内修改state后，不允许props从外部污染数据
+    // reset之后，恢复从props穿透数据渲染
     reset(param) {
       this.setSelfState((param || this.oriState))
+      this.selfStateChanged = false
+      selfStateChanged = false
     }
 
     syncParentData(param = {}) {
@@ -59,14 +63,23 @@ function combineComponent(ORIClass, options, parent, splitProps) {
           })
         }
 
+        let events = {}
         for (let ky in $state) {
           let val = $state[ky]
-          if (lib.isFunction(val) && !eventName.includes(ky)) {
-            parent[ky] = val
+
+          if (isEvents(ky)) {
+            if ( ['item', 'list'].indexOf(parent.$$is) === -1) {
+              events[ky] = val
+            }
+          } else {
+            if (lib.isFunction(val)) {
+              parent[ky] = val
+            }
           }
         }
-
-        return $state
+        events = bindEvents(events, parent)
+        
+        return Object.assign($state, events)
       }
 
       param = setMYstate(param)
@@ -152,12 +165,9 @@ function combineComponent(ORIClass, options, parent, splitProps) {
     // 在render之后调用，state已更新
     // snapshot 为getSnapshotBeforeUpdate方法返回的值
     componentDidUpdate(prevProps, prevState, snapshot) {
-      if (lib.isFunction(parent.componentDidUpdate)) {
-        super.componentDidUpdate && super.componentDidUpdate(prevProps, prevState, snapshot)
-        parent.componentDidUpdate && parent.componentDidUpdate(prevProps, prevState, snapshot)
-        parent.didUpdate(prevProps, prevState, snapshot)
-        // this.componentDidMount()
-      }
+      super.componentDidUpdate && super.componentDidUpdate(prevProps, prevState, snapshot)
+      parent.componentDidUpdate && parent.componentDidUpdate(prevProps, prevState, snapshot)
+      parent.didUpdate(prevProps, prevState, snapshot)
     }
 
     componentWillUnmount() {
@@ -211,6 +221,8 @@ class CombineClass {
     let _data = _param.data||{}; delete _param.data;
     let _property = _param;
     this.config = _param
+
+    let that = this
     
     this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_')
     
@@ -257,7 +269,10 @@ class CombineClass {
     Object.defineProperty(this, "reactComponentInstance", lib.protectProperty(null));
 
     // react dom销毁后，实例是否仍驻内存
-    Object.defineProperty(this, "isINmemery", lib.protectProperty(false)); 
+    Object.defineProperty(this, "isINmemery", lib.protectProperty());
+
+    // 渲染过后把jsx存储在本地
+    Object.defineProperty(this, "jsx", lib.protectProperty());
     
     // 小程序组件生命周期 attached, page生命周期 onLoad
     Object.defineProperty(this, "_onload_", lib.protectProperty(_onload_.bind(this)));
@@ -283,7 +298,11 @@ class CombineClass {
     });
 
     this.created() // 小程序组件生命周期 created
-    this.UI = combineComponent(oriClass, config, this, splitProps);
+    let UI = combineComponent(oriClass, config, this, splitProps);
+    this.UI = function(props) {
+      that.jsx = that.jsx || <UI {...props} />
+      return that.jsx
+    }
   }
 
   created(){
@@ -412,7 +431,7 @@ class CombineClass {
     }
   }
 
-  _setData(param, cb) {
+  __setData(param, cb) {
     clearTimeout(this.taskTimmer)
     let that = this
 
@@ -447,9 +466,10 @@ class CombineClass {
       if (lib.isFunction(callback)) callback()
       yield
       return function () {
-        that.taskTimmer = setTimeout(() => {
-          that.__setData(that.taskData, callback)
-        }, 51);
+        that.__setData(that.taskData, callback)
+        // that.taskTimmer = setTimeout(() => {
+        //   that.__setData(that.taskData, callback)
+        // }, 51);
       }
     }
 
@@ -465,7 +485,7 @@ class CombineClass {
   }
 
   // 真实setData，可以直接调用
-  __setData(param = {}, cb) {
+  _setData(param = {}, cb) {
     if (!lib.isPlainObject(param)) return;
     let result = this.hooks.emit('before-setdata', param, this)
     if (result && result[0]) {

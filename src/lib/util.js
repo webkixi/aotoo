@@ -67,22 +67,12 @@ export function sizeof(obj) {
 export function forEach(obj, callback) {
   if (typeof obj == 'object') {
     if (isArray(obj)) {
-      // for (let ii=0; ii<obj.length; ii++ ){
-      //   let item = obj[ii]
-      //   callback(item, ii)
-      // }
       obj.forEach(function (item, ii) {
         callback(item, ii)
       })
     }
 
     if (isObject(obj)) {
-      // let keys = Object.keys(obj) 
-      // for (let ii = 0; ii < obj.length; ii++) {
-      //   let key = keys[ii]
-      //   let item = obj[key]
-      //   callback(item, ii, key)
-      // }
       Object.keys(obj).forEach(function (key, ii) {
         callback(obj[key], ii, key)
       })

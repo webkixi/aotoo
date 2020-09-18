@@ -96,6 +96,7 @@ export function bindEvents(events, context) {
   function eventFunction(funKey, functionName, myquery) {
     return function a(e, param, inst) {
       const curContext = a.curContext || context
+      if (curContext && curContext.hasClass && curContext.hasClass('_disabled')) return // 无效状态，则不允许事件触发
       let responseContext = getContextCallback(curContext, functionName)
       if (responseContext) {
         responseContext[functionName].call(responseContext, e, myquery, curContext)

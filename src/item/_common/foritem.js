@@ -161,14 +161,6 @@ export function resetItem(data, context, loop, ky) {
     React.isValidElement(data)
   ) {
     return data
-    // if (context.$$is === 'list') {
-    //   data = { 
-    //     title: data,
-    //     itemClass: context.data.itemClass||''
-    //   }
-    // } else {
-    //   return data
-    // }
   }
 
   if (isObject(data)) {
@@ -186,7 +178,7 @@ export function resetItem(data, context, loop, ky) {
     data.__fromParent = context.data.__fromParent
 
     if ((ky && ky.indexOf('@') === 0) || isPlainObject(data)) {
-      data.__key = lib.uniqueId('innerComponent_')
+      data.__key = data.__key || lib.uniqueId('innerComponent_')
     }
 
     if (!blockKeys.includes(ky)) {
@@ -343,6 +335,18 @@ export function resetItem(data, context, loop, ky) {
   return data
 }
 
+
+export function attr(data, p1, p2) {
+  let attributs = data.attr || {}
+  if (lib.isString(p1)) {
+    if (p2) {
+      attributs[p1] = p2
+    }
+  } else if(lib.isPlainObject(p1)) {
+    attributs = Object.assign({}, attributs, p1)
+  }
+  return attributs
+}
 
 export function addClass(data, cls, cb) {
   if (cls) {

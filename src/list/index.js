@@ -1,8 +1,33 @@
-import createComponet, {$$, lib, getContextCallback} from '../core'
-import { resetItem } from "./_common/foritem";
+import createComponet, {
+  $$, 
+  lib, 
+  getContextCallback
+} from '../core'
+
+import {
+  resetItem,
+  addClass,
+  removeClass,
+  hasClass,
+  css,
+  toggleClass,
+  attr
+} from "./_common/foritem";
+
 import transTree from "./_common/tree";
-import {attrKey, accessKey, eventName, isEvents, bindEvents} from '../_common'
-import getConfig, {attachItem} from "./_common/getconfig";
+
+import {
+  attrKey, 
+  accessKey, 
+  eventName, 
+  isEvents, 
+  bindEvents
+} from '../_common'
+
+import getConfig, {
+  attachItem
+} from "./_common/getconfig";
+
 import * as partments from '../_common/partment'
 
 function getListMethod(events) {
@@ -35,6 +60,7 @@ function getListMethod(events) {
 const template = function(state, props) {
   let events = this.events
   let mode = state.mode || 'list'
+  let type = state.type || 'list'  // expose  scroll swiper
   let _attr = state.attr || props.attr || {}
   let data = state.data
 
@@ -68,6 +94,18 @@ const template = function(state, props) {
   let header = state.header
   let footer = state.footer
 
+  
+  if (type === 'expose') {
+    return (
+      <>
+        {header}
+        {items}
+        {footer}
+        {props.children}
+      </>
+    )
+  }
+
   return (
     <div 
       id={state.id}
@@ -93,9 +131,9 @@ const defaultConfig = {
 }
 
 let defaultBehavior = {
-  insert(query, pay){
+  insert(query, pay, cb){
     if (!pay) return
-    pay = attachItem(pay)
+    pay = attachItem(pay, this)
     let $data = this.getData().data
     let index = -1
     if (lib.isNumber(query)) {
@@ -108,44 +146,58 @@ let defaultBehavior = {
     if (index || index===0) {
       $data.splice(index, 0, ...pay)
     }
-
-    this.update({data: $data})
+    this.update({data: $data}, cb)
   },
-  append(pay){
+  append(pay, cb){
     if (!pay) return
-    pay = attachItem(pay)
+    pay = attachItem(pay, this)
     let $data = this.getData().data
     if (pay) {
       $data = $data.concat(pay)
-      this.update({ data: $data })
+      this.update({ data: $data }, cb)
     }
   },
-  prepend(pay){
+  prepend(pay, cb){
     if (!pay) return
-    pay = attachItem(pay)
+    pay = attachItem(pay, this)
     let $data = this.getData().data
     if (pay) {
       $data = [].concat(pay).concat($data)
-      this.update({ data: $data })
+      this.update({ data: $data }, cb)
     }
   },
-  remove(query){
+  remove(query, cb){
     let $data = this.getData().data
     let index = -1
+
     if (lib.isNumber(query)) {
       index = query
     }
+
     if (lib.isPlainObject(query)) {
       index = lib.findIndex($data, query)
     }
 
-    if (index || index === 0) {
-      $data.splice(index, 1)
+    if (!query) {
+      index = ($data.length-1)
     }
 
-    this.update({
-      data: $data
-    })
+    if (query === 'shift') {
+      index = 0
+    }
+
+    if (index || index === 0) {
+      let target = $data.splice(index, 1)
+      target.destory&&target.destory()
+    }
+    // this.children = []
+    this.update({ data: $data }, cb)
+  },
+  pop(){
+    this.remove()
+  },
+  shift(){
+    this.remove('shift')
   },
   setData(param, cb) {
     this.update(param, cb)
@@ -153,14 +205,19 @@ let defaultBehavior = {
   update(_param, cb) {
     // let param = lib.clone(_param)
     let param = (_param)
-    let $data = this.data
+    let $data = this.getData()
 
     const updateFun = (opts = {}) => {
       for (let ky in opts) {
         let val = opts[ky]
+        if (ky === 'data') {
+          val = val.map(item=>{
+            return resetItem(item, this, true)
+          })
+        }
         lib.set($data, ky, val)
       }
-      this._setData($data)
+      this._setData($data, cb)
     }
 
     let result = this.hooks.emit('before-update', param)
@@ -241,6 +298,118 @@ let defaultBehavior = {
     }
   },
 
+  disable(){},
+  enable(){},
+
+  forEach(cb){
+    let that = this
+    
+    // 方案一
+    // 使用子元素自己更新
+    // 一旦子元素自更新，则list组件不再能够透过props影响子元素，考虑到子元素更新应该要交给用户
+    this.children.forEach((item, ii)=>{
+      if (lib.isFunction(cb)) cb.call(item, item, ii)
+    })
+
+
+    // 方案二
+    // 由list透过props更新子元素
+    // let myupdates = {}
+    // let $data = this.getData().data
+    // $data.forEach((_item, ii)=>{
+    //   let item = lib.clone(_item)
+    //   let itemContext = {
+    //     addClass(cls){
+    //       let $itemClass = addClass(item, cls)
+    //       let ky = `data[${ii}].itemClass`
+    //       myupdates[ky] = $itemClass
+    //     },
+    //     removeClass(cls){
+    //       let $itemClass = removeClass(item, cls)
+    //       let ky = `data[${ii}].itemClass`
+    //       myupdates[ky] = $itemClass
+    //     },
+    //     hasClass(cls){
+    //       return hasClass(item, cls)
+    //     },
+    //     css(params){
+    //       let itemStyle = css(item, params)
+    //       let ky = `data[${ii}].itemStyle`
+    //       myupdates[ky] = itemStyle
+    //     },
+
+    //     toggleClass(cls){
+    //       if (this.hasClass(cls)) {
+    //         this.removeClass(cls)
+    //       } else {
+    //         this.addClass(cls)
+    //       }
+    //     },
+
+    //     update(param){
+    //       let ky = `data[${ii}]`
+    //       myupdates[ky] = param
+    //     },
+
+    //     show(){
+    //       let ky = `data[${ii}].show`
+    //       myupdates[ky] = true
+    //     },
+
+    //     hide(){
+    //       let ky = `data[${ii}].show`
+    //       myupdates[ky] = false
+    //     },
+
+    //     attr(p1, p2){
+    //       let ky = `data[${ii}].attr`
+    //       myupdates[ky] = attr(item, p1, p2)
+    //     },
+    //     disable(){
+    //       this.addClass('disabled _disabled')
+    //     },
+    //     enable(){
+    //       this.removeClass('disabled _disabled')
+    //     }
+    //   }
+    //   if (lib.isFunction(cb)) cb.call(itemContext, item, ii)
+    // })
+    // if (!lib.isEmpty(myupdates)) {
+    //   this.update(myupdates)
+    // }
+  },
+
+  length(){
+    if (this.tasks.length || this.taskTimmer) {
+      return this.taskData.data.length
+    } 
+    return this.getData().data.length
+  },
+
+  select(query, cls='active'){
+    let $data = this.getData().data
+    let index = null
+    if (lib.isNumber(query)) {
+      index = query
+    }
+
+    if (lib.isPlainObject(query)) {
+      index = lib.findIndex($data, query)
+    }
+
+    if (lib.isNumber(index)) {
+      this.forEach(function(item, ii){
+        if (ii === index) {
+          this.addClass(cls)
+        } else {
+          if (this.hasClass(cls)){
+            this.removeClass(cls)
+          }
+        }
+      })
+    }
+  }
+
   // didUpdate(){
   //   if (lib.isFunction(this.config.didUpdate)) {
   //     this.config.didUpdate.apply(this, arguments)
@@ -271,7 +440,8 @@ export default function list(options={}) {
 
   let customCreated = config.created
   config.created = function () {
-    this.$$is = this.config.$$is
+    // this.$$is = this.config.$$is
+    this.$$is = 'list'
     this.events = getListMethod.call(this, (this.config.listMethod || {}))
     if (lib.isFunction(customCreated)) {
       customCreated.call(this)

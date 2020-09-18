@@ -28,7 +28,6 @@ export function getContextCallback(ctx, f) {
   }
 }
 
-
 export function $$(id) {
   return _elements.getElement(id)
 }
@@ -80,8 +79,12 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       this.syncParentData();
     }
 
+    // 组件内修改state后，不允许props从外部污染数据
+    // reset之后，恢复从props穿透数据渲染
     reset(param){
       this.setSelfState((param||this.oriState))
+      this.selfStateChanged = false
+      selfStateChanged = false
     }
 
     syncParentData(param = {}) {
@@ -119,33 +122,6 @@ function getReactComponentClass(_data, parent, template, splitProps) {
               parent[ky] = val
             }
           }
-          
-          // if (isEvents(ky) && ['item', 'list'].indexOf(parent.$$is)===-1 ) {
-          //   let evt = val
-          //   let funKey = lib.uniqueId('__on_')
-          //   if (lib.isFunction(evt)) {
-          //     fun = evt
-          //     parent[funKey] = fun
-          //     evt = funKey
-          //   }
-
-          //   if (lib.isString(evt)) {
-          //     let {url, query, hasQuery} = lib.urlTOquery(evt)
-          //     let functionName = url
-          //     $state[ky] = (e) => {
-          //       let responseContext = getContextCallback(that, functionName)
-          //       if (responseContext) {
-          //         responseContext[functionName].call(responseContext, e, query, that)
-          //       } else {
-          //         console.warn('没有找到定义方法:' + k); // 定义pager的__fromParent
-          //       }
-          //     }
-          //   }
-          // }
-
-          // if (lib.isFunction(val) && !isEvents(ky)) {
-          //   parent[ky] = val
-          // }
         }
         events = bindEvents(events, parent)
         
@@ -311,6 +287,8 @@ class baseClass {
       return
     };
 
+    let that = this
+
     let _param = lib.cloneDeep(config);
     let _data = _param.data||{}; delete _param.data;
     let _property = _param;
@@ -361,7 +339,10 @@ class baseClass {
     Object.defineProperty(this, "reactComponentInstance", lib.protectProperty(null));
 
     // react dom销毁后，实例是否仍驻内存
-    Object.defineProperty(this, "isINmemery", lib.protectProperty(false)); 
+    Object.defineProperty(this, "isINmemery", lib.protectProperty()); 
+
+    // 渲染过后把jsx存储在本地
+    Object.defineProperty(this, "jsx", lib.protectProperty()); 
     
     // 小程序组件生命周期 attached, page生命周期 onLoad
     Object.defineProperty(this, "_onload_", lib.protectProperty(_onload_.bind(this)));
@@ -387,7 +368,11 @@ class baseClass {
     });
 
     this.created() // 小程序组件生命周期 created
-    this.UI = getReactComponentClass(this.data, this, template, splitProps);
+    let UI = getReactComponentClass(this.data, this, template, splitProps);
+    this.UI = function(props) {
+      that.jsx = that.jsx || <UI {...props} />
+      return that.jsx
+    }
   }
 
   created(){
@@ -516,23 +501,30 @@ class baseClass {
     }
   }
 
-  _setData(param, cb){
+  __setData(param, cb){
     clearTimeout(this.taskTimmer)
     let that = this
 
     if (!this.tasks.length) {
       this.taskData = this.getData()
     }
-    if (param){
-      this.tasks.push([param, cb])
+
+    // created
+    if (!this.hasMounted) {
+      this.__setData(param, cb)
+      return
     }
 
-    // 方案一
+    // attached/onload
+    // 插入任务前转走
     if (this.hasMounted === 'component_init_set_state') {
       this.__setData(param, cb)
       return
     }
 
+    if (param){
+      this.tasks.push([param, cb])
+    }
 
     function *tmp(opt) {
       let p = opt[0]
@@ -543,9 +535,10 @@ class baseClass {
       if (lib.isFunction(callback)) callback()
       yield 
       return function () {
-        that.taskTimmer = setTimeout(() => {
-          that.__setData(that.taskData, callback)
-        }, 51);
+        that.__setData(that.taskData, callback)
+        // that.taskTimmer = setTimeout(() => {
+        //   that.__setData(that.taskData, callback)
+        // }, 51);
       }
     }
 
@@ -561,7 +554,7 @@ class baseClass {
   }
 
   // 真实setData，可以直接调用
-  __setData(param = {}, cb) {
+  _setData(param = {}, cb) {
     if (!lib.isPlainObject(param)) return;
     let result = this.hooks.emit('before-setdata', param, this)
     if (result && result[0]) {
@@ -635,6 +628,9 @@ export default function(param, template, splitProps=true) {
   param = setUniqKey(param)
   if (param.__key && $$(param.__key)) {
     return $$(param.__key)
+  }
+  if (param.$$id && $$(param.$$id)) {
+    return $$(param.$$id)
   }
   return new baseClass(param, template, splitProps)
 }

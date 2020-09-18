@@ -312,6 +312,10 @@ const globalComponent = {
 let context = lib.curContext()
 context['UI_item'] = globalComponent['ui-item']
 context['UI_list'] = globalComponent['ui-list']
+context['Item'] = globalComponent['ui-item']
+context['List'] = globalComponent['ui-list']
+context['View'] = View
+context['Text'] = Text
 
 export function extendsTemplate(otherTemplate={}){
   lib.forEach(innerTemplate, (t, ii, ky)=>{
