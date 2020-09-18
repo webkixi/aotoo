@@ -22,7 +22,7 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-function attachItem(pay) {
+function attachItem(pay, context) {
   var payload = [];
   pay = [].concat(pay);
   pay.forEach(function (it) {
@@ -33,7 +33,10 @@ function attachItem(pay) {
     }
 
     if (lib.isPlainObject(it)) {
-      it['__key'] = lib.uniqueId('list_item_');
+      var cClass = context.data.itemClass || '';
+      var iClass = it.itemClass || '';
+      it.itemClass = iClass ? cClass + ' ' + iClass : cClass;
+      it['__key'] = it['__key'] || lib.uniqueId('list_item_');
       payload.push(it);
     }
   });
@@ -91,7 +94,6 @@ function getConfig(opts, context) {
 
   if (mydata.itemClass) {
     var itmClass = mydata.itemClass;
-    delete mydata.itemClass;
     itemClass = itmClass;
   }
 

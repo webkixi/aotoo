@@ -184,7 +184,7 @@ function forEach(obj, callback) {
 
     if ((0, _lodash.isObject)(obj)) {
       Object.keys(obj).forEach(function (key, ii) {
-        callback(obj[key], ii, key); // callback(key, ii, obj[key])
+        callback(obj[key], ii, key);
       });
     }
   }

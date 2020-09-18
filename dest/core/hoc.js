@@ -86,12 +86,16 @@ function combineComponent(ORIClass, options, parent, splitProps) {
       _this.syncParentData();
 
       return _this;
-    }
+    } // 组件内修改state后，不允许props从外部污染数据
+    // reset之后，恢复从props穿透数据渲染
+
 
     _createClass(CComponent, [{
       key: "reset",
       value: function reset(param) {
         this.setSelfState(param || this.oriState);
+        this.selfStateChanged = false;
+        selfStateChanged = false;
       }
     }, {
       key: "syncParentData",
@@ -122,15 +126,24 @@ function combineComponent(ORIClass, options, parent, splitProps) {
             });
           }
 
+          var events = {};
+
           for (var ky in $state) {
             var val = $state[ky];
 
-            if (lib.isFunction(val) && !_index.eventName.includes(ky)) {
-              parent[ky] = val;
+            if ((0, _index.isEvents)(ky)) {
+              if (['item', 'list'].indexOf(parent.$$is) === -1) {
+                events[ky] = val;
+              }
+            } else {
+              if (lib.isFunction(val)) {
+                parent[ky] = val;
+              }
             }
           }
 
-          return $state;
+          events = (0, _index.bindEvents)(events, parent);
+          return Object.assign($state, events);
         };
 
         param = setMYstate(param);
@@ -186,11 +199,9 @@ function combineComponent(ORIClass, options, parent, splitProps) {
     }, {
       key: "componentDidUpdate",
       value: function componentDidUpdate(prevProps, prevState, snapshot) {
-        if (lib.isFunction(parent.componentDidUpdate)) {
-          _get(_getPrototypeOf(CComponent.prototype), "componentDidUpdate", this) && _get(_getPrototypeOf(CComponent.prototype), "componentDidUpdate", this).call(this, prevProps, prevState, snapshot);
-          parent.componentDidUpdate && parent.componentDidUpdate(prevProps, prevState, snapshot);
-          parent.didUpdate(prevProps, prevState, snapshot); // this.componentDidMount()
-        }
+        _get(_getPrototypeOf(CComponent.prototype), "componentDidUpdate", this) && _get(_getPrototypeOf(CComponent.prototype), "componentDidUpdate", this).call(this, prevProps, prevState, snapshot);
+        parent.componentDidUpdate && parent.componentDidUpdate(prevProps, prevState, snapshot);
+        parent.didUpdate(prevProps, prevState, snapshot);
       }
     }, {
       key: "componentWillUnmount",
@@ -278,7 +289,13 @@ function _ready_(params) {
 function _setData_() {
   var param = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var cb = arguments.length > 1 ? arguments[1] : undefined;
-  this.reactComponentInstance.setSelfState(param, cb);
+
+  if (this.reactComponentInstance && this.hasMounted) {
+    this.reactComponentInstance.setSelfState(param, cb);
+  } else {
+    // created生命周期中
+    this.data = Object.assign({}, this.data, param);
+  }
 }
 
 var CombineClass = /*#__PURE__*/function () {
@@ -290,24 +307,29 @@ var CombineClass = /*#__PURE__*/function () {
 
     _classCallCheck(this, CombineClass);
 
-    var _param = config;
+    var _param = lib.cloneDeep(config);
+
+    ;
 
     var _data = _param.data || {};
 
     delete _param.data;
     var _property = _param;
-    this.data = _data;
     this.config = _param;
-    this.uniqId = lib.uniqueId('base_');
+    var that = this;
+    this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_');
     var defaultData = {// alwaysSyncProps: false
     };
     this.alwaysSyncProps = this.config.alwaysSyncProps || false; // 是否持续更新props(任何时候)
 
-    this.__showStat = _data.show || true;
+    this.__showStat = _data.hasOwnProperty('show') ? _data.show : true;
     this.id = _data.id;
     this.dom = null; // 真实dom实例，最外层的容器
 
     this.hasMounted = false;
+    this.data = Object.assign({
+      uniqId: this.uniqId
+    }, defaultData, _data);
     this.hooks = lib.hooks(lib.uniqueId('baseClass_'));
     this.children = [];
     this.events = null; // data中的event合集
@@ -341,7 +363,9 @@ var CombineClass = /*#__PURE__*/function () {
 
     Object.defineProperty(this, "reactComponentInstance", lib.protectProperty(null)); // react dom销毁后，实例是否仍驻内存
 
-    Object.defineProperty(this, "isINmemery", lib.protectProperty(false)); // 小程序组件生命周期 attached, page生命周期 onLoad
+    Object.defineProperty(this, "isINmemery", lib.protectProperty()); // 渲染过后把jsx存储在本地
+
+    Object.defineProperty(this, "jsx", lib.protectProperty()); // 小程序组件生命周期 attached, page生命周期 onLoad
 
     Object.defineProperty(this, "_onload_", lib.protectProperty(_onload_.bind(this))); // 小程序组件生命周期 ready, page生命周期 onReady
 
@@ -365,17 +389,46 @@ var CombineClass = /*#__PURE__*/function () {
     });
     this.created(); // 小程序组件生命周期 created
 
-    this.UI = combineComponent(oriClass, config, this, splitProps);
+    var UI = combineComponent(oriClass, config, this, splitProps);
+
+    this.UI = function (props) {
+      that.jsx = that.jsx || /*#__PURE__*/React.createElement(UI, props);
+      return that.jsx;
+    };
   }
 
   _createClass(CombineClass, [{
     key: "created",
     value: function created() {
+      var _this4 = this;
+
+      this.tasks = []; // setData的更新任务
+
+      this.taskData = this.getData();
+      this.taskStat = true; // setData的更新状态
+
+      this.taskTimmer = null;
       var config = this.config;
+      var $data = this.data;
+      var events = {};
+      lib.forEach($data, function (val, ii, ky) {
+        if ((0, _index.isEvents)(ky)) {
+          if (['item', 'list'].indexOf(_this4.$$is) === -1) {
+            events[ky] = val;
+          }
+        } else {
+          if (lib.isFunction(val)) {
+            _this4[ky] = val;
+          }
+        }
+      });
+      events = (0, _index.bindEvents)(events, this);
 
       if (lib.isFunction(config.created)) {
         config.created.call(this);
       }
+
+      this.data = Object.assign($data, events);
     }
   }, {
     key: "attached",
@@ -401,7 +454,11 @@ var CombineClass = /*#__PURE__*/function () {
   }, {
     key: "getData",
     value: function getData() {
-      return this.data;
+      if (this.tasks.length || this.taskTimmer) {
+        return lib.cloneDeep(this.taskData);
+      }
+
+      return lib.cloneDeep(this.data);
     }
   }, {
     key: "parent",
@@ -455,7 +512,7 @@ var CombineClass = /*#__PURE__*/function () {
   }, {
     key: "reset",
     value: function reset(param) {
-      this.reactComponentInstance.reset(param);
+      this.reactComponentInstance && this.reactComponentInstance.reset(param);
     }
   }, {
     key: "show",
@@ -474,6 +531,8 @@ var CombineClass = /*#__PURE__*/function () {
         _elements[this.$$id] = null;
       }
 
+      this.reactComponentInstance = null;
+      this.hasMounted = false;
       this.isINmemery = false;
       this.UI = null;
       this.dom = null;
@@ -482,7 +541,91 @@ var CombineClass = /*#__PURE__*/function () {
   }, {
     key: "setData",
     value: function setData() {
-      var _this4 = this;
+      if (this.config.setData) {
+        this.config.setData.apply(this, arguments);
+      } else {
+        this._setData.apply(this, arguments);
+      }
+    }
+  }, {
+    key: "__setData",
+    value: function __setData(param, cb) {
+      var _marked = /*#__PURE__*/regeneratorRuntime.mark(tmp);
+
+      clearTimeout(this.taskTimmer);
+      var that = this;
+
+      if (!this.tasks.length) {
+        this.taskData = this.getData();
+      } // created
+
+
+      if (!this.hasMounted) {
+        this.__setData(param, cb);
+
+        return;
+      } // attached/onload
+      // 插入任务前转走
+
+
+      if (this.hasMounted === 'component_init_set_state') {
+        this.__setData(param, cb);
+
+        return;
+      }
+
+      if (param) {
+        this.tasks.push([param, cb]);
+      } // 方案一
+
+
+      function tmp(opt) {
+        var p, callback;
+        return regeneratorRuntime.wrap(function tmp$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                p = opt[0];
+                callback = opt[1];
+                lib.forEach(p, function (val, ii, ky) {
+                  lib.set(that.taskData, ky, val);
+                });
+                if (lib.isFunction(callback)) callback();
+                _context.next = 6;
+                return;
+
+              case 6:
+                return _context.abrupt("return", function () {
+                  that.__setData(that.taskData, callback); // that.taskTimmer = setTimeout(() => {
+                  //   that.__setData(that.taskData, callback)
+                  // }, 51);
+
+                });
+
+              case 7:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _marked);
+      }
+
+      var task = this.tasks.shift();
+      var gen = tmp(task);
+      gen.next();
+
+      if (!this.tasks.length) {
+        var res = gen.next();
+        var fun = res.value;
+        fun();
+      } // 方案一结束
+
+    } // 真实setData，可以直接调用
+
+  }, {
+    key: "_setData",
+    value: function _setData() {
+      var _this5 = this;
 
       var param = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var cb = arguments.length > 1 ? arguments[1] : undefined;
@@ -494,7 +637,7 @@ var CombineClass = /*#__PURE__*/function () {
 
         if (lib.isFunction(result.then)) {
           result.then(function (res) {
-            return _this4._setData_(res, cb);
+            return _this5._setData_(res, cb);
           })["catch"](function (err) {
             return err;
           });

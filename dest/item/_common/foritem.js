@@ -4,6 +4,12 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.resetItem = resetItem;
+exports.attr = attr;
+exports.addClass = addClass;
+exports.removeClass = removeClass;
+exports.hasClass = hasClass;
+exports.css = css;
+exports.toggleClass = toggleClass;
 
 var _lib = require("../../lib");
 
@@ -204,8 +210,9 @@ function formatUrl(props, context) {
 }
 
 function resetItem(data, context, loop, ky) {
-  if (typeof data == 'string' || typeof data == 'number' || typeof data == 'boolean') return data;
-  if (React.isValidElement(data)) return data;
+  if (typeof data == 'string' || typeof data == 'number' || typeof data == 'boolean' || React.isValidElement(data)) {
+    return data;
+  }
 
   if ((0, _lib.isObject)(data)) {
     var methods = data.methods;
@@ -218,6 +225,10 @@ function resetItem(data, context, loop, ky) {
     data.__relationId = data.__relationId || (0, _lib.uniqueId)('relation_');
     data.fromComponent = context.data.fromComponent || data.fromComponent || context.data.uniqId || context.uniqId;
     data.__fromParent = context.data.__fromParent;
+
+    if (ky && ky.indexOf('@') === 0 || (0, _lib.isPlainObject)(data)) {
+      data.__key = data.__key || _core.lib.uniqueId('innerComponent_');
+    }
 
     if (!blockKeys.includes(ky)) {
       if (ky !== 'url' && data.url) {
@@ -353,7 +364,9 @@ function resetItem(data, context, loop, ky) {
         if (ky && attr.indexOf('@') > -1) {
           /** 不去污染内部的父级链，只做表层 */
         } else {
-          data[attr] = resetItem(sonItem, context, true, attr);
+          if (!React.isValidElement(sonItem)) {
+            data[attr] = resetItem(sonItem, context, true, attr);
+          }
         }
       }
     }
@@ -376,4 +389,89 @@ function resetItem(data, context, loop, ky) {
   }
 
   return data;
+}
+
+function attr(data, p1, p2) {
+  var attributs = data.attr || {};
+
+  if (_core.lib.isString(p1)) {
+    if (p2) {
+      attributs[p1] = p2;
+    }
+  } else if (_core.lib.isPlainObject(p1)) {
+    attributs = Object.assign({}, attributs, p1);
+  }
+
+  return attributs;
+}
+
+function addClass(data, cls, cb) {
+  if (cls) {
+    cls = cls.replace(/\./g, '');
+    cls = _core.lib.isString(cls) ? cls.split(' ') : [];
+    var $itemClass = data.itemClass && data.itemClass.split(' ') || [];
+    cls = cls.filter(function (c) {
+      return $itemClass.indexOf(c) == -1;
+    });
+    $itemClass = $itemClass.concat(cls).join(' ');
+    return $itemClass; // this.update({
+    //   itemClass: $itemClass.join(' ')
+    // }, cb)
+  }
+}
+
+function removeClass(data, cls, cb) {
+  if (cls) {
+    cls = cls.replace(/\./g, '');
+    cls = _core.lib.isString(cls) ? cls.split(' ') : [];
+    var $itemClass = data.itemClass && data.itemClass.split(' ') || [];
+
+    var _cls = $itemClass.filter(function (c) {
+      return c.indexOf(cls) === -1;
+    });
+
+    $itemClass = _cls.join(' ') || ' ';
+    return $itemClass; // this.update({
+    //   itemClass: ($itemClass.join(' ') || ' ')
+    // }, cb)
+  }
+}
+
+function hasClass(data, cls) {
+  if (cls) {
+    cls = cls.replace(/\./g, '');
+    cls = _core.lib.isString(cls) ? cls.split(' ') : [];
+    var len = cls.length;
+    var $itemClass = data.itemClass && data.itemClass.split(' ') || [];
+    cls = cls.filter(function (c) {
+      return $itemClass.indexOf(c) !== -1;
+    });
+    return len === cls.length ? true : false;
+  }
+}
+
+function css(data, params, cb) {
+  if (!_core.lib.isPlainObject(params)) {
+    console.warn('不符合react的内联样式格式');
+    return;
+  }
+
+  var itemStyle = Object.assign({}, data.itemStyle || {}, params);
+  return itemStyle; // this.update({ itemStyle }, cb)
+}
+
+function toggleClass(cls, cb) {
+  if (cls) {
+    var clsAry = _core.lib.isString(cls) ? cls.split(' ') : [];
+
+    if (clsAry.length) {
+      cls = clsAry[0];
+
+      if (this.hasClass(cls)) {
+        this.removeClass(cls, cb);
+      } else {
+        this.addClass(cls, cb);
+      }
+    }
+  }
 }

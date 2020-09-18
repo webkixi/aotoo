@@ -48,6 +48,8 @@ function bindEvents(events, context) {
   function eventFunction(funKey, functionName, myquery) {
     return function a(e, param, inst) {
       var curContext = a.curContext || context;
+      if (curContext && curContext.hasClass && curContext.hasClass('_disabled')) return; // 无效状态，则不允许事件触发
+
       var responseContext = (0, _core.getContextCallback)(curContext, functionName);
 
       if (responseContext) {

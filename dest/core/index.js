@@ -16,7 +16,7 @@ var _reactDom = _interopRequireDefault(require("react-dom"));
 
 var _elements2 = _interopRequireDefault(require("./elements"));
 
-var _wrap = _interopRequireDefault(require("./wrap"));
+var _hoc = _interopRequireDefault(require("./hoc"));
 
 var _partment = require("../_common/partment");
 
@@ -151,12 +151,16 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       _this.syncParentData();
 
       return _this;
-    }
+    } // 组件内修改state后，不允许props从外部污染数据
+    // reset之后，恢复从props穿透数据渲染
+
 
     _createClass(InnerClass, [{
       key: "reset",
       value: function reset(param) {
         this.setSelfState(param || this.oriState);
+        this.selfStateChanged = false;
+        selfStateChanged = false;
       }
     }, {
       key: "syncParentData",
@@ -200,31 +204,7 @@ function getReactComponentClass(_data, parent, template, splitProps) {
               if (lib.isFunction(val)) {
                 parent[ky] = val;
               }
-            } // if (isEvents(ky) && ['item', 'list'].indexOf(parent.$$is)===-1 ) {
-            //   let evt = val
-            //   let funKey = lib.uniqueId('__on_')
-            //   if (lib.isFunction(evt)) {
-            //     fun = evt
-            //     parent[funKey] = fun
-            //     evt = funKey
-            //   }
-            //   if (lib.isString(evt)) {
-            //     let {url, query, hasQuery} = lib.urlTOquery(evt)
-            //     let functionName = url
-            //     $state[ky] = (e) => {
-            //       let responseContext = getContextCallback(that, functionName)
-            //       if (responseContext) {
-            //         responseContext[functionName].call(responseContext, e, query, that)
-            //       } else {
-            //         console.warn('没有找到定义方法:' + k); // 定义pager的__fromParent
-            //       }
-            //     }
-            //   }
-            // }
-            // if (lib.isFunction(val) && !isEvents(ky)) {
-            //   parent[ky] = val
-            // }
-
+            }
           }
 
           events = (0, _index.bindEvents)(events, parent);
@@ -417,6 +397,7 @@ var baseClass = /*#__PURE__*/function () {
     }
 
     ;
+    var that = this;
 
     var _param = lib.cloneDeep(config);
 
@@ -425,12 +406,12 @@ var baseClass = /*#__PURE__*/function () {
     delete _param.data;
     var _property = _param;
     this.config = _param;
-    this.uniqId = lib.uniqueId('base_');
+    this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_');
     var defaultData = {// alwaysSyncProps: false
     };
     this.alwaysSyncProps = this.config.alwaysSyncProps || false; // 是否持续更新props(任何时候)
 
-    this.__showStat = _data.show || true;
+    this.__showStat = _data.hasOwnProperty('show') ? _data.show : true;
     this.id = _data.id;
     this.dom = null; // 真实dom实例，最外层的容器
 
@@ -471,7 +452,9 @@ var baseClass = /*#__PURE__*/function () {
 
     Object.defineProperty(this, "reactComponentInstance", lib.protectProperty(null)); // react dom销毁后，实例是否仍驻内存
 
-    Object.defineProperty(this, "isINmemery", lib.protectProperty(false)); // 小程序组件生命周期 attached, page生命周期 onLoad
+    Object.defineProperty(this, "isINmemery", lib.protectProperty()); // 渲染过后把jsx存储在本地
+
+    Object.defineProperty(this, "jsx", lib.protectProperty()); // 小程序组件生命周期 attached, page生命周期 onLoad
 
     Object.defineProperty(this, "_onload_", lib.protectProperty(_onload_.bind(this))); // 小程序组件生命周期 ready, page生命周期 onReady
 
@@ -495,7 +478,12 @@ var baseClass = /*#__PURE__*/function () {
     });
     this.created(); // 小程序组件生命周期 created
 
-    this.UI = getReactComponentClass(this.data, this, template, splitProps);
+    var UI = getReactComponentClass(this.data, this, template, splitProps);
+
+    this.UI = function (props) {
+      that.jsx = that.jsx || /*#__PURE__*/React.createElement(UI, props);
+      return that.jsx;
+    };
   }
 
   _createClass(baseClass, [{
@@ -503,7 +491,12 @@ var baseClass = /*#__PURE__*/function () {
     value: function created() {
       var _this4 = this;
 
-      var that = this;
+      this.tasks = []; // setData的更新任务
+
+      this.taskData = this.getData();
+      this.taskStat = true; // setData的更新状态
+
+      this.taskTimmer = null;
       var config = this.config;
       var $data = this.data;
       var events = {};
@@ -550,7 +543,11 @@ var baseClass = /*#__PURE__*/function () {
   }, {
     key: "getData",
     value: function getData() {
-      return this.data;
+      if (this.tasks.length || this.taskTimmer) {
+        return lib.cloneDeep(this.taskData);
+      }
+
+      return lib.cloneDeep(this.data);
     }
   }, {
     key: "parent",
@@ -623,6 +620,8 @@ var baseClass = /*#__PURE__*/function () {
         _elements[this.$$id] = null;
       }
 
+      this.reactComponentInstance = null;
+      this.hasMounted = false;
       this.isINmemery = false;
       this.UI = null;
       this.dom = null;
@@ -637,6 +636,80 @@ var baseClass = /*#__PURE__*/function () {
         this._setData.apply(this, arguments);
       }
     }
+  }, {
+    key: "__setData",
+    value: function __setData(param, cb) {
+      var _marked = /*#__PURE__*/regeneratorRuntime.mark(tmp);
+
+      clearTimeout(this.taskTimmer);
+      var that = this;
+
+      if (!this.tasks.length) {
+        this.taskData = this.getData();
+      } // created
+
+
+      if (!this.hasMounted) {
+        this.__setData(param, cb);
+
+        return;
+      } // attached/onload
+      // 插入任务前转走
+
+
+      if (this.hasMounted === 'component_init_set_state') {
+        this.__setData(param, cb);
+
+        return;
+      }
+
+      if (param) {
+        this.tasks.push([param, cb]);
+      }
+
+      function tmp(opt) {
+        var p, callback;
+        return regeneratorRuntime.wrap(function tmp$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                p = opt[0];
+                callback = opt[1];
+                lib.forEach(p, function (val, ii, ky) {
+                  lib.set(that.taskData, ky, val);
+                });
+                if (lib.isFunction(callback)) callback();
+                _context.next = 6;
+                return;
+
+              case 6:
+                return _context.abrupt("return", function () {
+                  that.__setData(that.taskData, callback); // that.taskTimmer = setTimeout(() => {
+                  //   that.__setData(that.taskData, callback)
+                  // }, 51);
+
+                });
+
+              case 7:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _marked);
+      }
+
+      var task = this.tasks.shift();
+      var gen = tmp(task);
+      gen.next();
+
+      if (!this.tasks.length) {
+        var res = gen.next();
+        var fun = res.value;
+        fun();
+      } // 方案一结束
+
+    } // 真实setData，可以直接调用
+
   }, {
     key: "_setData",
     value: function _setData() {
@@ -686,6 +759,21 @@ function extTemplate() {
   var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   (0, _partment.extendsTemplate)(params);
 }
+
+function setUniqKey(param) {
+  if (param.key || param.data && param.data.key) {
+    var key = param.key || param.data && param.data.key;
+    param.__key = key;
+  }
+
+  if (param.__key || param.data && param.data.__key) {
+    var _key = param.__key || param.data && param.data.__key;
+
+    param.__key = _key;
+  }
+
+  return param;
+}
 /**
  * 
  * @param {Object} param param.data = state，param的其它参数作为实例属性
@@ -700,12 +788,28 @@ function _default(param, template) {
   if (lib.isFunction(param)) {
     if (lib.isClass(param)) {
       var options = template;
-      return new _wrap["default"](param, options, splitProps);
+      options = setUniqKey(options);
+
+      if (options.__key && $$(options.__key)) {
+        return $$(options.__key);
+      }
+
+      return new _hoc["default"](param, options, splitProps);
     }
 
     template = param;
     param = {};
     return new baseClass(param, template, splitProps);
+  }
+
+  param = setUniqKey(param);
+
+  if (param.__key && $$(param.__key)) {
+    return $$(param.__key);
+  }
+
+  if (param.$$id && $$(param.$$id)) {
+    return $$(param.$$id);
   }
 
   return new baseClass(param, template, splitProps);

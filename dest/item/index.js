@@ -23,6 +23,12 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 var subClassNames = ['hb-item', 'hf-item', 'hdot-item', 'li-item'];
@@ -124,83 +130,90 @@ var defaultBehavior = {
     }
   },
   addClass: function addClass(cls, cb) {
-    if (cls) {
-      cls = cls.replace(/\./g, '');
-      cls = _core.lib.isString(cls) ? cls.split(' ') : [];
-      var $item = this.getData();
-      var $itemClass = $item.itemClass && $item.itemClass.split(' ') || [];
-      cls = cls.filter(function (cls) {
-        return $itemClass.indexOf(cls) == -1;
-      });
-      $itemClass = $itemClass.concat(cls);
-      this.update({
-        itemClass: $itemClass.join(' ')
-      }, cb);
-    }
+    var data = this.getData();
+    var $itemClass = (0, _foritem.addClass)(data, cls, cb);
+    this.update({
+      itemClass: $itemClass
+    }, cb); // if (cls) {
+    //   cls = cls.replace(/\./g, '')
+    //   cls = lib.isString(cls) ? cls.split(' ') : []
+    //   let $item = this.getData()
+    //   let $itemClass = $item.itemClass && $item.itemClass.split(' ') || []
+    //   cls = cls.filter(cls => $itemClass.indexOf(cls) == -1)
+    //   $itemClass = $itemClass.concat(cls)
+    //   this.update({
+    //     itemClass: $itemClass.join(' ')
+    //   }, cb)
+    // }
   },
   removeClass: function removeClass(cls, cb) {
-    if (cls) {
-      cls = cls.replace(/\./g, '');
-      cls = _core.lib.isString(cls) ? cls.split(' ') : [];
-      var $item = this.getData();
-      var $itemClass = $item.itemClass && $item.itemClass.split(' ') || [];
-
-      var _cls = $itemClass.filter(function (c) {
-        return c.indexOf(cls) === -1;
-      });
-
-      $itemClass = _cls;
-      this.update({
-        itemClass: $itemClass.join(' ') || ' '
-      }, cb);
-    }
+    var data = this.getData();
+    var $itemClass = (0, _foritem.removeClass)(data, cls, cb);
+    this.update({
+      itemClass: $itemClass || ' '
+    }, cb); // if (cls) {
+    //   cls = cls.replace(/\./g, '')
+    //   cls = lib.isString(cls) ? cls.split(' ') : []
+    //   let $item = this.getData()
+    //   let $itemClass = $item.itemClass && $item.itemClass.split(' ') || []
+    //   let _cls = $itemClass.filter(c => c.indexOf(cls) === -1)
+    //   $itemClass = _cls
+    //   this.update({
+    //     itemClass: ($itemClass.join(' ') || ' ')
+    //   }, cb)
+    // }
   },
   hasClass: function hasClass(cls) {
-    if (cls) {
-      cls = cls.replace(/\./g, '');
-      cls = _core.lib.isString(cls) ? cls.split(' ') : [];
-      var len = cls.length;
-      var $item = this.getData();
-      var $itemClass = $item.itemClass && $item.itemClass.split(' ') || [];
-      cls = cls.filter(function (c) {
-        return $itemClass.indexOf(c) !== -1;
-      });
-      return len === cls.length ? true : false;
-    }
+    var data = this.getData();
+    return (0, _foritem.hasClass)(data, cls); // if (cls) {
+    //   cls = cls.replace(/\./g, '')
+    //   cls = lib.isString(cls) ? cls.split(' ') : []
+    //   let len = cls.length
+    //   let $item = this.getData()
+    //   let $itemClass = $item.itemClass && $item.itemClass.split(' ') || []
+    //   cls = cls.filter(c => $itemClass.indexOf(c) !== -1)
+    //   return len === cls.length ? true : false
+    // }
   },
   css: function css(params, cb) {
-    if (!_core.lib.isPlainObject(params)) {
-      console.warn('不符合react的内联样式格式');
-      return;
-    }
-
-    var $item = this.getData();
-    var itemStyle = Object.assign({}, $item.itemStyle || {}, params);
+    var data = this.getData();
+    var itemStyle = (0, _foritem.css)(data, params, cb);
     this.update({
       itemStyle: itemStyle
-    }, cb);
+    }, cb); // if (!lib.isPlainObject(params)) {
+    //   console.warn('不符合react的内联样式格式');
+    //   return
+    // }
+    // let $item = this.getData()
+    // let itemStyle = Object.assign({}, ($item.itemStyle||{}), params)
+    // this.update({ itemStyle }, cb)
   },
   toggleClass: function toggleClass(cls, cb) {
-    if (cls) {
-      var clsAry = _core.lib.isString(cls) ? cls.split(' ') : [];
+    _foritem.toggleClass.call(this, cls, cb); // if (cls) {
+    //   let clsAry = lib.isString(cls) ? cls.split(' ') : []
+    //   if (clsAry.length) {
+    //     cls = clsAry[0]
+    //     if (this.hasClass(cls)) {
+    //       this.removeClass(cls, cb)
+    //     } else {
+    //       this.addClass(cls, cb)
+    //     }
+    //   }
+    // }
 
-      if (clsAry.length) {
-        cls = clsAry[0];
-
-        if (this.hasClass(cls)) {
-          this.removeClass(cls, cb);
-        } else {
-          this.addClass(cls, cb);
-        }
-      }
-    }
+  },
+  disable: function disable() {
+    this.addClass('disabled _disabled');
+  },
+  enable: function enable() {
+    this.removeClass('disabled _disabled');
   },
   siblings: function siblings(indentify) {
     var _this2 = this;
 
     if (this.parentInst) {
       var allChilds = this.parentInst.children;
-      broChilds = allChilds.filter(function (child) {
+      var broChilds = allChilds.filter(function (child) {
         return child.uniqId !== _this2.uniqId;
       });
 
@@ -210,7 +223,72 @@ var defaultBehavior = {
         });
       }
 
-      return broChilds;
+      var obj = {};
+      obj = _objectSpread({}, broChilds);
+      obj.length = broChilds.length;
+      Object.setPrototypeOf(obj, {
+        forEach: [].forEach,
+        addClass: function addClass() {
+          var _arguments = arguments;
+          this.forEach(function (it) {
+            return it.addClass.apply(it, _arguments);
+          });
+        },
+        removeClass: function removeClass() {
+          var _arguments2 = arguments;
+          this.forEach(function (it) {
+            return it.removeClass.apply(it, _arguments2);
+          });
+        },
+        toggleClass: function toggleClass() {
+          var _arguments3 = arguments;
+          this.forEach(function (it) {
+            return it.toggleClass.apply(it, _arguments3);
+          });
+        },
+        hasClass: function hasClass() {},
+        show: function show() {
+          this.forEach(function (it) {
+            return it.show();
+          });
+        },
+        hide: function hide() {
+          this.forEach(function (it) {
+            return it.hide();
+          });
+        },
+        reset: function reset() {
+          var _arguments4 = arguments;
+          this.forEach(function (it) {
+            return it.reset.apply(it, _arguments4);
+          });
+        },
+        disable: function disable() {
+          var _arguments5 = arguments;
+          this.forEach(function (it) {
+            return it.disable.apply(it, _arguments5);
+          });
+        },
+        enable: function enable() {
+          var _arguments6 = arguments;
+          this.forEach(function (it) {
+            return it.enable.apply(it, _arguments6);
+          });
+        },
+        css: function css() {
+          var _arguments7 = arguments;
+          this.forEach(function (it) {
+            return it.css.apply(it, _arguments7);
+          });
+        },
+        attr: function attr() {
+          var _arguments8 = arguments;
+          this.forEach(function (it) {
+            return it.attr.apply(it, _arguments8);
+          });
+        }
+      });
+      return obj;
     }
   }
 };

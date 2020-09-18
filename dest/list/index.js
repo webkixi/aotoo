@@ -69,6 +69,7 @@ var template = function template(state, props) {
 
   var events = this.events;
   var mode = state.mode || 'list';
+  var type = state.type || 'list'; // expose  scroll swiper
 
   var _attr = state.attr || props.attr || {};
 
@@ -110,6 +111,11 @@ var template = function template(state, props) {
 
   var header = state.header;
   var footer = state.footer;
+
+  if (type === 'expose') {
+    return /*#__PURE__*/React.createElement(React.Fragment, null, header, items, footer, props.children);
+  }
+
   return /*#__PURE__*/React.createElement("div", _extends({
     id: state.id,
     className: 'hlist ' + (state.listClass || ''),
@@ -125,9 +131,9 @@ var defaultConfig = {
   __ready: null
 };
 var defaultBehavior = {
-  insert: function insert(query, pay) {
+  insert: function insert(query, pay, cb) {
     if (!pay) return;
-    pay = (0, _getconfig.attachItem)(pay);
+    pay = (0, _getconfig.attachItem)(pay, this);
     var $data = this.getData().data;
     var index = -1;
 
@@ -145,33 +151,33 @@ var defaultBehavior = {
 
     this.update({
       data: $data
-    });
+    }, cb);
   },
-  append: function append(pay) {
+  append: function append(pay, cb) {
     if (!pay) return;
-    pay = (0, _getconfig.attachItem)(pay);
+    pay = (0, _getconfig.attachItem)(pay, this);
     var $data = this.getData().data;
 
     if (pay) {
       $data = $data.concat(pay);
       this.update({
         data: $data
-      });
+      }, cb);
     }
   },
-  prepend: function prepend(pay) {
+  prepend: function prepend(pay, cb) {
     if (!pay) return;
-    pay = (0, _getconfig.attachItem)(pay);
+    pay = (0, _getconfig.attachItem)(pay, this);
     var $data = this.getData().data;
 
     if (pay) {
       $data = [].concat(pay).concat($data);
       this.update({
         data: $data
-      });
+      }, cb);
     }
   },
-  remove: function remove(query) {
+  remove: function remove(query, cb) {
     var $data = this.getData().data;
     var index = -1;
 
@@ -183,13 +189,29 @@ var defaultBehavior = {
       index = _core.lib.findIndex($data, query);
     }
 
-    if (index || index === 0) {
-      $data.splice(index, 1);
+    if (!query) {
+      index = $data.length - 1;
     }
+
+    if (query === 'shift') {
+      index = 0;
+    }
+
+    if (index || index === 0) {
+      var target = $data.splice(index, 1);
+      target.destory && target.destory();
+    } // this.children = []
+
 
     this.update({
       data: $data
-    });
+    }, cb);
+  },
+  pop: function pop() {
+    this.remove();
+  },
+  shift: function shift() {
+    this.remove('shift');
   },
   setData: function setData(param, cb) {
     this.update(param, cb);
@@ -199,7 +221,7 @@ var defaultBehavior = {
 
     // let param = lib.clone(_param)
     var param = _param;
-    var $data = this.data;
+    var $data = this.getData();
 
     var updateFun = function updateFun() {
       var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -207,10 +229,16 @@ var defaultBehavior = {
       for (var ky in opts) {
         var val = opts[ky];
 
+        if (ky === 'data') {
+          val = val.map(function (item) {
+            return (0, _foritem.resetItem)(item, _this2, true);
+          });
+        }
+
         _core.lib.set($data, ky, val);
       }
 
-      _this2._setData($data);
+      _this2._setData($data, cb);
     };
 
     var result = this.hooks.emit('before-update', param);
@@ -302,6 +330,108 @@ var defaultBehavior = {
         }
       }
     }
+  },
+  disable: function disable() {},
+  enable: function enable() {},
+  forEach: function forEach(cb) {
+    var that = this; // 方案一
+    // 使用子元素自己更新
+    // 一旦子元素自更新，则list组件不再能够透过props影响子元素，考虑到子元素更新应该要交给用户
+
+    this.children.forEach(function (item, ii) {
+      if (_core.lib.isFunction(cb)) cb.call(item, item, ii);
+    }); // 方案二
+    // 由list透过props更新子元素
+    // let myupdates = {}
+    // let $data = this.getData().data
+    // $data.forEach((_item, ii)=>{
+    //   let item = lib.clone(_item)
+    //   let itemContext = {
+    //     addClass(cls){
+    //       let $itemClass = addClass(item, cls)
+    //       let ky = `data[${ii}].itemClass`
+    //       myupdates[ky] = $itemClass
+    //     },
+    //     removeClass(cls){
+    //       let $itemClass = removeClass(item, cls)
+    //       let ky = `data[${ii}].itemClass`
+    //       myupdates[ky] = $itemClass
+    //     },
+    //     hasClass(cls){
+    //       return hasClass(item, cls)
+    //     },
+    //     css(params){
+    //       let itemStyle = css(item, params)
+    //       let ky = `data[${ii}].itemStyle`
+    //       myupdates[ky] = itemStyle
+    //     },
+    //     toggleClass(cls){
+    //       if (this.hasClass(cls)) {
+    //         this.removeClass(cls)
+    //       } else {
+    //         this.addClass(cls)
+    //       }
+    //     },
+    //     update(param){
+    //       let ky = `data[${ii}]`
+    //       myupdates[ky] = param
+    //     },
+    //     show(){
+    //       let ky = `data[${ii}].show`
+    //       myupdates[ky] = true
+    //     },
+    //     hide(){
+    //       let ky = `data[${ii}].show`
+    //       myupdates[ky] = false
+    //     },
+    //     attr(p1, p2){
+    //       let ky = `data[${ii}].attr`
+    //       myupdates[ky] = attr(item, p1, p2)
+    //     },
+    //     disable(){
+    //       this.addClass('disabled _disabled')
+    //     },
+    //     enable(){
+    //       this.removeClass('disabled _disabled')
+    //     }
+    //   }
+    //   if (lib.isFunction(cb)) cb.call(itemContext, item, ii)
+    // })
+    // if (!lib.isEmpty(myupdates)) {
+    //   this.update(myupdates)
+    // }
+  },
+  length: function length() {
+    if (this.tasks.length || this.taskTimmer) {
+      return this.taskData.data.length;
+    }
+
+    return this.getData().data.length;
+  },
+  select: function select(query) {
+    var cls = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'active';
+    var $data = this.getData().data;
+    var index = null;
+
+    if (_core.lib.isNumber(query)) {
+      index = query;
+    }
+
+    if (_core.lib.isPlainObject(query)) {
+      index = _core.lib.findIndex($data, query);
+    }
+
+    if (_core.lib.isNumber(index)) {
+      this.forEach(function (item, ii) {
+        if (ii === index) {
+          this.addClass(cls);
+        } else {
+          if (this.hasClass(cls)) {
+            this.removeClass(cls);
+          }
+        }
+      });
+    }
   } // didUpdate(){
   //   if (lib.isFunction(this.config.didUpdate)) {
   //     this.config.didUpdate.apply(this, arguments)
@@ -332,7 +462,8 @@ function list() {
   var customCreated = config.created;
 
   config.created = function () {
-    this.$$is = this.config.$$is;
+    // this.$$is = this.config.$$is
+    this.$$is = 'list';
     this.events = getListMethod.call(this, this.config.listMethod || {});
 
     if (_core.lib.isFunction(customCreated)) {
