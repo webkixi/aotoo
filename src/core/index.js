@@ -219,7 +219,7 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       if (this.uiCount !== parent.uiCount) return
       parent.hasMounted = false
       parent.isINmemery = true
-      let unLoad = parent.onUnload || parent.componentWillUnmount
+      let unLoad = parent.onUnload || parent.componentWillUnmount || parent.detached
       if (lib.isFunction(unLoad)) {
         unLoad.call(parent)
       }
@@ -429,6 +429,14 @@ class baseClass {
     let myready = config.onReady || config.ready || config.__ready
     if (lib.isFunction(myready)) { // 小程序组件生命周期 ready / Pager的onReady
       myready.call(this)
+    }
+  }
+
+  detached(){
+    let config = this.config
+    let mydetached = config.onUnload || config.detached || config.componentWillUnmount
+    if (lib.isFunction(mydetached)) { // 小程序组件生命周期 ready / Pager的onReady
+      mydetached.call(this)
     }
   }
 
