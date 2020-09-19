@@ -297,7 +297,8 @@ class baseClass {
     let _property = _param;
     this.config = _param
     
-    this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_')
+    // this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_')
+    this.uniqId = _param.uniqId || _data.uniqId || lib.uniqueId('base_')
     
     let defaultData = {
       // alwaysSyncProps: false
@@ -604,17 +605,11 @@ export function extTemplate(params={}){
   extendsTemplate(params)
 }
 
-function setUniqKey(param){
-  if (param.key || (param.data && param.data.key)) {
-    let key = param.key || (param.data && param.data.key)
-    param.__key = key
+function setUniqId(param){
+  if (param.uniqId) return param
+  else {
+    param.uniqId = lib.uniqueId('base_')
   }
-
-  if (param.__key || (param.data && param.data.__key)) {
-    let key = param.__key || (param.data && param.data.__key)
-    param.__key = key
-  }
-
   return param
 }
 
@@ -628,9 +623,12 @@ export default function(param, template, splitProps=true) {
   if (lib.isFunction(param)) {
     if (lib.isClass(param)) {
       let options = template
-      options = setUniqKey(options)
-      if (options.__key && $$(options.__key)) {
-        return $$(options.__key)
+      options = setUniqId(options)
+      if (options.uniqId && $$(options.uniqId)) {
+        return $$(options.uniqId)
+      }
+      if (options.$$id && $$(options.$$id)) {
+        return $$(options.$$id)
       }
       return new hocClass(param, options, splitProps)
     }
@@ -638,9 +636,9 @@ export default function(param, template, splitProps=true) {
     param = {}
     return new baseClass(param, template, splitProps)
   }
-  param = setUniqKey(param)
-  if (param.__key && $$(param.__key)) {
-    return $$(param.__key)
+  param = setUniqId(param)
+  if (param.uniqId && $$(param.uniqId)) {
+    return $$(param.uniqId)
   }
   if (param.$$id && $$(param.$$id)) {
     return $$(param.$$id)

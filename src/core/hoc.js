@@ -227,7 +227,8 @@ class CombineClass {
 
     let that = this
     
-    this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_')
+    // this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_')
+    this.uniqId = _param.uniqId || _data.uniqId || lib.uniqueId('base_')
     
     let defaultData = {
       // alwaysSyncProps: false
@@ -525,7 +526,5 @@ class CombineClass {
 }
 
 export default function hocClass(reactComponentClass, options, splitProps) {
-  if (lib.isClass(reactComponentClass)) {
-    return new CombineClass(reactComponentClass, options, splitProps)
-  }
+  return new CombineClass(reactComponentClass, options, splitProps)
 }
