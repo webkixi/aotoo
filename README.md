@@ -1,100 +1,128 @@
 # aotoo
-aotoo is a react library, Able to instantiate react components for js  
-一个react的封装库，将react组件js实例化  
 
-# INSTALL
+aotoo是一个react的封装库，将react组件js实例化  
+
+在一些小型的项目，不需要引入redux等状态库，使用ao2封装原生react组件(自定义)生成JS对象，通过定义内部的属性和方法，来更新状态
+
+[GITHUB源码](https://www.github.com/webkixi/aotoo)
+
+## INSTALL
+
 ```bash
 yarn add @aotoo/aotoo
 #
 npm install @aotoo/aotoo
 ```
 
-## USAGE 1  
-将原生React组件封装成JS对象
+## USAGE 1 计数器
+
+下例是一个简单的计数器组件，为react原生组件添加了属性和api方法，其中api暴露给外部使用，如下例中的button按钮通过暴露的increase方法设置组件计数
+
+Demo: <https://codesandbox.io/s/aotoo6jishuqi-dv1uf>
 
 ```js
 import createComponent from '@aotoo/aotoo'
 
-class Test extends React.Component {
-  render(){
+class Count extends React.Component {
+  render() {
     return (
-      <div className='container' onClick={this.env.onTest}>
-        {this.state.title}
+      <div className="container" onClick={this.env.increase}>
+        {this.state.count || 0}
       </div>
-    )
+    );
   }
 }
 
-const testInstance = createComponent(Test, {
-  data: {
-    title: 'some text'
+const countInstance = createComponent(Count, {
+  data: {  // 将转化成react组件的state
+    count: 0,
   },
-  onTest(e){
-    console.log('do something')
+  increase(e) {
+    let count = this.getData().count;
+    count++;
+    this.setData({ count });
   }
-})
+});
 
-function Container(props){
-  setTimeout(()=>{
-    testInstance.setData({
-      title: 'change state.title'
-    })
-  }, 3000)
-
+function Container() {
   return (
-    <testInstance.UI />
-  )
+    <>
+      <countInstance.UI />
+      <button onClick={countInstance.increase}>计数器</button>
+    </>
+  );
 }
 
 ReactDOM.render(<Container />, document.getElementById('root'))
 ```
 
-## USAGE 2 
-使用配置数据生成实例
+## USAGE 2 配置化计数器组件
+
+参考微信小程序组件的设计，使用配置化生成react组件，并对外曝露相关api方法  
+
+Demo: <https://codesandbox.io/s/aotoo6jishuqi-forked-vh8n2>
 
 ```js
 import createComponent from '@aotoo/aotoo'
 
-const test = createComponent(
-  {
-    data: {
-      title: 'some text',
-      onClick: 'onTest?user=jack'
-    },
-    onTest(e, param, inst){
-      console.log(param) // {user: jack}
-      inst.setData({
-        title: 'change state.title'
-      })
-    },
-    changeTitle() {
-      this.setData({
-        title: 'change title again'
-      })
-    }
+const countTemplate = function (state, props) {
+  return <div className={"container"}>{state.count}</div>;
+};
+
+const countConfig = {
+  data: {
+    count: 0
   },
-
-  // template
-  function(state, props){
-    return (
-      <div onClick={state.onClick}>{state.title}</div>
-    )
+  increase() {
+    let count = this.getData().count;
+    count++;
+    this.setData({ count });
   }
-)
+};
 
-setTimeout(() => {
-  test.changeTitle()
-}, 3000);
+let count = createComponent(countConfig, countTemplate);
 
-ReactDOM.render(<test.UI />, document.getElementById('root'))
+function Container() {
+  return (
+    <>
+      <count.UI />
+      <button onClick={count.increase}>计数器</button>
+    </>
+  );
+}
+
+ReactDOM.render(<Container/>, document.getElementById('root'))
 ```
 
-## 基础DEMO
-https://codesandbox.io/s/aotoo6basedemo-li0jq?file=/src/App.js  
-https://codesandbox.io/s/aotoo6basedemo-forked-3ikdp?file=/src/demos/basecomponent.js  
+## 生命周期
 
+组件的生命周期，指的是组件自身的一些函数，这些函数在特殊的时间点或遇到一些特殊的框架事件时被自动触发。其中，最重要的生命周期是 `created` `attached` `detached` ，包含一个组件实例生命流程的最主要时间点。生命周期的设计参考微信小程序  
 
-### 通用属性
+```js
+import createComponent, {$$} from '@aotoo/aotoo';
+createComponent({
+  created: function(){
+    // 在组件实例刚刚被创建时执行
+  },
+  attached: function() {
+    // 在组件实例进入页面节点树时执行
+  },
+  ready: function(){
+    // 在组件在视图层布局完成后执行
+  },
+  didUpdate: function(){
+    // 在组件挂载后，每一次更新后会调用
+  },
+  detached: function() {
+    // 在组件实例被从页面节点树移除时执行
+  },
+},
+template
+)
+```
+
+## 通用属性
+
 | 属性      |    类型 | 说明  |
 | :-------- | :--------: | :-- |
 | $$id  | String |  类似于$('#id')的id  |
@@ -103,7 +131,8 @@ https://codesandbox.io/s/aotoo6basedemo-forked-3ikdp?file=/src/demos/basecompone
 | ready      |   Function | 生命周期，同小程序组件 |
 | didUpdate      |   Function | 每次更新后触发 |
 
-### 通用API
+## 通用API
+
 | 方法      |    类型 | 说明  |
 | :-------- | :--------: | :-- |
 | parent      |   (p) | 查找父级 |
@@ -114,13 +143,16 @@ https://codesandbox.io/s/aotoo6basedemo-forked-3ikdp?file=/src/demos/basecompone
 | render      |   (p) | 渲染组件，与直接写jsx一致 |
 | attr |  (p1, p2) |  设置/获取data-*属性 |
 
+## 内置组件
 
+### item  
 
-
-# item  
 引入`@aotoo/aotoo`后，会生成全局变量`ui_item`和全局方法组件`UI_item`, item组件将会生成一个`div`的html结构  
 
-####  配置生成组件ui_item
+#### ui_item
+
+配置化生成item组件
+
 ```js
 import '@aotoo/aotoo'
 
@@ -129,8 +161,8 @@ const itemConfig = {
   onClick: 'changeTitle?title=新的标题',
   changeTitle(e, param, inst){
     inst.update({
-	  title: param.title
-	})
+   title: param.title
+ })
   }
 }
 
@@ -138,7 +170,11 @@ const item = ui_item(itemConfig)
 
 ReactDOM.render(<item.UI />, document.getElementById('root'))
 ```
-#### 使用React方法组件UI_item  
+
+#### UI_item  
+
+通过React方法组件  
+
 ```js
 import '@aotoo/aotoo'
 
@@ -151,12 +187,8 @@ function changeTitle(e){
 const JSX = <UI_item title='标题' onClick={changeTitle}/>
 ```  
 
-### item组件DEMO
-https://codesandbox.io/s/aotoo6basedemo1-forked-bxcs9?file=/src/App.js    
-https://codesandbox.io/s/aotoo6itembase1-cpdvt  
+#### item属性
 
-
-### item属性
 | 属性      |    类型 | 说明  |
 | :-------- | :--------: | :-- |
 | $$id  | String |  类似于$('#id')的id  |
@@ -174,7 +206,8 @@ https://codesandbox.io/s/aotoo6itembase1-cpdvt
 | attached      |   Function | 生命周期，同小程序组件 |
 | ready      |   Function | 生命周期，同小程序组件 |
 
-### item API 方法
+#### item API 方法
+
 | 方法      |    参数 | 说明  |
 | :-------- | :--------: | :-- |
 | reset  | (p) |  恢复初始数据  |
@@ -194,10 +227,14 @@ https://codesandbox.io/s/aotoo6itembase1-cpdvt
 | destory      |   () | 销毁该组件 |
 | render      |   (p) | 渲染组件，与直接写jsx一致 |
 
-# list  
+### list  
+
 引入`@aotoo/aotoo`后，会生成全局变量`ui_list`和全局方法组件`UI_list`, list组件将会生成一组`div`的html结构(基于`item`组件)
 
-####  配置生成组件ui_list
+#### ui_list
+
+配置生成list组件
+
 ```js
 const listConfig = {
   data: [
@@ -220,7 +257,10 @@ ReactDOM.render(<list.UI />, document.getElementById('root'))
   
 ```
 
-#### 使用React方法组件UI_list  
+#### UI_list  
+
+通过React方法组件
+
 ```js
 import {$$} '@aotoo/aotoo'
 
@@ -237,9 +277,9 @@ const listData = [
   {title: 'ROSE'}
 ]
 
-const JSX = <UI_list 
-  $$id='mylist' 
-  data={listData} 
+const JSX = <UI_list
+  $$id='mylist'
+  data={listData}
   onItemClick={itemClick}
 />
 
@@ -252,40 +292,8 @@ setTimeout(() => {
 ReactDOM.render(JSX, document.getElementById('root'))
 ```
 
-# tree
-tree组件是list组件的超集，通过扁平数据输出层次性的HTML结构，可支持多层次数据
+#### list配置参数
 
-```js
-const listConfig = {
-  data: [
-    {title: '广东省', idf: 'gd'},
-    {title: '广州市', parent: 'gd', idf: 'gz'},
-      {title: '天河区', parent: 'gd', parent: 'gz'},
-      {title: '白云区', parent: 'gd', parent: 'gz'},
-      {title: '越秀区', parent: 'gd', parent: 'gz'},
-    {title: '深圳市', parent: 'gd'},
-    {title: '东莞市', parent: 'gd'},
-
-	{title: '湖南省', idf: 'hn'},
-	{title: '长沙市', parent: 'hn'},
-	{title: '衡阳市', parent: 'hn'},
-  ],
-  mode: 'tree'
-}
-
-const tree = ui_list(listConfig)  
-
-ReactDOM.render(<tree.UI />, document.getElementById('root'))
-```
-
-### list组件DEMO
-https://codesandbox.io/s/aotoo6listbase-6kmkb  
-https://codesandbox.io/s/aotoo6listbase1-xltew  
-[tree](https://codesandbox.io/s/aotoo6listbase1-forked-cyte9)  
-
-> 空格不是必须的，为展现数据层次  
-
-### list属性
 | 属性      |    类型 | 说明  |
 | :-------- | :--------: | :-- |
 | $$id  | String |  类似于$('#id')的id  |
@@ -299,7 +307,8 @@ https://codesandbox.io/s/aotoo6listbase1-xltew
 | methods     |   Object |  设置实例方法  |
 | mode     |   String |  列表类型  |
 
-### list API 方法
+#### list API 方法
+
 | 方法      |    参数 | 说明  |
 | :-------- | :--------: | :-- |
 | reset  | (p) |  恢复初始数据  |
@@ -321,5 +330,34 @@ https://codesandbox.io/s/aotoo6listbase1-xltew
 | hide      |   () | 隐藏该组件 |
 | destory      |   () | 销毁该组件 |
 | render      |   (p) | 渲染组件，与直接写jsx一致 |
+
+### tree
+
+tree组件是list组件的超集，通过扁平数据输出层次性的HTML结构，可支持多层次数据
+
+```js
+const listConfig = {
+  data: [
+    {title: '广东省', idf: 'gd'},
+    {title: '广州市', parent: 'gd', idf: 'gz'},
+      {title: '天河区', parent: 'gd', parent: 'gz'},
+      {title: '白云区', parent: 'gd', parent: 'gz'},
+      {title: '越秀区', parent: 'gd', parent: 'gz'},
+    {title: '深圳市', parent: 'gd'},
+    {title: '东莞市', parent: 'gd'},
+
+ {title: '湖南省', idf: 'hn'},
+ {title: '长沙市', parent: 'hn'},
+ {title: '衡阳市', parent: 'hn'},
+  ],
+  mode: 'tree'
+}
+
+const tree = ui_list(listConfig)  
+
+ReactDOM.render(<tree.UI />, document.getElementById('root'))
+```
+
+> 空格不是必须的，为展现数据层次  
 
 关注我们，后续完善文档

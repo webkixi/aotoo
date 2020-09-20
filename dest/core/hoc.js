@@ -212,7 +212,7 @@ function combineComponent(ORIClass, options, parent, splitProps) {
         parent.hasMounted = false;
         parent.isINmemery = true;
         _get(_getPrototypeOf(CComponent.prototype), "componentWillUnmount", this) && _get(_getPrototypeOf(CComponent.prototype), "componentWillUnmount", this).call(this);
-        var unLoad = parent.onUnload || parent.componentWillUnmount;
+        var unLoad = parent.onUnload || parent.componentWillUnmount || parent.detached;
 
         if (lib.isFunction(unLoad)) {
           unLoad.call(parent);
@@ -319,8 +319,9 @@ var CombineClass = /*#__PURE__*/function () {
     delete _param.data;
     var _property = _param;
     this.config = _param;
-    var that = this;
-    this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_');
+    var that = this; // this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_')
+
+    this.uniqId = _param.uniqId || _data.uniqId || lib.uniqueId('base_');
     var defaultData = {// alwaysSyncProps: false
     };
     this.alwaysSyncProps = this.config.alwaysSyncProps || false; // 是否持续更新props(任何时候)
@@ -461,6 +462,17 @@ var CombineClass = /*#__PURE__*/function () {
       if (lib.isFunction(myready)) {
         // 小程序组件生命周期 ready / Pager的onReady
         myready.call(this);
+      }
+    }
+  }, {
+    key: "detached",
+    value: function detached() {
+      var config = this.config;
+      var mydetached = config.onUnload || config.detached || config.componentWillUnmount;
+
+      if (lib.isFunction(mydetached)) {
+        // 小程序组件生命周期 ready / Pager的onReady
+        mydetached.call(this);
       }
     }
   }, {
@@ -679,7 +691,5 @@ var CombineClass = /*#__PURE__*/function () {
 }();
 
 function hocClass(reactComponentClass, options, splitProps) {
-  if (lib.isClass(reactComponentClass)) {
-    return new CombineClass(reactComponentClass, options, splitProps);
-  }
+  return new CombineClass(reactComponentClass, options, splitProps);
 }

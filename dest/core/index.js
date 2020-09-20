@@ -273,7 +273,7 @@ function getReactComponentClass(_data, parent, template, splitProps) {
         if (this.uiCount !== parent.uiCount) return;
         parent.hasMounted = false;
         parent.isINmemery = true;
-        var unLoad = parent.onUnload || parent.componentWillUnmount;
+        var unLoad = parent.onUnload || parent.componentWillUnmount || parent.detached;
 
         if (lib.isFunction(unLoad)) {
           unLoad.call(parent);
@@ -408,8 +408,9 @@ var baseClass = /*#__PURE__*/function () {
 
     delete _param.data;
     var _property = _param;
-    this.config = _param;
-    this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_');
+    this.config = _param; // this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_')
+
+    this.uniqId = _param.uniqId || _data.uniqId || lib.uniqueId('base_');
     var defaultData = {// alwaysSyncProps: false
     };
     this.alwaysSyncProps = this.config.alwaysSyncProps || false; // 是否持续更新props(任何时候)
@@ -551,6 +552,17 @@ var baseClass = /*#__PURE__*/function () {
       if (lib.isFunction(myready)) {
         // 小程序组件生命周期 ready / Pager的onReady
         myready.call(this);
+      }
+    }
+  }, {
+    key: "detached",
+    value: function detached() {
+      var config = this.config;
+      var mydetached = config.onUnload || config.detached || config.componentWillUnmount;
+
+      if (lib.isFunction(mydetached)) {
+        // 小程序组件生命周期 ready / Pager的onReady
+        mydetached.call(this);
       }
     }
   }, {
@@ -773,18 +785,10 @@ function extTemplate() {
   (0, _partment.extendsTemplate)(params);
 }
 
-function setUniqKey(param) {
-  if (param.key || param.data && param.data.key) {
-    var key = param.key || param.data && param.data.key;
-    param.__key = key;
+function setUniqId(param) {
+  if (param.uniqId) return param;else {
+    param.uniqId = lib.uniqueId('base_');
   }
-
-  if (param.__key || param.data && param.data.__key) {
-    var _key = param.__key || param.data && param.data.__key;
-
-    param.__key = _key;
-  }
-
   return param;
 }
 /**
@@ -801,10 +805,14 @@ function _default(param, template) {
   if (lib.isFunction(param)) {
     if (lib.isClass(param)) {
       var options = template;
-      options = setUniqKey(options);
+      options = setUniqId(options);
 
-      if (options.__key && $$(options.__key)) {
-        return $$(options.__key);
+      if (options.uniqId && $$(options.uniqId)) {
+        return $$(options.uniqId);
+      }
+
+      if (options.$$id && $$(options.$$id)) {
+        return $$(options.$$id);
       }
 
       return new _hoc["default"](param, options, splitProps);
@@ -815,10 +823,10 @@ function _default(param, template) {
     return new baseClass(param, template, splitProps);
   }
 
-  param = setUniqKey(param);
+  param = setUniqId(param);
 
-  if (param.__key && $$(param.__key)) {
-    return $$(param.__key);
+  if (param.uniqId && $$(param.uniqId)) {
+    return $$(param.uniqId);
   }
 
   if (param.$$id && $$(param.$$id)) {
