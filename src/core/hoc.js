@@ -262,6 +262,11 @@ class CombineClass {
         if (!isExist) {
           this.parentInst.children.push(this)
         }
+
+        if (!this.componentInst) {
+          this.componentInst = this.parentInst
+          this.rootInstance = this.componentInst
+        }
       }
     } else {
       this.data.fromComponent = this.uniqId

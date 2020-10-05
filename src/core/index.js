@@ -2,6 +2,7 @@ import react from 'react'
 import reactDom from 'react-dom'
 import elementsCollection from './elements'
 import hocClass from './hoc'
+import wrapClass from './wrap'
 import {extendsTemplate} from '../_common/partment'
 import * as lib from "../lib";
 import {attrKey, accessKey, eventName, internalKeys, isEvents, bindEvents} from '../_common/index'
@@ -332,6 +333,11 @@ class baseClass {
         if (!isExist) {
           this.parentInst.children.push(this)
         }
+
+        if (!this.componentInst) {
+          this.componentInst = this.parentInst
+          this.rootInstance = this.componentInst
+        }
       }
     } else {
       this.data.fromComponent = this.uniqId
@@ -627,7 +633,10 @@ function setUniqId(param){
  * @param {*} template react需要的模板
  * @param {*} splitProps 分离props数据和state数据
  */
-export default function(param, template, splitProps=true) {
+export default function(param={}, template, splitProps=true) {
+  if (React.isValidElement(param)) {
+    return wrapClass(param, template)
+  }
   if (lib.isFunction(param)) {
     if (lib.isClass(param)) {
       let options = template

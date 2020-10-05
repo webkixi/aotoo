@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.urlTOquery = urlTOquery;
 exports.queryTOurl = queryTOurl;
 
+var _util = require("./util");
+
 function urlTOquery(url) {
   var aim = url;
   var query = {};
@@ -37,7 +39,7 @@ function urlTOquery(url) {
 function queryTOurl(url) {
   var param = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-  if (isString(url) && isObject(param)) {
+  if ((0, _util.isString)(url) && (0, _util.isObject)(param)) {
     var queryStr = '';
     Object.keys(param).forEach(function (key) {
       queryStr += "&".concat(key, "=").concat(param[key]);

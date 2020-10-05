@@ -5,6 +5,8 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.render = render;
+exports.html = html;
 exports.$$ = $$;
 Object.defineProperty(exports, "lib", {
   enumerable: true,
@@ -38,6 +40,32 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function $$(indentify) {
   return _core._elements.getElement(indentify);
+}
+
+function render(jsx, id) {
+  if (_core.lib.isClient()) {
+    var root = id;
+
+    if (_core.lib.isString(id)) {
+      root = document.getElementById(id);
+    }
+
+    if (_core.lib.isDomElement(root)) {
+      // ReactDOM.render(jsx, root)
+      ReactDOM.hydrate(jsx, root);
+    }
+  }
+
+  if (_core.lib.isNode()) {
+    // return ReactDOM.render(jsx)
+    return ReactDomServer.renderToString(jsx);
+  }
+}
+
+function html(jsx) {
+  if (_core.lib.isNode()) {
+    return ReactDomServer.renderToStaticMarkup(jsx);
+  }
 }
 
 var _default = _core["default"];

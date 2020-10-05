@@ -16,6 +16,7 @@ npm install @aotoo/aotoo
 
 ## USAGE 1 计数器
 
+封装react原生组件，并曝露api方法以方便外部修改组件状态  
 下例是一个简单的计数器组件，为react原生组件添加了属性和api方法，其中api暴露给外部使用，如下例中的button按钮通过暴露的increase方法设置组件计数
 
 Demo: <https://codesandbox.io/s/aotoo6jishuqi-dv1uf>
@@ -58,6 +59,7 @@ ReactDOM.render(<Container />, document.getElementById('root'))
 
 ## USAGE 2 配置化计数器组件
 
+封装配置，并生成js对象及曝露该对象的api方法  
 参考微信小程序组件的设计，使用配置化生成react组件，并对外曝露相关api方法  
 
 Demo: <https://codesandbox.io/s/aotoo6jishuqi-forked-vh8n2>
@@ -92,6 +94,27 @@ function Container() {
 }
 
 ReactDOM.render(<Container/>, document.getElementById('root'))
+```
+
+## WRAP
+
+封装JSX输出真实dom，有些场景调用第三方库需要作用于真实dom  
+
+```js
+import createComponent from '@aotoo/aotoo'
+
+let jsx = createComponent((
+  <div>
+    <span>文本内容</span>
+  <div>
+), function(dom){
+  $(dom).on('click', clickHandle)
+  return function(){
+    $dom.off('click', clickHandle)
+  }
+})
+
+ReactDOM.render(jsx, document.getElementById('root'))
 ```
 
 ## 生命周期

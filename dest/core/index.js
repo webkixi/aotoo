@@ -18,6 +18,8 @@ var _elements2 = _interopRequireDefault(require("./elements"));
 
 var _hoc = _interopRequireDefault(require("./hoc"));
 
+var _wrap = _interopRequireDefault(require("./wrap"));
+
 var _partment = require("../_common/partment");
 
 var lib = _interopRequireWildcard(require("../lib"));
@@ -446,6 +448,11 @@ var baseClass = /*#__PURE__*/function () {
         if (!isExist) {
           this.parentInst.children.push(this);
         }
+
+        if (!this.componentInst) {
+          this.componentInst = this.parentInst;
+          this.rootInstance = this.componentInst;
+        }
       }
     } else {
       this.data.fromComponent = this.uniqId;
@@ -799,8 +806,14 @@ function setUniqId(param) {
  */
 
 
-function _default(param, template) {
+function _default() {
+  var param = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var template = arguments.length > 1 ? arguments[1] : undefined;
   var splitProps = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
+  if (React.isValidElement(param)) {
+    return (0, _wrap["default"])(param, template);
+  }
 
   if (lib.isFunction(param)) {
     if (lib.isClass(param)) {
