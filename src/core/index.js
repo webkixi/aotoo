@@ -84,8 +84,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
 
     // 组件内修改state后，不允许props从外部污染数据
     // reset之后，恢复从props穿透数据渲染
-    reset(param){
-      this.setSelfState((param||this.oriState))
+    reset(param, cb){
+      this.setSelfState((param||this.oriState), cb)
       this.selfStateChanged = false
       selfStateChanged = false
     }
@@ -497,8 +497,12 @@ class baseClass {
     }
   }
 
-  reset(param){
-    this.reactComponentInstance && this.reactComponentInstance.reset(param)
+  reset(param, cb){
+    if (lib.isFunction(this.config.reset)) {
+      this.config.reset.call(this, param, cb)
+    } else {
+      this.reactComponentInstance && this.reactComponentInstance.reset(param, cb)
+    }
   }
 
   show(){

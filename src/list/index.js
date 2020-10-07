@@ -131,6 +131,26 @@ const defaultConfig = {
 }
 
 let defaultBehavior = {
+  reset(param, cb){
+    let that = this
+    if (this.reactComponentInstance) {
+      this.reactComponentInstance.reset({data: []}, function() {
+        if (lib.isArray(param)) {
+          param = {data: param}
+        }
+        if (lib.isPlainObject(param)) {
+          if (param.data) {
+            if (lib.isArray(param.data)) {
+              param.data = attachItem(param.data, that)
+            } else {
+              delete param.data
+            }
+          }
+        }
+        that.reactComponentInstance.reset(param, cb)
+      })
+    }
+  },
   insert(query, pay, cb){
     if (!pay) return
     pay = attachItem(pay, this)

@@ -45,7 +45,7 @@ function attachItem(pay, context) {
 
 function getConfig(opts, context) {
   var mydata = {};
-  var oriData = null;
+  var oriData = [];
   var myoptions = {};
   var attr = {};
   var config = {};

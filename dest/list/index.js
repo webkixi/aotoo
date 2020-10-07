@@ -131,6 +131,33 @@ var defaultConfig = {
   __ready: null
 };
 var defaultBehavior = {
+  reset: function reset(param, cb) {
+    var that = this;
+
+    if (this.reactComponentInstance) {
+      this.reactComponentInstance.reset({
+        data: []
+      }, function () {
+        if (_core.lib.isArray(param)) {
+          param = {
+            data: param
+          };
+        }
+
+        if (_core.lib.isPlainObject(param)) {
+          if (param.data) {
+            if (_core.lib.isArray(param.data)) {
+              param.data = (0, _getconfig.attachItem)(param.data, that);
+            } else {
+              delete param.data;
+            }
+          }
+        }
+
+        that.reactComponentInstance.reset(param, cb);
+      });
+    }
+  },
   insert: function insert(query, pay, cb) {
     if (!pay) return;
     pay = (0, _getconfig.attachItem)(pay, this);

@@ -51,13 +51,15 @@ function render(jsx, id) {
     }
 
     if (_core.lib.isDomElement(root)) {
-      // ReactDOM.render(jsx, root)
-      ReactDOM.hydrate(jsx, root);
+      ReactDOM.unmountComponentAtNode(root);
+      root.innerHTML = ''; // ReactDOM.render(jsx, root)
+      // ReactDOM.hydrate(jsx, root)
+
+      typeof noserver === 'undefined' ? ReactDOM.hydrate(jsx, root) : ReactDOM.render(jsx, root);
     }
   }
 
   if (_core.lib.isNode()) {
-    // return ReactDOM.render(jsx)
     return ReactDomServer.renderToString(jsx);
   }
 }

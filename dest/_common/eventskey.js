@@ -47,6 +47,7 @@ function isEvents(key) {
 function bindEvents(events, context) {
   function eventFunction(funKey, functionName, myquery) {
     return function a(e, param, inst) {
+      e = e.persist();
       var curContext = a.curContext || context;
       if (curContext && curContext.hasClass && curContext.hasClass('_disabled')) return; // 无效状态，则不允许事件触发
 

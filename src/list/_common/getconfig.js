@@ -21,7 +21,7 @@ export function attachItem(pay, context) {
 
 export default function getConfig(opts, context) {
   let mydata = {}
-  let oriData = null
+  let oriData = []
   let myoptions = {}
   let attr = {}
   let config = {}

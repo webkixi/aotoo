@@ -161,8 +161,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
 
     _createClass(InnerClass, [{
       key: "reset",
-      value: function reset(param) {
-        this.setSelfState(param || this.oriState);
+      value: function reset(param, cb) {
+        this.setSelfState(param || this.oriState, cb);
         this.selfStateChanged = false;
         selfStateChanged = false;
       }
@@ -632,8 +632,12 @@ var baseClass = /*#__PURE__*/function () {
     }
   }, {
     key: "reset",
-    value: function reset(param) {
-      this.reactComponentInstance && this.reactComponentInstance.reset(param);
+    value: function reset(param, cb) {
+      if (lib.isFunction(this.config.reset)) {
+        this.config.reset.call(this, param, cb);
+      } else {
+        this.reactComponentInstance && this.reactComponentInstance.reset(param, cb);
+      }
     }
   }, {
     key: "show",

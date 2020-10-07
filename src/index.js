@@ -13,13 +13,15 @@ export function render(jsx, id){
       root = document.getElementById(id)
     }
     if (lib.isDomElement(root)) {
+      ReactDOM.unmountComponentAtNode(root);
+      root.innerHTML = ''
       // ReactDOM.render(jsx, root)
-      ReactDOM.hydrate(jsx, root)
+      // ReactDOM.hydrate(jsx, root)
+      typeof noserver === 'undefined' ? ReactDOM.hydrate(jsx, root) : ReactDOM.render(jsx, root)
     }
   }
 
   if (lib.isNode()) {
-    // return ReactDOM.render(jsx)
     return ReactDomServer.renderToString(jsx)
   }
 }
