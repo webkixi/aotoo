@@ -47,13 +47,13 @@ function isEvents(key) {
 function bindEvents(events, context) {
   function eventFunction(funKey, functionName, myquery) {
     return function a(e, param, inst) {
-      e = e.persist();
       var curContext = a.curContext || context;
       if (curContext && curContext.hasClass && curContext.hasClass('_disabled')) return; // 无效状态，则不允许事件触发
 
       var responseContext = (0, _core.getContextCallback)(curContext, functionName);
 
       if (responseContext) {
+        e.persist();
         responseContext[functionName].call(responseContext, e, myquery, curContext);
       } else {
         console.warn('没有找到定义方法:' + functionName); // 定义pager的__fromParent
