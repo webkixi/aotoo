@@ -26,6 +26,12 @@ Object.defineProperty(exports, "ReturnPromiseComponent", {
     return _core.ReturnPromiseComponent;
   }
 });
+Object.defineProperty(exports, "extTemplate", {
+  enumerable: true,
+  get: function get() {
+    return _core.extTemplate;
+  }
+});
 exports["default"] = void 0;
 
 var _core = _interopRequireWildcard(require("./core"));

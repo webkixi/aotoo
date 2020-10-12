@@ -23,16 +23,17 @@ const template = function(state, props) {
 
 
   let sort = state.__sort
-  sort = sort.filter(ky => partments[ky] ? true : false)
+  let partElement = partments()
+  sort = sort.filter(ky => partElement[ky] ? true : false)
   let myTemplate = sort.map((ky, ii) => {
     let elementKey = lib.uniqueId('part_')
     let value = state[ky]
     return (
       <React.Fragment key={elementKey}>
-        {partments[ky](value, undefined, state, props)}
+        {partElement[ky](value, undefined, state, props)}
       </React.Fragment>
     )
-    // return partments[ky](value, state, props, elementKey, _ky)
+    // return partElement[ky](value, state, props, elementKey, _ky)
   })
 
   let clsNmae = 'item ' + (state.itemClass||'')
@@ -46,7 +47,7 @@ const template = function(state, props) {
   }
 
   return (
-    <div 
+    <View 
       id={state.id}
       key={state.__key}
       className={clsNmae}
@@ -58,7 +59,7 @@ const template = function(state, props) {
         {myTemplate}
         {props.children}
       </React.Fragment>
-    </div>
+    </View>
   )
 }
 

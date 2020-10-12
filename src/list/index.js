@@ -107,7 +107,7 @@ const template = function(state, props) {
   }
 
   return (
-    <div 
+    <View 
       id={state.id}
       className={'hlist '+(state.listClass||'')}
       style={state.listStyle}
@@ -118,7 +118,7 @@ const template = function(state, props) {
       {items}
       {footer}
       {props.children}
-    </div>
+    </View>
   )
 }
 

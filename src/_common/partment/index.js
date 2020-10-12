@@ -1,4 +1,5 @@
 import * as lib from "../../lib";
+let context = lib.curContext()
 
 /**
  * 
@@ -309,7 +310,6 @@ const globalComponent = {
   },
 }
 
-let context = lib.curContext()
 context['UI_item'] = globalComponent['ui-item']
 context['UI_list'] = globalComponent['ui-list']
 context['Item'] = globalComponent['ui-item']
@@ -318,10 +318,15 @@ context['View'] = View
 context['Text'] = Text
 
 export function extendsTemplate(otherTemplate={}){
+  let contextInnerTemplate = context._ao2_innerTemplate_||{}
   lib.forEach(innerTemplate, (t, ii, ky)=>{
     delete otherTemplate[ky]
   })
-  innerTemplate = Object.assign({}, innerTemplate, otherTemplate)
+  innerTemplate = Object.assign({}, innerTemplate, contextInnerTemplate, otherTemplate)
+  context._ao2_innerTemplate_ = innerTemplate
+  return innerTemplate
 }
 
-export default innerTemplate
+export default function(){
+  return context._ao2_innerTemplate_ || innerTemplate
+}

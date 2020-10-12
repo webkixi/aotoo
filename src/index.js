@@ -1,4 +1,4 @@
-import createComponet, { lib, _elements, ReturnPromiseComponent } from './core'
+import createComponet, { lib, _elements, ReturnPromiseComponent, extTemplate } from './core'
 import './item'
 import './list'
 
@@ -36,7 +36,8 @@ export {
   lib, 
   $$,
   _elements,
-  ReturnPromiseComponent
+  ReturnPromiseComponent,
+  extTemplate
 }
 
 export default createComponet

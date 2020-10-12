@@ -35,7 +35,7 @@ export function $$(id) {
 
 export function ReturnPromiseComponent(props){
   let [value, setValue] = React.useState(
-    <div className={'ui-loading '+(props.loadingClass||'')}/>
+    <View className={'ui-loading '+(props.loadingClass||'')}/>
   )
 
   React.useEffect(()=>{
@@ -620,7 +620,7 @@ export {
 
 // 扩展内部模板
 export function extTemplate(params={}){
-  extendsTemplate(params)
+  return extendsTemplate(params)
 }
 
 function setUniqId(param){

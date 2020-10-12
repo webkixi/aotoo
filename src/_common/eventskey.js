@@ -100,7 +100,8 @@ export function bindEvents(events, context) {
       let responseContext = getContextCallback(curContext, functionName)
       if (responseContext) {
         e.persist()
-        responseContext[functionName].call(responseContext, e, myquery, curContext)
+        let rightContext = responseContext === curContext ? responseContext.parentInst ? responseContext.parentInst : responseContext : responseContext;
+        responseContext[functionName].call(rightContext, e, myquery, curContext)
       } else {
         console.warn('没有找到定义方法:' + functionName); // 定义pager的__fromParent
       }
