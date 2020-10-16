@@ -74,6 +74,7 @@ var template = function template(state, props) {
   var _attr = state.attr || props.attr || {};
 
   var data = state.data;
+  var select = state.select || -1;
   var attr = {};
   Object.keys(_attr).forEach(function (ky) {
     var $ky = ky;
@@ -87,8 +88,29 @@ var template = function template(state, props) {
   var items = [];
 
   if (mode === 'list') {
-    items = data.map(function (item) {
+    items = data.map(function (item, ii) {
       item = (0, _foritem.resetItem)(item, _this, true);
+
+      if (_core.lib.isNumber(item) || _core.lib.isString(item) || React.isValidElement(item)) {
+        if (React.isValidElement(item)) {
+          item = {
+            title: item
+          };
+        } else {
+          item = {
+            text: item
+          };
+        }
+      } else {
+        if (_core.lib.isPlainObject(select) && _core.lib.isPlainObject(item)) {
+          select = _core.lib.findIndex([item], select);
+        }
+      }
+
+      if (select !== -1 && ii === select && _core.lib.isPlainObject(item)) {
+        item.itemClass = item.itemClass ? item.className + ' active' : 'active';
+      }
+
       var it = ui_item(item);
       return /*#__PURE__*/React.createElement(it.UI, {
         key: item.__key
@@ -116,7 +138,7 @@ var template = function template(state, props) {
     return /*#__PURE__*/React.createElement(React.Fragment, null, header, items, footer, props.children);
   }
 
-  return /*#__PURE__*/React.createElement("div", _extends({
+  return /*#__PURE__*/React.createElement(View, _extends({
     id: state.id,
     className: 'hlist ' + (state.listClass || ''),
     style: state.listStyle
@@ -479,6 +501,7 @@ var defaultBehavior = {
  *   methods: {},
  *   footer: <>,
  *   header: <>
+ *   select: [number|object]  //默认选中项
  * }
  */
 

@@ -99,7 +99,7 @@ function $$(id) {
 }
 
 function ReturnPromiseComponent(props) {
-  var _React$useState = React.useState( /*#__PURE__*/React.createElement("div", {
+  var _React$useState = React.useState( /*#__PURE__*/React.createElement(View, {
     className: 'ui-loading ' + (props.loadingClass || '')
   })),
       _React$useState2 = _slicedToArray(_React$useState, 2),
@@ -793,7 +793,7 @@ var baseClass = /*#__PURE__*/function () {
 // 扩展内部模板
 function extTemplate() {
   var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  (0, _partment.extendsTemplate)(params);
+  return (0, _partment.extendsTemplate)(params);
 }
 
 function setUniqId(param) {

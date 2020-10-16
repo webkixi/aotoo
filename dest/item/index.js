@@ -49,8 +49,9 @@ var template = function template(state, props) {
     attr[$ky] = _attr[ky];
   });
   var sort = state.__sort;
+  var partElement = (0, _partment["default"])();
   sort = sort.filter(function (ky) {
-    return _partment["default"][ky] ? true : false;
+    return partElement[ky] ? true : false;
   });
   var myTemplate = sort.map(function (ky, ii) {
     var elementKey = _core.lib.uniqueId('part_');
@@ -58,7 +59,7 @@ var template = function template(state, props) {
     var value = state[ky];
     return /*#__PURE__*/React.createElement(React.Fragment, {
       key: elementKey
-    }, _partment["default"][ky](value, undefined, state, props)); // return partments[ky](value, state, props, elementKey, _ky)
+    }, partElement[ky](value, undefined, state, props)); // return partElement[ky](value, state, props, elementKey, _ky)
   });
   var clsNmae = 'item ' + (state.itemClass || '');
   var propsClassName = props.className;
@@ -71,7 +72,7 @@ var template = function template(state, props) {
     });
   }
 
-  return /*#__PURE__*/React.createElement("div", _extends({
+  return /*#__PURE__*/React.createElement(View, _extends({
     id: state.id,
     key: state.__key,
     className: clsNmae,

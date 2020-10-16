@@ -7,7 +7,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.UIitem = UIitem;
 exports.extendsTemplate = extendsTemplate;
-exports["default"] = void 0;
+exports["default"] = _default;
 
 var lib = _interopRequireWildcard(require("../../lib"));
 
@@ -17,6 +17,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var context = lib.curContext();
 /**
  * 
  * 模板中现存在太多的clone，虽然是浅层克隆，但还是会有点影响新能
@@ -24,6 +25,7 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
  * 考虑 Immer 或者 Immutable， 未定 
  * 
  */
+
 function ExtendComponent(_props) {
   var data = lib.clone(_props.data || _props); // let data = props.data || props
 
@@ -417,7 +419,6 @@ var globalComponent = {
     return /*#__PURE__*/React.createElement(list.UI, null, props.children);
   }
 };
-var context = lib.curContext();
 context['UI_item'] = globalComponent['ui-item'];
 context['UI_list'] = globalComponent['ui-list'];
 context['Item'] = globalComponent['ui-item'];
@@ -427,11 +428,15 @@ context['Text'] = Text;
 
 function extendsTemplate() {
   var otherTemplate = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var contextInnerTemplate = context._ao2_innerTemplate_ || {};
   lib.forEach(innerTemplate, function (t, ii, ky) {
     delete otherTemplate[ky];
   });
-  innerTemplate = Object.assign({}, innerTemplate, otherTemplate);
+  innerTemplate = Object.assign({}, innerTemplate, contextInnerTemplate, otherTemplate);
+  context._ao2_innerTemplate_ = innerTemplate;
+  return innerTemplate;
 }
 
-var _default = innerTemplate;
-exports["default"] = _default;
+function _default() {
+  return context._ao2_innerTemplate_ || innerTemplate;
+}

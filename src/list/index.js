@@ -63,6 +63,7 @@ const template = function(state, props) {
   let type = state.type || 'list'  // expose  scroll swiper
   let _attr = state.attr || props.attr || {}
   let data = state.data
+  let select = state.select || -1
 
   let attr = {}
   Object.keys(_attr).forEach(ky=>{
@@ -75,8 +76,24 @@ const template = function(state, props) {
 
   let items = []
   if (mode === 'list') {
-    items = data.map(item => {
+    items = data.map((item, ii) => {
       item = resetItem(item, this, true)
+      if (lib.isNumber(item) || lib.isString(item) || React.isValidElement(item)) {
+        if (React.isValidElement(item)) {
+          item = {title: item}
+        } else {
+          item = {text: item}
+        }
+      } else {
+        if (lib.isPlainObject(select) && lib.isPlainObject(item)){
+          select = lib.findIndex([item], select)
+        }
+      }
+
+      if (select !== -1 && ii === select && lib.isPlainObject(item)) {
+        item.itemClass = item.itemClass ? item.className+' active' : 'active'
+      }
+      
       let it = ui_item(item)
       return <it.UI key={item.__key}/>
     })
@@ -452,6 +469,7 @@ let defaultBehavior = {
  *   methods: {},
  *   footer: <>,
  *   header: <>
+ *   select: [number|object]  //默认选中项
  * }
  */
 export default function list(options={}) {
