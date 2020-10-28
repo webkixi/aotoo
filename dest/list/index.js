@@ -86,31 +86,44 @@ var template = function template(state, props) {
     attr[$ky] = _attr[ky];
   });
   var items = [];
+  items = data.map(function (item, ii) {
+    item = (0, _foritem.resetItem)(item, _this, true);
+
+    if (_core.lib.isNumber(item) || _core.lib.isString(item) || React.isValidElement(item)) {
+      if (React.isValidElement(item)) {
+        item = {
+          title: item
+        };
+      } else {
+        item = {
+          text: item
+        };
+      }
+    } else {
+      if (_core.lib.isPlainObject(select) && _core.lib.isPlainObject(item)) {
+        select = _core.lib.findIndex([item], select);
+      }
+    }
+
+    if (select !== -1 && ii === select && _core.lib.isPlainObject(item)) {
+      item.itemClass = item.itemClass ? item.className + ' active' : 'active';
+    }
+
+    if (item.select === true) {
+      var tmpClass = item.itemClass || 'active';
+
+      if (tmpClass.indexOf('active') === -1) {
+        tmpClass += ' active';
+      }
+
+      item.itemClass = tmpClass;
+    }
+
+    return item;
+  });
 
   if (mode === 'list') {
-    items = data.map(function (item, ii) {
-      item = (0, _foritem.resetItem)(item, _this, true);
-
-      if (_core.lib.isNumber(item) || _core.lib.isString(item) || React.isValidElement(item)) {
-        if (React.isValidElement(item)) {
-          item = {
-            title: item
-          };
-        } else {
-          item = {
-            text: item
-          };
-        }
-      } else {
-        if (_core.lib.isPlainObject(select) && _core.lib.isPlainObject(item)) {
-          select = _core.lib.findIndex([item], select);
-        }
-      }
-
-      if (select !== -1 && ii === select && _core.lib.isPlainObject(item)) {
-        item.itemClass = item.itemClass ? item.className + ' active' : 'active';
-      }
-
+    items = items.map(function (item) {
       var it = ui_item(item);
       return /*#__PURE__*/React.createElement(it.UI, {
         key: item.__key
@@ -119,9 +132,6 @@ var template = function template(state, props) {
   }
 
   if (mode === 'tree') {
-    items = data.map(function (item) {
-      return (0, _foritem.resetItem)(item, _this, true);
-    });
     items = (0, _tree["default"])(items, state);
     items = items.map(function (item) {
       var it = ui_item(item);

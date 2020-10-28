@@ -3,6 +3,7 @@ export const attrKey = [
   'itemClass', 'itemStyle', 'className', 'style', 'id', 'idf', 'parent', 'show', '$$id',
   
 
+  'imgClass', 'imgStyle',
   'bodyClass', 'titleClass', 'footerClass', 'liClass', 'loadingClass',
   'bodyStyle', 'titleStyle', 'footerStyle', 'liStyle',
   'listClass', 'listStyle', 'containerClass', 'containerStyle',

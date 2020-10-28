@@ -75,32 +75,42 @@ const template = function(state, props) {
   })
 
   let items = []
-  if (mode === 'list') {
-    items = data.map((item, ii) => {
-      item = resetItem(item, this, true)
-      if (lib.isNumber(item) || lib.isString(item) || React.isValidElement(item)) {
-        if (React.isValidElement(item)) {
-          item = {title: item}
-        } else {
-          item = {text: item}
-        }
+  items = data.map((item, ii) => {
+    item = resetItem(item, this, true)
+    if (lib.isNumber(item) || lib.isString(item) || React.isValidElement(item)) {
+      if (React.isValidElement(item)) {
+        item = {title: item}
       } else {
-        if (lib.isPlainObject(select) && lib.isPlainObject(item)){
-          select = lib.findIndex([item], select)
-        }
+        item = {text: item}
       }
+    } else {
+      if (lib.isPlainObject(select) && lib.isPlainObject(item)){
+        select = lib.findIndex([item], select)
+      }
+    }
 
-      if (select !== -1 && ii === select && lib.isPlainObject(item)) {
-        item.itemClass = item.itemClass ? item.className+' active' : 'active'
+    if (select !== -1 && ii === select && lib.isPlainObject(item)) {
+      item.itemClass = item.itemClass ? item.className+' active' : 'active'
+    }
+
+    if (item.select === true) {
+      let tmpClass = item.itemClass || 'active'
+      if (tmpClass.indexOf('active') === -1) {
+        tmpClass += ' active'
       }
-      
+      item.itemClass = tmpClass
+    }
+    return item
+  })
+
+  if (mode === 'list') {
+    items = items.map(item => {
       let it = ui_item(item)
       return <it.UI key={item.__key}/>
     })
   }
 
   if (mode === 'tree') {
-    items = data.map(item => resetItem(item, this, true) )
     items = transTree(items, state)
     items = items.map(item => {
       let it = ui_item(item)

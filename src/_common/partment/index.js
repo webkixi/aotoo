@@ -61,8 +61,8 @@ function Title(_props) {
   let props = lib.clone((_props.data || _props))
   // let props = _props
   let data = props.data||props
-  let state = props.state||{}
-  let property = props.property||{}
+  let state = props.state||_props.state||{}
+  let property = props.property||_props.property||{}
   let titleClass = state.titleClass || property.titleClass || ''
   let titleStyle = state.titleStyle || property.titleStyle || undefined
   
@@ -90,7 +90,7 @@ function Title(_props) {
   if (lib.isArray(data)) {
     let tmpAry = data.map((it, ii)=>{
       let It = ui_item(it)
-      let key = it.__key
+      let key = it.__key||'t_item'+ii
       return <It.UI key={key} itemClass="t-item" />
     })
 
@@ -105,6 +105,11 @@ function Title(_props) {
 function Img(_props) {
   let props = lib.clone((_props.data||_props))
   // let props = (_props.data || _props)
+
+  let state = _props.state || {}
+  let property = _props.property || {}
+  let imgClass = state.imgClass || property.imgClass || ''
+  let imgStyle = state.imgStyle || property.imgStyle || undefined
 
   if (lib.isPlainObject(props)) {
     if (props.url) {
@@ -126,7 +131,7 @@ function Img(_props) {
       }
     })
     return (
-      <View className='himgs'>
+      <View className={'himgs '+ imgClass} style={imgStyle}>
         {props}
       </View>
     )

@@ -82,8 +82,8 @@ function Title(_props) {
   var props = lib.clone(_props.data || _props); // let props = _props
 
   var data = props.data || props;
-  var state = props.state || {};
-  var property = props.property || {};
+  var state = props.state || _props.state || {};
+  var property = props.property || _props.property || {};
   var titleClass = state.titleClass || property.titleClass || '';
   var titleStyle = state.titleStyle || property.titleStyle || undefined;
 
@@ -111,7 +111,7 @@ function Title(_props) {
   if (lib.isArray(data)) {
     var tmpAry = data.map(function (it, ii) {
       var It = ui_item(it);
-      var key = it.__key;
+      var key = it.__key || 't_item' + ii;
       return /*#__PURE__*/React.createElement(It.UI, {
         key: key,
         itemClass: "t-item"
@@ -126,6 +126,11 @@ function Title(_props) {
 
 function Img(_props) {
   var props = lib.clone(_props.data || _props); // let props = (_props.data || _props)
+
+  var state = _props.state || {};
+  var property = _props.property || {};
+  var imgClass = state.imgClass || property.imgClass || '';
+  var imgStyle = state.imgStyle || property.imgStyle || undefined;
 
   if (lib.isPlainObject(props)) {
     if (props.url) {
@@ -146,7 +151,8 @@ function Img(_props) {
       }
     });
     return /*#__PURE__*/React.createElement(View, {
-      className: "himgs"
+      className: 'himgs ' + imgClass,
+      style: imgStyle
     }, props);
   }
 
