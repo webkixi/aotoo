@@ -154,7 +154,7 @@ function Body(_props) {
     let tmpAry = props.map((item, ii)=>{
       let it = ui_item(item)
       let key = 'body_'+ii
-      return <it.UI key={key} className={'hb-item '+(item.itemClass||'')} />
+      return <it.UI key={key} itemClass={'hb-item '+(item.itemClass||'')} />
     })
 
     return (
@@ -177,7 +177,7 @@ function Footer(_props) {
     let tmpAry = props.map((item, ii)=>{
       let it = ui_item(item)
       let key = 'footer_'+ii
-      return <it.UI key={key} className={'hf-item '+(item.itemClass||'')} />
+      return <it.UI key={key} itemClass={'hf-item '+(item.itemClass||'')} />
     })
 
     return (
@@ -200,7 +200,7 @@ function Li(_props) {
     let tmpAry = props.map((item, ii)=>{
       let it = ui_item(item)
       let key = 'li_'+ii
-      return <it.UI key={key} className={'li-item '+(item.itemClass||'')} />
+      return <it.UI key={key} itemClass={'li-item '+(item.itemClass||'')} />
     })
 
     return (
@@ -221,7 +221,7 @@ function Dot(_props) {
     let tmpAry = props.map((item, ii)=>{
       let it = ui_item(item)
       let key = 'dot_'+ii
-      return <it.UI key={key} className={'hdot-item '+(item.itemClass||'')} />
+      return <it.UI key={key} itemClass={'hdot-item '+(item.itemClass||'')} />
     })
 
     return (

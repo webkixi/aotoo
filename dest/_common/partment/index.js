@@ -173,7 +173,7 @@ function Body(_props) {
       var key = 'body_' + ii;
       return /*#__PURE__*/React.createElement(it.UI, {
         key: key,
-        className: 'hb-item ' + (item.itemClass || '')
+        itemClass: 'hb-item ' + (item.itemClass || '')
       });
     });
     return /*#__PURE__*/React.createElement(View, {
@@ -197,7 +197,7 @@ function Footer(_props) {
       var key = 'footer_' + ii;
       return /*#__PURE__*/React.createElement(it.UI, {
         key: key,
-        className: 'hf-item ' + (item.itemClass || '')
+        itemClass: 'hf-item ' + (item.itemClass || '')
       });
     });
     return /*#__PURE__*/React.createElement(View, {
@@ -221,7 +221,7 @@ function Li(_props) {
       var key = 'li_' + ii;
       return /*#__PURE__*/React.createElement(it.UI, {
         key: key,
-        className: 'li-item ' + (item.itemClass || '')
+        itemClass: 'li-item ' + (item.itemClass || '')
       });
     });
     return /*#__PURE__*/React.createElement(View, {
@@ -243,7 +243,7 @@ function Dot(_props) {
       var key = 'dot_' + ii;
       return /*#__PURE__*/React.createElement(it.UI, {
         key: key,
-        className: 'hdot-item ' + (item.itemClass || '')
+        itemClass: 'hdot-item ' + (item.itemClass || '')
       });
     });
     return /*#__PURE__*/React.createElement(React.Fragment, null, tmpAry);
