@@ -91,7 +91,7 @@ function Title(_props) {
     let tmpAry = data.map((it, ii)=>{
       let It = ui_item(it)
       let key = it.__key||'t_item'+ii
-      return <It.UI key={key} itemClass="t-item" />
+      return <It.UI key={key} itemClass={'t-item '+(it.itemClass||'')} />
     })
 
     return (

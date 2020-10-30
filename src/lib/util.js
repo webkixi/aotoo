@@ -11,6 +11,8 @@ export function isPromise (fn) {
   }
 }
 
+// export function isMobil(){}
+
 export function isDomElement(obj) {
   return typeof obj == 'object' && obj.nodeType
 }

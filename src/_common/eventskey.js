@@ -75,12 +75,25 @@ const TransitionEvents = [
 ]
 
 const OtherEvents = [
-  'onToggle'
+  'onToggle',
+  
+]
+
+// 仿小程序事件
+const minipEvents = [
+  'tap', 'aim',
+  'longpress', 'longtap', 'catchtap',
+  'touchstart', 'touchmove', 'touchcancel', 'touchend',
+  'catchlongpress', 'catchlongtap', 
+  'catchtouchstart', 'catchtouchmove', 'catchtouchcancel', 'catchtouchend'
 ]
 
 export const eventName = [].concat(ClipboardEvents, CompositionEvents, KeyboardEvents, FocusEvents, FormEvents, ImageEvents, MouseEvents, PointerEvents, SelectionEvents, TouchEvents, UIEvents, WheelEvents, MediaEvents, AnimationEvents, TransitionEvents, OtherEvents)
 
 export function isEvents(key) {
+  if (minipEvents.indexOf(key)>-1) {
+    return true
+  }
   let eventString = eventName.join(',')
   if (eventString.indexOf(key) > -1) {
     let index = eventString.indexOf(key)
@@ -93,13 +106,35 @@ export function isEvents(key) {
 
 // reset/getconfig等初始化数据方法中对event事件的重新封装
 export function bindEvents(events, context) {
-  function eventFunction(funKey, functionName, myquery) {
+  function eventFunction(funKey, functionName, myquery, ky) {
     return function a(e, param, inst) {
       const curContext = a.curContext || context
       if (curContext && curContext.hasClass && curContext.hasClass('_disabled')) return // 无效状态，则不允许事件触发
       let responseContext = getContextCallback(curContext, functionName)
       if (responseContext) {
         e.persist()
+        
+        if (ky === 'aim' || ky.indexOf('catch')===0) {
+          e.stopPropagation()
+          e.preventDefault()
+        }
+
+        if (ky.indexOf('longpress')>-1) {
+          let start;
+          function step(timestamp) {
+            if (start === undefined) start = timestamp;
+            const elapsed = timestamp - start;
+            if (elapsed < 300) { // 在两秒后停止动画
+              window.requestAnimationFrame(step);
+            } else {
+              let rightContext = responseContext === curContext ? responseContext.parentInst ? responseContext.parentInst : responseContext : responseContext;
+              responseContext[functionName].call(rightContext, e, myquery, curContext)
+            }
+          }
+          window.requestAnimationFrame(step);
+          return
+        }
+
         let rightContext = responseContext === curContext ? responseContext.parentInst ? responseContext.parentInst : responseContext : responseContext;
         responseContext[functionName].call(rightContext, e, myquery, curContext)
       } else {
@@ -122,9 +157,23 @@ export function bindEvents(events, context) {
     if (lib.isString(evt)) {
       let {url, query, hasQuery} = lib.urlTOquery(evt)
       let functionName = url
-      let evtFun = eventFunction(funKey, functionName, query)
+      let evtFun = eventFunction(funKey, functionName, query, ky)
       evtFun.funKey = funKey
-      events[ky] = evtFun.bind(context)
+      if (minipEvents.indexOf(ky) > -1) {
+        let oky = ky
+        if (ky.indexOf('aim')>-1) ky = 'onClick'
+        if (ky.indexOf('tap')>-1) ky = 'onClick'
+        if (ky.indexOf('catchtap')>-1) ky = 'onClick'
+        if (ky.indexOf('touchstart')>-1) ky = 'onTouchStart'
+        if (ky.indexOf('touchmove')>-1) ky = 'onTouchMove'
+        if (ky.indexOf('touchend')>-1) ky = 'onTouchEnd'
+        if (ky.indexOf('touchcancel')>-1) ky = 'onTouchCancel'
+        if (ky.indexOf('longpress')>-1) ky = 'onMouseDown'
+        if (ky.indexOf('longtap')>-1) ky = 'onLongTap'
+
+        delete events[oky];
+      }
+      events[ky] = evtFun.bind(context);
     }
   })
   return events

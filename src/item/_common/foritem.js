@@ -228,11 +228,11 @@ export function resetItem(data, context, loop, ky) {
         if (accessKey.indexOf(key) > -1 || (key.indexOf('@') === 0 && key.length > 1)) {
           incAttrs.push(key)
         }
-        if (key == 'aim') {
-          data.catchtap = data[key]
-          extAttrs['catchtap'] = data[key]
-          delete data.aim
-        } 
+        // if (key == 'aim') {
+        //   data.catchtap = data[key]
+        //   extAttrs['catchtap'] = data[key]
+        //   delete data.aim
+        // } 
         if (isEvents(key) && context && !loop) {
           events[key] = data[key]
         } 
