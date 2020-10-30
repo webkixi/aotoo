@@ -114,7 +114,7 @@ function Title(_props) {
       var key = it.__key || 't_item' + ii;
       return /*#__PURE__*/React.createElement(It.UI, {
         key: key,
-        itemClass: "t-item"
+        itemClass: 't-item ' + (it.itemClass || '')
       });
     });
     return /*#__PURE__*/React.createElement(View, {

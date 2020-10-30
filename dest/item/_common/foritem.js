@@ -275,13 +275,12 @@ function resetItem(data, context, loop, ky) {
       if (data[key] || data[key] === 0 || typeof data[key] === 'boolean') {
         if (_common.accessKey.indexOf(key) > -1 || key.indexOf('@') === 0 && key.length > 1) {
           incAttrs.push(key);
-        }
+        } // if (key == 'aim') {
+        //   data.catchtap = data[key]
+        //   extAttrs['catchtap'] = data[key]
+        //   delete data.aim
+        // } 
 
-        if (key == 'aim') {
-          data.catchtap = data[key];
-          extAttrs['catchtap'] = data[key];
-          delete data.aim;
-        }
 
         if ((0, _common.isEvents)(key) && context && !loop) {
           events[key] = data[key];

@@ -27,11 +27,17 @@ var WheelEvents = ['onWheel'];
 var MediaEvents = ['onAbort', 'onCanPlay', 'onCanPlayThrough', 'onDurationChange', 'onEmptied', 'onEncrypted', 'onEnded', 'onError', 'onLoadedData', 'onLoadedMetadata', 'onLoadStart', 'onPause', 'onPlay', 'onPlaying', 'onProgress', 'onRateChange', 'onSeeked', 'onSeeking', 'onStalled', 'onSuspend', 'onTimeUpdate', 'onVolumeChange', 'onWaiting'];
 var AnimationEvents = ['onAnimationStart', 'onAnimationEnd', 'onAnimationIteration'];
 var TransitionEvents = ['onTransitionEnd'];
-var OtherEvents = ['onToggle'];
+var OtherEvents = ['onToggle']; // 仿小程序事件
+
+var minipEvents = ['tap', 'aim', 'longpress', 'longtap', 'catchtap', 'touchstart', 'touchmove', 'touchcancel', 'touchend', 'catchlongpress', 'catchlongtap', 'catchtouchstart', 'catchtouchmove', 'catchtouchcancel', 'catchtouchend'];
 var eventName = [].concat(ClipboardEvents, CompositionEvents, KeyboardEvents, FocusEvents, FormEvents, ImageEvents, MouseEvents, PointerEvents, SelectionEvents, TouchEvents, UIEvents, WheelEvents, MediaEvents, AnimationEvents, TransitionEvents, OtherEvents);
 exports.eventName = eventName;
 
 function isEvents(key) {
+  if (minipEvents.indexOf(key) > -1) {
+    return true;
+  }
+
   var eventString = eventName.join(',');
 
   if (eventString.indexOf(key) > -1) {
@@ -45,7 +51,7 @@ function isEvents(key) {
 
 
 function bindEvents(events, context) {
-  function eventFunction(funKey, functionName, myquery) {
+  function eventFunction(funKey, functionName, myquery, ky) {
     return function a(e, param, inst) {
       var curContext = a.curContext || context;
       if (curContext && curContext.hasClass && curContext.hasClass('_disabled')) return; // 无效状态，则不允许事件触发
@@ -54,6 +60,32 @@ function bindEvents(events, context) {
 
       if (responseContext) {
         e.persist();
+
+        if (ky === 'aim' || ky.indexOf('catch') === 0) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+
+        if (ky.indexOf('longpress') > -1) {
+          var step = function step(timestamp) {
+            if (start === undefined) start = timestamp;
+            var elapsed = timestamp - start;
+
+            if (elapsed < 300) {
+              // 在两秒后停止动画
+              window.requestAnimationFrame(step);
+            } else {
+              var _rightContext = responseContext === curContext ? responseContext.parentInst ? responseContext.parentInst : responseContext : responseContext;
+
+              responseContext[functionName].call(_rightContext, e, myquery, curContext);
+            }
+          };
+
+          var start;
+          window.requestAnimationFrame(step);
+          return;
+        }
+
         var rightContext = responseContext === curContext ? responseContext.parentInst ? responseContext.parentInst : responseContext : responseContext;
         responseContext[functionName].call(rightContext, e, myquery, curContext);
       } else {
@@ -83,8 +115,23 @@ function bindEvents(events, context) {
           hasQuery = _lib$urlTOquery.hasQuery;
 
       var functionName = url;
-      var evtFun = eventFunction(funKey, functionName, query);
+      var evtFun = eventFunction(funKey, functionName, query, ky);
       evtFun.funKey = funKey;
+
+      if (minipEvents.indexOf(ky) > -1) {
+        var oky = ky;
+        if (ky.indexOf('aim') > -1) ky = 'onClick';
+        if (ky.indexOf('tap') > -1) ky = 'onClick';
+        if (ky.indexOf('catchtap') > -1) ky = 'onClick';
+        if (ky.indexOf('touchstart') > -1) ky = 'onTouchStart';
+        if (ky.indexOf('touchmove') > -1) ky = 'onTouchMove';
+        if (ky.indexOf('touchend') > -1) ky = 'onTouchEnd';
+        if (ky.indexOf('touchcancel') > -1) ky = 'onTouchCancel';
+        if (ky.indexOf('longpress') > -1) ky = 'onMouseDown';
+        if (ky.indexOf('longtap') > -1) ky = 'onLongTap';
+        delete events[oky];
+      }
+
       events[ky] = evtFun.bind(context);
     }
   });

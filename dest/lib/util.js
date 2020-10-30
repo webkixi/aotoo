@@ -120,7 +120,8 @@ function isPromise(fn) {
   if (!!fn && typeof fn.then === 'function') {
     return true;
   }
-}
+} // export function isMobil(){}
+
 
 function isDomElement(obj) {
   return _typeof(obj) == 'object' && obj.nodeType;
