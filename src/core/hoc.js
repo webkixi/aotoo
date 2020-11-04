@@ -32,7 +32,7 @@ function combineComponent(ORIClass, options, parent, splitProps) {
       // if (!parent.isINmemery) {
         parent._onload_(this.props)
       }
-      this.syncParentData();
+      this.syncParentData(this.props);
     }
 
     // 组件内修改state后，不允许props从外部污染数据
