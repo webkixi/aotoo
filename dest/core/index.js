@@ -152,7 +152,7 @@ function getReactComponentClass(_data, parent, template, splitProps) {
         parent._onload_(_this.props);
       }
 
-      _this.syncParentData();
+      _this.syncParentData(_this.props);
 
       return _this;
     } // 组件内修改state后，不允许props从外部污染数据
