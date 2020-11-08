@@ -112,7 +112,7 @@ function formatImg(props, context) {
 // hash 传递navigate组件的参数
 function formatUrl(props, context) {
   let url = props.url
-  if (isString(url) && url.length > 1) {
+  if ((isString(url) && url.length > 1) || url === '/') {
     let ary = url.split('@')
     let isbutton = url.indexOf('button://') === 0
     let __isAd = null

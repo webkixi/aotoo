@@ -121,14 +121,43 @@ const template = function(state, props) {
   let header = state.header
   let footer = state.footer
 
+  if (header && !React.isValidElement(header) && lib.isPlainObject(header)) {
+    let head = ui_item(header)
+    header = <head.UI />
+  }
+
+  if (footer && !React.isValidElement(footer) && lib.isPlainObject(footer)) {
+    let foot = ui_item(footer)
+    footer = <foot.UI />
+  }
+
+  let bodys = (
+    <>
+      {items}
+      {props.children}
+    </>
+  )
+
+  if (header || footer) {
+    bodys = (
+      <>
+        {header}
+        <View className="list-body">
+          {items}
+          {props.children}
+        </View>
+        {footer}
+      </>
+    )
+  }
   
   if (type === 'expose') {
     return (
       <>
         {header}
         {items}
-        {footer}
         {props.children}
+        {footer}
       </>
     )
   }
@@ -141,10 +170,7 @@ const template = function(state, props) {
       {...attr}
       {...events}
     >
-      {header}
-      {items}
-      {footer}
-      {props.children}
+      {bodys}
     </View>
   )
 }
