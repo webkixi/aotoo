@@ -147,7 +147,7 @@ function formatImg(props, context) {
 function formatUrl(props, context) {
   var url = props.url;
 
-  if ((0, _lib.isString)(url) && url.length > 1) {
+  if ((0, _lib.isString)(url) && url.length > 1 || url === '/') {
     var ary = url.split('@');
     var isbutton = url.indexOf('button://') === 0;
     var __isAd = null;

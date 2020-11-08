@@ -144,15 +144,33 @@ var template = function template(state, props) {
   var header = state.header;
   var footer = state.footer;
 
+  if (header && !React.isValidElement(header) && _core.lib.isPlainObject(header)) {
+    var head = ui_item(header);
+    header = /*#__PURE__*/React.createElement(head.UI, null);
+  }
+
+  if (footer && !React.isValidElement(footer) && _core.lib.isPlainObject(footer)) {
+    var foot = ui_item(footer);
+    footer = /*#__PURE__*/React.createElement(foot.UI, null);
+  }
+
+  var bodys = /*#__PURE__*/React.createElement(React.Fragment, null, items, props.children);
+
+  if (header || footer) {
+    bodys = /*#__PURE__*/React.createElement(React.Fragment, null, header, /*#__PURE__*/React.createElement(View, {
+      className: "list-body"
+    }, items, props.children), footer);
+  }
+
   if (type === 'expose') {
-    return /*#__PURE__*/React.createElement(React.Fragment, null, header, items, footer, props.children);
+    return /*#__PURE__*/React.createElement(React.Fragment, null, header, items, props.children, footer);
   }
 
   return /*#__PURE__*/React.createElement(View, _extends({
     id: state.id,
     className: 'hlist ' + (state.listClass || ''),
     style: state.listStyle
-  }, attr, events), header, items, footer, props.children);
+  }, attr, events), bodys);
 };
 
 var defaultConfig = {
