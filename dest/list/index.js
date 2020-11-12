@@ -284,11 +284,17 @@ var defaultBehavior = {
       data: $data
     }, cb);
   },
-  pop: function pop() {
-    this.remove();
+  pop: function pop(cb) {
+    this.remove(null, cb);
   },
-  shift: function shift() {
-    this.remove('shift');
+  push: function push(pay, cb) {
+    this.append(pay, cb);
+  },
+  shift: function shift(cb) {
+    this.remove('shift', cb);
+  },
+  unshift: function unshift(pay, cb) {
+    this.prepend(pay, cb);
   },
   setData: function setData(param, cb) {
     this.update(param, cb);
@@ -487,6 +493,7 @@ var defaultBehavior = {
   },
   select: function select(query) {
     var cls = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'active';
+    var cb = arguments.length > 2 ? arguments[2] : undefined;
     var $data = this.getData().data;
     var index = null;
 
@@ -498,10 +505,15 @@ var defaultBehavior = {
       index = _core.lib.findIndex($data, query);
     }
 
+    if (_core.lib.isFunction(cls)) {
+      cb = cls;
+      cls = 'active';
+    }
+
     if (_core.lib.isNumber(index)) {
       this.forEach(function (item, ii) {
         if (ii === index) {
-          this.addClass(cls);
+          this.addClass(cls, cb);
         } else {
           if (this.hasClass(cls)) {
             this.removeClass(cls);
