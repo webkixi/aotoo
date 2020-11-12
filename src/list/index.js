@@ -266,11 +266,17 @@ let defaultBehavior = {
     // this.children = []
     this.update({ data: $data }, cb)
   },
-  pop(){
-    this.remove()
+  pop(cb){
+    this.remove(null, cb)
   },
-  shift(){
-    this.remove('shift')
+  push(pay, cb){
+    this.append(pay, cb)
+  },
+  shift(cb){
+    this.remove('shift', cb)
+  },
+  unshift(pay, cb){
+    this.prepend(pay, cb)
   },
   setData(param, cb) {
     this.update(param, cb)
@@ -459,7 +465,7 @@ let defaultBehavior = {
     return this.getData().data.length
   },
 
-  select(query, cls='active'){
+  select(query, cls='active', cb){
     let $data = this.getData().data
     let index = null
     if (lib.isNumber(query)) {
@@ -470,10 +476,15 @@ let defaultBehavior = {
       index = lib.findIndex($data, query)
     }
 
+    if (lib.isFunction(cls)) {
+      cb = cls
+      cls = 'active'
+    }
+
     if (lib.isNumber(index)) {
       this.forEach(function(item, ii){
         if (ii === index) {
-          this.addClass(cls)
+          this.addClass(cls, cb)
         } else {
           if (this.hasClass(cls)){
             this.removeClass(cls)
