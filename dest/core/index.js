@@ -412,13 +412,23 @@ var baseClass = /*#__PURE__*/function () {
     var _property = _param;
     this.config = _param; // this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_')
 
-    this.uniqId = _param.uniqId || _data.uniqId || lib.uniqueId('base_');
+    this.uniqId = _param.uniqId || _data.uniqId || lib.uniqueId('base_'); // 存储实例
+
+    _elements.setElement(this.uniqId, this);
+
+    if (_data.$$id) {
+      this.$$id = _data.$$id;
+      this.id = this.$$id;
+
+      _elements.setElement(this.$$id, this);
+    }
+
     var defaultData = {// alwaysSyncProps: false
     };
     this.alwaysSyncProps = this.config.alwaysSyncProps || false; // 是否持续更新props(任何时候)
 
     this.__showStat = _data.hasOwnProperty('show') ? _data.show : true;
-    this.id = _data.id;
+    this.id = this.$$id || _data.id;
     this.dom = null; // 真实dom实例，最外层的容器
 
     this.hasMounted = false;
@@ -472,17 +482,7 @@ var baseClass = /*#__PURE__*/function () {
     Object.defineProperty(this, "_onload_", lib.protectProperty(_onload_.bind(this))); // 小程序组件生命周期 ready, page生命周期 onReady
 
     Object.defineProperty(this, "_ready_", lib.protectProperty(_ready_.bind(this)));
-    Object.defineProperty(this, "_setData_", lib.protectProperty(_setData_.bind(this))); // 存储实例
-
-    _elements.setElement(this.uniqId, this);
-
-    if (_data.$$id) {
-      this.$$id = _data.$$id;
-      this.id = this.$$id;
-
-      _elements.setElement(this.$$id, this);
-    } // 批量设置实例属性
-
+    Object.defineProperty(this, "_setData_", lib.protectProperty(_setData_.bind(this))); // 批量设置实例属性
 
     Object.keys(_property).forEach(function (ky) {
       if (_index.internalKeys.indexOf(ky) === -1) {

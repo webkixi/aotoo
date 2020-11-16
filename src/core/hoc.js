@@ -229,6 +229,13 @@ class CombineClass {
     
     // this.uniqId = _param.__key || _data.__key || lib.uniqueId('base_')
     this.uniqId = _param.uniqId || _data.uniqId || lib.uniqueId('base_')
+    // 存储实例
+    _elements.setElement(this.uniqId, this)
+    if (config.$$id) {
+      this.$$id = config.$$id
+      this.id = this.$$id
+      _elements.setElement(this.$$id, this)
+    }
     
     let defaultData = {
       // alwaysSyncProps: false
@@ -236,7 +243,7 @@ class CombineClass {
     
     this.alwaysSyncProps = this.config.alwaysSyncProps || false  // 是否持续更新props(任何时候)
     this.__showStat = _data.hasOwnProperty('show') ? _data.show : true
-    this.id = _data.id
+    this.id = this.$$id || _data.id
     this.dom = null  // 真实dom实例，最外层的容器
     this.hasMounted = false;
     this.data = Object.assign({uniqId: this.uniqId}, defaultData, _data);
@@ -293,14 +300,6 @@ class CombineClass {
     Object.defineProperty(this, "_ready_", lib.protectProperty(_ready_.bind(this)));
 
     Object.defineProperty(this, "_setData_", lib.protectProperty(_setData_.bind(this)));
-
-    // 存储实例
-    _elements.setElement(this.uniqId, this)
-    if (config.$$id) {
-      this.$$id = config.$$id
-      this.id = this.$$id
-      _elements.setElement(this.$$id, this)
-    }
 
     // 批量设置实例属性
     Object.keys(_property).forEach((ky) => {
