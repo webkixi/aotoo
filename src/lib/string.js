@@ -1,6 +1,8 @@
 //计算字符变量的长度，包含处理中文
-export function strlen(str) {
-  return str.replace(/[^\x00-\xff]/g, "aa").length;
+export function strlen(str, long) {
+  let longtext = 'aa'
+  if (long) longtext = 'aaa'
+  return str.replace(/[^\x00-\xff]/g, longtext).length;
 }
 
 /* 2007-11-28 XuJian */

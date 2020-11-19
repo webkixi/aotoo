@@ -7,8 +7,10 @@ exports.strlen = strlen;
 exports.subcontent = subcontent;
 
 //计算字符变量的长度，包含处理中文
-function strlen(str) {
-  return str.replace(/[^\x00-\xff]/g, "aa").length;
+function strlen(str, _long) {
+  var longtext = 'aa';
+  if (_long) longtext = 'aaa';
+  return str.replace(/[^\x00-\xff]/g, longtext).length;
 }
 /* 2007-11-28 XuJian */
 //截取字符串 包含中文处理
