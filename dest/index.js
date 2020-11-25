@@ -48,7 +48,7 @@ function $$(indentify) {
   return _core._elements.getElement(indentify);
 }
 
-function render(jsx, id) {
+function render(jsx, id, cb) {
   if (_core.lib.isClient()) {
     var root = id;
 
@@ -61,7 +61,7 @@ function render(jsx, id) {
       root.innerHTML = ''; // ReactDOM.render(jsx, root)
       // ReactDOM.hydrate(jsx, root)
 
-      typeof noserver === 'undefined' ? ReactDOM.hydrate(jsx, root) : ReactDOM.render(jsx, root);
+      typeof noserver === 'undefined' ? ReactDOM.hydrate(jsx, root, cb) : ReactDOM.render(jsx, root, cb);
     }
   }
 

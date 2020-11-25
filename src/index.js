@@ -6,7 +6,7 @@ function $$(indentify) {
   return _elements.getElement(indentify)
 }
 
-export function render(jsx, id){
+export function render(jsx, id, cb){
   if (lib.isClient()) {
     let root = id
     if (lib.isString(id)) {
@@ -17,7 +17,7 @@ export function render(jsx, id){
       root.innerHTML = ''
       // ReactDOM.render(jsx, root)
       // ReactDOM.hydrate(jsx, root)
-      typeof noserver === 'undefined' ? ReactDOM.hydrate(jsx, root) : ReactDOM.render(jsx, root)
+      typeof noserver === 'undefined' ? ReactDOM.hydrate(jsx, root, cb) : ReactDOM.render(jsx, root, cb)
     }
   }
 
