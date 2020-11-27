@@ -17,7 +17,8 @@ export function render(jsx, id, cb){
       root.innerHTML = ''
       // ReactDOM.render(jsx, root)
       // ReactDOM.hydrate(jsx, root)
-      typeof noserver === 'undefined' ? ReactDOM.hydrate(jsx, root, cb) : ReactDOM.render(jsx, root, cb)
+      // typeof noserver === 'undefined' ? ReactDOM.hydrate(jsx, root, cb) : ReactDOM.render(jsx, root, cb)
+      typeof noserver === 'undefined' ? ReactDOM.render(jsx, root, cb) : ReactDOM.hydrate(jsx, root, cb)
     }
   }
 
