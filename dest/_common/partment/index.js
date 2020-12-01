@@ -67,6 +67,11 @@ function Url(_props) {
   var url = props.url;
   delete props.url;
 
+  if (url && url.indexOf('__') === 0) {
+    url = url.split('__')[1].trim();
+    props.target = '_blank';
+  }
+
   if (title) {
     title = /*#__PURE__*/React.createElement(Title, {
       data: title

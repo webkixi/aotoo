@@ -8,6 +8,7 @@ var _eventskey = require("./eventskey");
 
 Object.keys(_eventskey).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _eventskey[key]) return;
   Object.defineProperty(exports, key, {
     enumerable: true,
     get: function get() {
@@ -20,6 +21,7 @@ var _validkey = require("./validkey");
 
 Object.keys(_validkey).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _validkey[key]) return;
   Object.defineProperty(exports, key, {
     enumerable: true,
     get: function get() {
@@ -32,6 +34,7 @@ var _internalkey = require("./internalkey");
 
 Object.keys(_internalkey).forEach(function (key) {
   if (key === "default" || key === "__esModule") return;
+  if (key in exports && exports[key] === _internalkey[key]) return;
   Object.defineProperty(exports, key, {
     enumerable: true,
     get: function get() {

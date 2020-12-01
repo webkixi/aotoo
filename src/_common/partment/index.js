@@ -48,6 +48,10 @@ function Url(_props) {
   // let props = (_props.data || _props)
   let title = props.title; delete props.title
   let url = props.url; delete props.url
+  if (url && url.indexOf('__')===0) {
+    url = url.split('__')[1].trim()
+    props.target = '_blank'
+  }
 
   if (title) {
     title = <Title data={title} />
