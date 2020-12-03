@@ -122,11 +122,13 @@ const template = function(state, props) {
   let footer = state.footer
 
   if (header && !React.isValidElement(header) && lib.isPlainObject(header)) {
+    header = resetItem(header, this, true)
     let head = ui_item(header)
     header = <head.UI />
   }
 
   if (footer && !React.isValidElement(footer) && lib.isPlainObject(footer)) {
+    footer = resetItem(footer, this, true)
     let foot = ui_item(footer)
     footer = <foot.UI />
   }

@@ -145,11 +145,13 @@ var template = function template(state, props) {
   var footer = state.footer;
 
   if (header && !React.isValidElement(header) && _core.lib.isPlainObject(header)) {
+    header = (0, _foritem.resetItem)(header, this, true);
     var head = ui_item(header);
     header = /*#__PURE__*/React.createElement(head.UI, null);
   }
 
   if (footer && !React.isValidElement(footer) && _core.lib.isPlainObject(footer)) {
+    footer = (0, _foritem.resetItem)(footer, this, true);
     var foot = ui_item(footer);
     footer = /*#__PURE__*/React.createElement(foot.UI, null);
   }
