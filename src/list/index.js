@@ -528,7 +528,7 @@ export default function list(options={}) {
   let customCreated = config.created
   config.created = function () {
     // this.$$is = this.config.$$is
-    this.$$is = 'list'
+    this.$$is = options.mode || 'list'
     this.events = getListMethod.call(this, (this.config.listMethod || {}))
     if (lib.isFunction(customCreated)) {
       customCreated.call(this)

@@ -58,7 +58,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
     constructor(props) {
       super(props);
       let propsData = props.data
-      _data = Object.assign({}, _data, propsData)
+      // _data = Object.assign({}, _data, propsData)
+      _data = Object.assign({}, parent.data, propsData)
       let myState = splitProps ? _data : Object.assign({}, _data, props);
       this.state = myState;
       this.template = template;
@@ -660,8 +661,21 @@ export default function(param={}, template, splitProps=true) {
   if (param.uniqId && $$(param.uniqId)) {
     return $$(param.uniqId)
   }
+  
   if (param.$$id && $$(param.$$id)) {
     return $$(param.$$id)
   }
-  return new baseClass(param, template, splitProps)
+
+  let __key = param.data && param.data.__key
+  if (__key && $$(__key)) {
+    return $$(__key)
+  }
+
+  let instance = new baseClass(param, template, splitProps)
+  
+  if (__key) {
+    _elements.setElement(__key, instance)
+  }
+  
+  return instance
 }

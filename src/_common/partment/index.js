@@ -130,7 +130,7 @@ function Img(_props) {
     props = props.filter(pic=> (lib.isString(pic) || lib.isPlainObject(pic)) )
     props = props.map((pic, ii) => {
       if (lib.isPlainObject(pic)) {
-        pic.key = 'img_'+ii
+        pic.key = pic.__key || 'img_'+ii
         return <Img {...pic} />
       }
     })
@@ -157,8 +157,8 @@ function Body(_props) {
   if (lib.isArray(props)) {
     let tmpAry = props.map((item, ii)=>{
       let it = ui_item(item)
-      let key = 'body_'+ii
-      return <it.UI key={key} itemClass={'hb-item '+(item.itemClass||'')} />
+      let key = item.__key || 'body_'+ii
+      return <it.UI key={key} itemClass={'body-item '+(item.itemClass||'')} />
     })
 
     return (
@@ -180,8 +180,8 @@ function Footer(_props) {
   if (lib.isArray(props)) {
     let tmpAry = props.map((item, ii)=>{
       let it = ui_item(item)
-      let key = 'footer_'+ii
-      return <it.UI key={key} itemClass={'hf-item '+(item.itemClass||'')} />
+      let key = item.__key || 'footer_'+ii
+      return <it.UI key={key} itemClass={'footer-item '+(item.itemClass||'')} />
     })
 
     return (
@@ -203,7 +203,7 @@ function Li(_props) {
   if (lib.isArray(props)) {
     let tmpAry = props.map((item, ii)=>{
       let it = ui_item(item)
-      let key = 'li_'+ii
+      let key = item.__key || 'li_'+ii
       return <it.UI key={key} itemClass={'li-item '+(item.itemClass||'')} />
     })
 
@@ -224,8 +224,8 @@ function Dot(_props) {
   if (lib.isArray(props)) {
     let tmpAry = props.map((item, ii)=>{
       let it = ui_item(item)
-      let key = 'dot_'+ii
-      return <it.UI key={key} itemClass={'hdot-item '+(item.itemClass||'')} />
+      let key = item.__key || 'dot_'+ii
+      return <it.UI key={key} itemClass={'dot-item '+(item.itemClass||'')} />
     })
 
     return (

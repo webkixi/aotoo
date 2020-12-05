@@ -555,7 +555,7 @@ function list() {
 
   config.created = function () {
     // this.$$is = this.config.$$is
-    this.$$is = 'list';
+    this.$$is = options.mode || 'list';
     this.events = getListMethod.call(this, this.config.listMethod || {});
 
     if (_core.lib.isFunction(customCreated)) {

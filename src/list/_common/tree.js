@@ -89,6 +89,7 @@ function subTree(item, dataAry, deep){
 	if (nsons.length) {
 		item.li = nsons
 		item.liClass = 'itemroot'
+		item.__sort.push('li')
 	}
 	return item
 }

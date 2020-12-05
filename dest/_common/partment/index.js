@@ -151,7 +151,7 @@ function Img(_props) {
     });
     props = props.map(function (pic, ii) {
       if (lib.isPlainObject(pic)) {
-        pic.key = 'img_' + ii;
+        pic.key = pic.__key || 'img_' + ii;
         return /*#__PURE__*/React.createElement(Img, pic);
       }
     });
@@ -175,10 +175,10 @@ function Body(_props) {
   if (lib.isArray(props)) {
     var tmpAry = props.map(function (item, ii) {
       var it = ui_item(item);
-      var key = 'body_' + ii;
+      var key = item.__key || 'body_' + ii;
       return /*#__PURE__*/React.createElement(it.UI, {
         key: key,
-        itemClass: 'hb-item ' + (item.itemClass || '')
+        itemClass: 'body-item ' + (item.itemClass || '')
       });
     });
     return /*#__PURE__*/React.createElement(View, {
@@ -199,10 +199,10 @@ function Footer(_props) {
   if (lib.isArray(props)) {
     var tmpAry = props.map(function (item, ii) {
       var it = ui_item(item);
-      var key = 'footer_' + ii;
+      var key = item.__key || 'footer_' + ii;
       return /*#__PURE__*/React.createElement(it.UI, {
         key: key,
-        itemClass: 'hf-item ' + (item.itemClass || '')
+        itemClass: 'footer-item ' + (item.itemClass || '')
       });
     });
     return /*#__PURE__*/React.createElement(View, {
@@ -223,7 +223,7 @@ function Li(_props) {
   if (lib.isArray(props)) {
     var tmpAry = props.map(function (item, ii) {
       var it = ui_item(item);
-      var key = 'li_' + ii;
+      var key = item.__key || 'li_' + ii;
       return /*#__PURE__*/React.createElement(it.UI, {
         key: key,
         itemClass: 'li-item ' + (item.itemClass || '')
@@ -245,10 +245,10 @@ function Dot(_props) {
   if (lib.isArray(props)) {
     var tmpAry = props.map(function (item, ii) {
       var it = ui_item(item);
-      var key = 'dot_' + ii;
+      var key = item.__key || 'dot_' + ii;
       return /*#__PURE__*/React.createElement(it.UI, {
         key: key,
-        itemClass: 'hdot-item ' + (item.itemClass || '')
+        itemClass: 'dot-item ' + (item.itemClass || '')
       });
     });
     return /*#__PURE__*/React.createElement(React.Fragment, null, tmpAry);

@@ -226,10 +226,6 @@ function resetItem(data, context, loop, ky) {
     data.fromComponent = context.data.fromComponent || data.fromComponent || context.data.uniqId || context.uniqId;
     data.__fromParent = context.data.__fromParent;
 
-    if (ky && ky.indexOf('@') === 0 || (0, _lib.isPlainObject)(data)) {
-      data.__key = data.__key || _core.lib.uniqueId('innerComponent_');
-    }
-
     if (!blockKeys.includes(ky)) {
       if (ky !== 'url' && data.url) {
         data = formatUrl(data, context);
@@ -260,6 +256,10 @@ function resetItem(data, context, loop, ky) {
         delete data.methods;
         delete data.itemMethod;
       }
+    }
+
+    if (ky && ky.indexOf('@') === 0 || (0, _lib.isPlainObject)(data)) {
+      data.__key = data.__key || _core.lib.uniqueId('innerComponent_');
     }
 
     if (context.$$is && (context.$$is === 'list' || context.$$is === 'tree')) {

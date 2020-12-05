@@ -129,8 +129,9 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       _classCallCheck(this, InnerClass);
 
       _this = _super.call(this, props);
-      var propsData = props.data;
-      _data = Object.assign({}, _data, propsData);
+      var propsData = props.data; // _data = Object.assign({}, _data, propsData)
+
+      _data = Object.assign({}, parent.data, propsData);
       var myState = splitProps ? _data : Object.assign({}, _data, props);
       _this.state = myState;
       _this.template = template;
@@ -850,5 +851,17 @@ function _default() {
     return $$(param.$$id);
   }
 
-  return new baseClass(param, template, splitProps);
+  var __key = param.data && param.data.__key;
+
+  if (__key && $$(__key)) {
+    return $$(__key);
+  }
+
+  var instance = new baseClass(param, template, splitProps);
+
+  if (__key) {
+    _elements.setElement(__key, instance);
+  }
+
+  return instance;
 }
