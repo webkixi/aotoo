@@ -1,6 +1,6 @@
 {
   "name": "@aotoo/aotoo",
-  "version": "6.1.31",
+  "version": "6.1.32",
   "description": "aotoo is a react library, for simpler development of react components, it is like a lightweight redux that but more better, you can use aotoo in",
   "scripts": {
     "build": "babel src -d dest",
@@ -13,6 +13,7 @@
   "main": "dest/index.js",
   "dependencies": {
     "lodash": "^4.17.4",
+    "md5": "^2.3.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0"
   },
