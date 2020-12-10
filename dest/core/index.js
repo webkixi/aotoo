@@ -99,6 +99,8 @@ function $$(id) {
 }
 
 function ReturnPromiseComponent(props) {
+  var rendered = false;
+
   var _React$useState = React.useState( /*#__PURE__*/React.createElement(View, {
     className: 'ui-loading ' + (props.loadingClass || '')
   })),
@@ -107,9 +109,15 @@ function ReturnPromiseComponent(props) {
       setValue = _React$useState2[1];
 
   React.useEffect(function () {
+    rendered = true;
     props.content.then(function (value) {
-      setValue(value);
+      if (rendered) {
+        setValue(value);
+      }
     });
+    return function () {
+      rendered = false;
+    };
   });
   return /*#__PURE__*/React.createElement(React.Fragment, null, value);
 }

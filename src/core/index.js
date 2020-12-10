@@ -34,14 +34,21 @@ export function $$(id) {
 }
 
 export function ReturnPromiseComponent(props){
+  let rendered = false
   let [value, setValue] = React.useState(
     <View className={'ui-loading '+(props.loadingClass||'')}/>
   )
 
   React.useEffect(()=>{
+    rendered = true
     props.content.then(value=>{
-      setValue(value)
+      if (rendered) {
+        setValue(value)
+      }
     })
+    return function(){
+      rendered = false
+    }
   })
   
   return (
