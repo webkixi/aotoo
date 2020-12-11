@@ -90,8 +90,7 @@ class ElementsCollection {
   }
 }
 
-let _elements = new ElementsCollection()
-
+// let _elements = new ElementsCollection()
 
 let memory = {}
 export default function(prefix) {

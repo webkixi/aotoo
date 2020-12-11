@@ -437,9 +437,15 @@ class CombineClass {
   }
 
   destory(){
+    let __key = this.config.__key || this.config.data.__key
     if (this.$$id) {
-      _elements[this.$$id] = null
+      _elements.delElement(this.$$id)
     }
+    if (__key) {
+      _elements.delElement(__key)
+    }
+    
+    _elements.delElement(this.uniqId)
     this.reactComponentInstance = null
     this.hasMounted = false
     this.isINmemery = undefined

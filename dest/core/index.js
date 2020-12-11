@@ -661,9 +661,17 @@ var baseClass = /*#__PURE__*/function () {
   }, {
     key: "destory",
     value: function destory() {
+      var __key = this.config.__key || this.config.data.__key;
+
       if (this.$$id) {
-        _elements[this.$$id] = null;
+        _elements.delElement(this.$$id);
       }
+
+      if (__key) {
+        _elements.delElement(__key);
+      }
+
+      _elements.delElement(this.uniqId);
 
       this.reactComponentInstance = null;
       this.hasMounted = false;
@@ -806,8 +814,15 @@ function extTemplate() {
 }
 
 function setUniqId(param) {
-  if (param.uniqId) return param;else {
+  var _uid = param.uniqId || param.data.uniqId;
+
+  if (_uid) return param;else {
     param.uniqId = lib.uniqueId('base_');
+
+    if (param.data) {
+      param.data.uniqId = param.uniqId;
+      delete param.uniqId;
+    }
   }
   return param;
 }
@@ -833,12 +848,16 @@ function _default() {
       var options = template;
       options = setUniqId(options);
 
-      if (options.uniqId && $$(options.uniqId)) {
-        return $$(options.uniqId);
+      var _uniqId = options.uniqId || options.data.uniqId;
+
+      if (_uniqId && $$(_uniqId)) {
+        return $$(_uniqId);
       }
 
-      if (options.$$id && $$(options.$$id)) {
-        return $$(options.$$id);
+      var _id = options.$$id || options.data.$$id;
+
+      if (_id && $$(_id)) {
+        return $$(_id);
       }
 
       return new _hoc["default"](param, options, splitProps);
@@ -851,12 +870,16 @@ function _default() {
 
   param = setUniqId(param);
 
-  if (param.uniqId && $$(param.uniqId)) {
-    return $$(param.uniqId);
+  var __uniqId = param.uniqId || param.data.uniqId;
+
+  if (__uniqId && $$(__uniqId)) {
+    return $$(__uniqId);
   }
 
-  if (param.$$id && $$(param.$$id)) {
-    return $$(param.$$id);
+  var __id = param.$$id || param.data.$$id;
+
+  if (__id && $$(__id)) {
+    return $$(__id);
   }
 
   var __key = param.data && param.data.__key;

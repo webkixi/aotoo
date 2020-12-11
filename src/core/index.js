@@ -521,9 +521,15 @@ class baseClass {
   }
 
   destory(){
+    let __key = this.config.__key || this.config.data.__key
     if (this.$$id) {
-      _elements[this.$$id] = null
+      _elements.delElement(this.$$id)
     }
+    if (__key) {
+      _elements.delElement(__key)
+    }
+    
+    _elements.delElement(this.uniqId)
     this.reactComponentInstance = null
     this.hasMounted = false
     this.isINmemery = undefined
@@ -631,9 +637,14 @@ export function extTemplate(params={}){
 }
 
 function setUniqId(param){
-  if (param.uniqId) return param
+  let _uid = param.uniqId || param.data.uniqId
+  if (_uid) return param
   else {
     param.uniqId = lib.uniqueId('base_')
+    if (param.data) {
+      param.data.uniqId = param.uniqId
+      delete param.uniqId
+    }
   }
   return param
 }
@@ -652,11 +663,15 @@ export default function(param={}, template, splitProps=true) {
     if (lib.isClass(param)) {
       let options = template
       options = setUniqId(options)
-      if (options.uniqId && $$(options.uniqId)) {
-        return $$(options.uniqId)
+
+      let __uniqId = options.uniqId || options.data.uniqId
+      if (__uniqId && $$(__uniqId)) {
+        return $$(__uniqId)
       }
-      if (options.$$id && $$(options.$$id)) {
-        return $$(options.$$id)
+
+      let __id = options.$$id || options.data.$$id
+      if (__id && $$(__id)) {
+        return $$(__id)
       }
       return new hocClass(param, options, splitProps)
     }
@@ -665,12 +680,14 @@ export default function(param={}, template, splitProps=true) {
     return new baseClass(param, template, splitProps)
   }
   param = setUniqId(param)
-  if (param.uniqId && $$(param.uniqId)) {
-    return $$(param.uniqId)
+  let __uniqId = param.uniqId || param.data.uniqId
+  if (__uniqId && $$(__uniqId)) {
+    return $$(__uniqId)
   }
   
-  if (param.$$id && $$(param.$$id)) {
-    return $$(param.$$id)
+  let __id = param.$$id || param.data.$$id
+  if (__id && $$(__id)) {
+    return $$(__id)
   }
 
   let __key = param.data && param.data.__key

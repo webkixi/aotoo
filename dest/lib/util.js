@@ -110,13 +110,7 @@ Object.defineProperty(exports, "cloneDeep", {
     return _lodash.cloneDeep;
   }
 });
-Object.defineProperty(exports, "md5", {
-  enumerable: true,
-  get: function get() {
-    return _lodash.md5;
-  }
-});
-exports.toArray = void 0;
+exports.md5 = exports.toArray = void 0;
 
 var _lodash = require("lodash");
 
@@ -253,3 +247,6 @@ function isClass(obj) {
   if (hasThis && obj.name === "default_1") return true;
   return false;
 }
+
+var md5 = _md["default"];
+exports.md5 = md5;

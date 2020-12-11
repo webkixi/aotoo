@@ -5,8 +5,6 @@ import {
   isString
 } from "lodash";
 
-import md5 from "md5";
-
 export function isPromise (fn) {
   if (!!fn && typeof fn.then === 'function') {
     return true
@@ -151,6 +149,10 @@ export function isClass(obj) {
   return false;
 }
 
+import _md5 from "md5";
+
+export const md5 = _md5;
+
 export {
   uniqueId,
   isString,
@@ -168,7 +170,5 @@ export {
   find,
   findIndex,
   clone,
-  cloneDeep,
-
-  md5
+  cloneDeep
 } from 'lodash'

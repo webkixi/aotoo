@@ -126,9 +126,8 @@ var ElementsCollection = /*#__PURE__*/function () {
   }]);
 
   return ElementsCollection;
-}();
+}(); // let _elements = new ElementsCollection()
 
-var _elements = new ElementsCollection();
 
 var memory = {};
 
