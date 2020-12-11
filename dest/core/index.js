@@ -385,6 +385,10 @@ function _setData_() {
   } else {
     // created生命周期中
     this.data = Object.assign({}, this.data, param);
+
+    if (lib.isfunction(cb)) {
+      cb();
+    }
   }
 }
 

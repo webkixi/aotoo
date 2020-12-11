@@ -419,13 +419,35 @@ var defaultBehavior = {
   disable: function disable() {},
   enable: function enable() {},
   forEach: function forEach(cb) {
+    var _this3 = this;
+
     var that = this; // 方案一
     // 使用子元素自己更新
     // 一旦子元素自更新，则list组件不再能够透过props影响子元素，考虑到子元素更新应该要交给用户
 
-    this.children.forEach(function (item, ii) {
-      if (_core.lib.isFunction(cb)) cb.call(item, item, ii);
-    }); // 方案二
+    var theData = this.getData().data;
+
+    if (theData.length === this.children.length) {
+      this.children.forEach(function (item, ii) {
+        if (_core.lib.isFunction(cb)) cb.call(item, item, ii);
+      });
+    } else {
+      var validChildren = [];
+      theData.forEach(function (item) {
+        var key = item.__key;
+
+        _this3.children.forEach(function (child) {
+          var $key = child.data.__key;
+
+          if (key === $key) {
+            validChildren.push(child);
+          }
+        });
+      });
+      validChildren.forEach(function (item, ii) {
+        if (_core.lib.isFunction(cb)) cb.call(item, item, ii);
+      });
+    } // 方案二
     // 由list透过props更新子元素
     // let myupdates = {}
     // let $data = this.getData().data
@@ -485,6 +507,7 @@ var defaultBehavior = {
     // if (!lib.isEmpty(myupdates)) {
     //   this.update(myupdates)
     // }
+
   },
   length: function length() {
     if (this.tasks.length || this.taskTimmer) {

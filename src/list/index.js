@@ -388,9 +388,27 @@ let defaultBehavior = {
     // 方案一
     // 使用子元素自己更新
     // 一旦子元素自更新，则list组件不再能够透过props影响子元素，考虑到子元素更新应该要交给用户
-    this.children.forEach((item, ii)=>{
-      if (lib.isFunction(cb)) cb.call(item, item, ii)
-    })
+    let theData = this.getData().data
+    if (theData.length === this.children.length) {
+      this.children.forEach((item, ii)=>{
+        if (lib.isFunction(cb)) cb.call(item, item, ii)
+      })
+    } else {
+      let validChildren = []
+      theData.forEach(item=>{
+        let key = item.__key
+        this.children.forEach(child=>{
+          let $key = child.data.__key
+          if (key === $key) {
+            validChildren.push(child)
+          }
+        })
+      })
+      validChildren.forEach((item, ii)=>{
+        if (lib.isFunction(cb)) cb.call(item, item, ii)
+      })
+    }
+    
 
 
     // 方案二
