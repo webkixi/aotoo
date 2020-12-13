@@ -1,6 +1,6 @@
 {
   "name": "@aotoo/aotoo",
-  "version": "6.1.34",
+  "version": "6.1.35",
   "description": "aotoo is a react library, for simpler development of react components, it is like a lightweight redux that but more better, you can use aotoo in",
   "scripts": {
     "build": "babel src -d dest",
@@ -38,12 +38,24 @@
     "gulp-uglify": "^3.0.2"
   },
   "keywords": [
-    "react",
     "aotoo",
     "componet",
-    "redux"
+    "components",
+    "framework",
+    "frontend",
+    "react",
+    "react-component",
+    "redux",
+    "ui"
+  ],
+  "browserslist": [
+    "last 2 versions",
+    "Firefox ESR",
+    "> 1%",
+    "ie >= 11",
+    "maintained node versions"
   ],
   "author": "天天修改",
-  "license": "ISC",
-  "homepage": "https://github.com/webkixi/aotoo#readme"
+  "license": "MIT",
+  "homepage": "http://www.agzgz.com"
 }
