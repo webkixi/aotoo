@@ -5,7 +5,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = item;
+exports.default = item;
 
 var _core = _interopRequireWildcard(require("../core"));
 
@@ -17,11 +17,11 @@ var _getconfig = _interopRequireDefault(require("./_common/getconfig"));
 
 var _partment = _interopRequireDefault(require("../_common/partment"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -49,7 +49,7 @@ var template = function template(state, props) {
     attr[$ky] = _attr[ky];
   });
   var sort = state.__sort;
-  var partElement = (0, _partment["default"])();
+  var partElement = (0, _partment.default)();
   sort = sort.filter(function (ky) {
     return partElement[ky] ? true : false;
   });
@@ -120,7 +120,7 @@ var defaultBehavior = {
       if (_core.lib.isFunction(result.then)) {
         result.then(function (res) {
           return updateFun(res);
-        })["catch"](function (err) {
+        }).catch(function (err) {
           return err;
         });
       } else {
@@ -297,7 +297,7 @@ var defaultBehavior = {
 function item() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   // ??? options === string   options === reactElement options === reactClass
-  var config = (0, _getconfig["default"])(options);
+  var config = (0, _getconfig.default)(options);
   config = Object.assign({}, defaultConfig, config, defaultBehavior);
   var customCreated = config.created;
 
@@ -326,7 +326,7 @@ function item() {
     }
   };
 
-  return (0, _core["default"])(config, template);
+  return (0, _core.default)(config, template);
 }
 
 var context = _core.lib.curContext();

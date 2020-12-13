@@ -116,7 +116,7 @@ var _lodash = require("lodash");
 
 var _md = _interopRequireDefault(require("md5"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -248,5 +248,5 @@ function isClass(obj) {
   return false;
 }
 
-var md5 = _md["default"];
+var md5 = _md.default;
 exports.md5 = md5;

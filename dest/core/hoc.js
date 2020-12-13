@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = hocClass;
+exports.default = hocClass;
 
 var lib = _interopRequireWildcard(require("../lib"));
 
@@ -11,7 +11,7 @@ var _index = require("../_common/index");
 
 var _elements2 = _interopRequireDefault(require("./elements"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
@@ -45,7 +45,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-var _elements = (0, _elements2["default"])('core');
+var _elements = (0, _elements2.default)('core');
 
 function combineComponent(ORIClass, options, parent, splitProps) {
   var selfStateChanging = false;
@@ -675,7 +675,7 @@ var CombineClass = /*#__PURE__*/function () {
         if (lib.isFunction(result.then)) {
           result.then(function (res) {
             return _this5._setData_(res, cb);
-          })["catch"](function (err) {
+          }).catch(function (err) {
             return err;
           });
         } else {

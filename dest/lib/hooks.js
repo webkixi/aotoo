@@ -245,7 +245,7 @@ var _hooks = /*#__PURE__*/function () {
             if (expireTime && expireTime > nowTime) {
               return orin ? _res : res;
             } else {
-              this["delete"](key);
+              this.delete(key);
             }
           } else {
             return orin ? _res : res;

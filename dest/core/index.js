@@ -7,7 +7,7 @@ exports.getContextCallback = getContextCallback;
 exports.$$ = $$;
 exports.ReturnPromiseComponent = ReturnPromiseComponent;
 exports.extTemplate = extTemplate;
-exports["default"] = _default;
+exports.default = _default;
 exports.lib = exports._elements = void 0;
 
 var _react = _interopRequireDefault(require("react"));
@@ -30,7 +30,7 @@ var _index = require("../_common/index");
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -71,16 +71,16 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 var context = lib.curContext();
-context.React = _react["default"];
+context.React = _react.default;
 
 if (lib.isNode()) {// context.ReactDOM = null
   // context.ReactDom = null
 } else {
-  context.ReactDOM = _reactDom["default"];
-  context.ReactDom = _reactDom["default"];
+  context.ReactDOM = _reactDom.default;
+  context.ReactDom = _reactDom.default;
 }
 
-var _elements = (0, _elements2["default"])('core');
+var _elements = (0, _elements2.default)('core');
 
 exports._elements = _elements;
 
@@ -783,7 +783,7 @@ var baseClass = /*#__PURE__*/function () {
         if (lib.isFunction(result.then)) {
           result.then(function (res) {
             return _this5._setData_(res, cb);
-          })["catch"](function (err) {
+          }).catch(function (err) {
             return err;
           });
         } else {
@@ -844,7 +844,7 @@ function _default() {
   var splitProps = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
   if (React.isValidElement(param)) {
-    return (0, _wrap["default"])(param, template);
+    return (0, _wrap.default)(param, template);
   }
 
   if (lib.isFunction(param)) {
@@ -864,7 +864,7 @@ function _default() {
         return $$(_id);
       }
 
-      return new _hoc["default"](param, options, splitProps);
+      return new _hoc.default(param, options, splitProps);
     }
 
     template = param;
