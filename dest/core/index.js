@@ -298,9 +298,9 @@ function getReactComponentClass(_data, parent, template, splitProps) {
         if (parent.__showStat) {
           var state = lib.cloneDeep(this.state);
           var props = lib.cloneDeep(this.props);
-          var JSX = template.call(parent, state, props, this.ref);
+          var JSX = template.call(parent, state, props, this.ref); // if (lib.isFunction(JSX.then)) {
 
-          if (lib.isFunction(JSX.then)) {
+          if (lib.isPromise(JSX)) {
             return /*#__PURE__*/React.createElement(ReturnPromiseComponent, {
               content: JSX,
               loadingClass: state.loadingClass || ''
@@ -308,9 +308,7 @@ function getReactComponentClass(_data, parent, template, splitProps) {
           }
 
           if (lib.isString(JSX.type)) {
-            return React.cloneElement(JSX, {
-              ref: this.ref
-            });
+            return JSX; // return React.cloneElement(JSX, { ref: this.ref }) 
           } else {
             return JSX;
           }

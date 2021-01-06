@@ -58,11 +58,8 @@ function render(jsx, id, cb) {
 
     if (_core.lib.isDomElement(root)) {
       ReactDOM.unmountComponentAtNode(root);
-      root.innerHTML = ''; // ReactDOM.render(jsx, root)
-      // ReactDOM.hydrate(jsx, root)
-      // typeof noserver === 'undefined' ? ReactDOM.hydrate(jsx, root, cb) : ReactDOM.render(jsx, root, cb)
-
-      typeof noserver === 'undefined' ? ReactDOM.render(jsx, root, cb) : ReactDOM.hydrate(jsx, root, cb);
+      root.innerHTML = '';
+      typeof noserver === 'undefined' || noserver === true ? ReactDOM.render(jsx, root, cb) : ReactDOM.hydrate(jsx, root, cb);
     }
   }
 

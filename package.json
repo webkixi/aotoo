@@ -1,6 +1,6 @@
 {
   "name": "@aotoo/aotoo",
-  "version": "6.1.35",
+  "version": "6.1.36",
   "description": "aotoo is a react library, for simpler development of react components, it is like a lightweight redux that but more better, you can use aotoo in",
   "scripts": {
     "build": "babel src -d dest",
@@ -13,9 +13,7 @@
   "main": "dest/index.js",
   "dependencies": {
     "lodash": "^4.17.4",
-    "md5": "^2.3.0",
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0"
+    "md5": "^2.3.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.11.6",
@@ -32,6 +30,7 @@
     "@babel/polyfill": "^7.10.4",
     "@babel/preset-env": "^7.9.5",
     "@babel/preset-react": "^7.10.4",
+    "core-js": "^3.6.5",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",

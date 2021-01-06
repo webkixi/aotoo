@@ -243,13 +243,15 @@ function getReactComponentClass(_data, parent, template, splitProps) {
         let state = lib.cloneDeep(this.state)
         let props = lib.cloneDeep(this.props)
         let JSX = template.call(parent, state, props, this.ref)
-        if (lib.isFunction(JSX.then)) {
+        // if (lib.isFunction(JSX.then)) {
+        if (lib.isPromise(JSX)) {
           return (
             <ReturnPromiseComponent content={JSX} loadingClass={state.loadingClass||''} />
           )
         }
         if (lib.isString(JSX.type)) {
-          return React.cloneElement(JSX, { ref: this.ref }) 
+          return JSX
+          // return React.cloneElement(JSX, { ref: this.ref }) 
         } else {
           return JSX
         }
