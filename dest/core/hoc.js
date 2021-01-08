@@ -298,6 +298,10 @@ function _setData_() {
   } else {
     // created生命周期中
     this.data = Object.assign({}, this.data, param);
+
+    if (lib.isfunction(cb)) {
+      cb();
+    }
   }
 }
 
@@ -540,8 +544,12 @@ var CombineClass = /*#__PURE__*/function () {
     }
   }, {
     key: "reset",
-    value: function reset(param) {
-      this.reactComponentInstance && this.reactComponentInstance.reset(param);
+    value: function reset(param, cb) {
+      if (lib.isFunction(this.config.reset)) {
+        this.config.reset.call(this, param, cb);
+      } else {
+        this.reactComponentInstance && this.reactComponentInstance.reset(param, cb);
+      }
     }
   }, {
     key: "show",
