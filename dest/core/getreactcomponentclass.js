@@ -233,7 +233,10 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       }
     }], [{
       key: "getDerivedStateFromProps",
-      value: function getDerivedStateFromProps(props, state) {
+      value: function getDerivedStateFromProps(nextProps, prevState) {
+        var props = nextProps;
+        var state = prevState;
+
         if (selfStateChanging) {
           return state;
         } else {

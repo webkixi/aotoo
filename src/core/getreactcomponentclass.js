@@ -118,7 +118,9 @@ function getReactComponentClass(_data, parent, template, splitProps) {
 
 
     // 父级传导数据触发更新  -----  step 1
-    static getDerivedStateFromProps(props, state){
+    static getDerivedStateFromProps(nextProps, prevState){
+      let props = nextProps
+      let state = prevState
       if (selfStateChanging) {
         return state
       } else {

@@ -130,7 +130,11 @@ function getFunctionComponent(_data, parent, template, splitProps) {
       parent.isINmemery = false;
       parent.hooks.emit('sync-state-data', parent.data);
 
-      parent._ready_();
+      if (parent.uiCount === 0) {
+        parent._ready_();
+      } else {
+        parent.didUpdate();
+      }
 
       return function () {
         if (selfStateChanging) {
