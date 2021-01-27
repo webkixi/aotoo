@@ -57,12 +57,12 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 var context = lib.curContext();
-context.React = _react.default;
+context.React = context.React || _react.default;
 
 if (lib.isNode()) {// context.ReactDOM = null
   // context.ReactDom = null
 } else {
-  context.ReactDOM = _reactDom.default;
+  context.ReactDOM = context.ReactDOM || context.ReactDom || _reactDom.default;
   context.ReactDom = _reactDom.default;
 }
 
@@ -139,9 +139,20 @@ function _setData_() {
     // created生命周期中
     this.data = Object.assign({}, this.data, param);
 
-    if (lib.isfunction(cb)) {
+    if (lib.isFunction(cb)) {
       cb();
     }
+  }
+}
+
+function removeParentChild() {
+  if (this.parentInst && this.parentInst.children.length) {
+    var uniqId = this.uniqId;
+    var tmpAry = [];
+    this.parentInst.forEach(function (child) {
+      if (child.uniqId !== uniqId) tmpAry.push(child);
+    });
+    this.parentInst.children = tmpAry;
   }
 }
 
@@ -152,6 +163,7 @@ var baseClass = /*#__PURE__*/function () {
     var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     var template = arguments.length > 1 ? arguments[1] : undefined;
     var splitProps = arguments.length > 2 ? arguments[2] : undefined;
+    var useConfigComponent = arguments.length > 3 ? arguments[3] : undefined;
 
     _classCallCheck(this, baseClass);
 
@@ -204,7 +216,8 @@ var baseClass = /*#__PURE__*/function () {
     this.hooks = lib.hooks(lib.uniqueId('baseClass_'));
     this.children = [];
     this.events = null; // data中的event合集
-    // 祖先节点
+
+    this.ref = React.createRef(); // 祖先节点
 
     if ((this.data.fromComponent || this.data.rootComponent) && (this.data.fromComponent || this.data.rootComponent) !== this.uniqId) {
       this.componentInst = $$(this.data.fromComponent);
@@ -243,7 +256,9 @@ var baseClass = /*#__PURE__*/function () {
 
     Object.defineProperty(this, "uiCount", lib.protectProperty(0)); // 渲染过后把jsx存储在本地
 
-    Object.defineProperty(this, "jsx", lib.protectProperty()); // 小程序组件生命周期 attached, page生命周期 onLoad
+    Object.defineProperty(this, "jsx", lib.protectProperty()); // UI被移除时，移除父级children的引用
+
+    Object.defineProperty(this, "removeParentChild", lib.protectProperty(removeParentChild.bind(this))); // 小程序组件生命周期 attached, page生命周期 onLoad
 
     Object.defineProperty(this, "_onload_", lib.protectProperty(_onload_.bind(this))); // 小程序组件生命周期 ready, page生命周期 onReady
 
@@ -263,11 +278,15 @@ var baseClass = /*#__PURE__*/function () {
     });
     this.created(); // 小程序组件生命周期 created
 
-    this.UI = getFunctionComponent(this.data, this, template, splitProps); // let UI = getReactComponentClass(this.data, this, template, splitProps);
-    // this.UI = function(props) {
-    //   that.uiCount++
-    //   return <UI {...props} />
-    // }
+    if (useConfigComponent) {
+      this.UI = getReactComponentClass(this.data, this, template, splitProps); // let UI = getReactComponentClass(this.data, this, template, splitProps);
+      // this.UI = function(props) {
+      //   that.uiCount++
+      //   return <UI {...props} />
+      // }
+    } else {
+      this.UI = getFunctionComponent(this.data, this, template, splitProps);
+    }
   }
 
   _createClass(baseClass, [{
@@ -338,11 +357,15 @@ var baseClass = /*#__PURE__*/function () {
   }, {
     key: "getData",
     value: function getData() {
-      if (this.tasks.length || this.taskTimmer) {
-        return lib.cloneDeep(this.taskData);
-      }
+      if (lib.isFunction(this.config.getData)) {
+        return this.config.getData.call(this);
+      } else {
+        if (this.tasks.length || this.taskTimmer) {
+          return lib.cloneDeep(this.taskData);
+        }
 
-      return lib.cloneDeep(this.data);
+        return lib.cloneDeep(this.data);
+      }
     }
   }, {
     key: "parent",
@@ -415,7 +438,7 @@ var baseClass = /*#__PURE__*/function () {
   }, {
     key: "destory",
     value: function destory() {
-      var __key = this.config.__key || this.config.data.__key;
+      var __key = this.config.__key || this.config.data && this.config.data.__key;
 
       if (this.$$id) {
         _elements.delElement(this.$$id);
@@ -597,56 +620,62 @@ function _default() {
     return (0, _wrap.default)(param, template);
   }
 
+  var $instance = null;
+
   if (lib.isFunction(param)) {
     if (lib.isClass(param)) {
       var options = template;
       options = setUniqId(options);
 
-      var _uniqId = options.uniqId || options.data.uniqId;
+      var __uniqId = options.uniqId || options.data.uniqId;
 
-      if (_uniqId && $$(_uniqId)) {
-        return $$(_uniqId);
+      var __id = options.$$id || options.data.$$id;
+
+      if (__uniqId && $$(__uniqId)) {
+        $instance = $$(__uniqId);
+      } else if (__id && $$(__id)) {
+        $instance = $$(__id);
+      } else {
+        $instance = new _hoc.default(param, options, splitProps);
       }
-
-      var _id = options.$$id || options.data.$$id;
-
-      if (_id && $$(_id)) {
-        return $$(_id);
-      }
-
-      return new _hoc.default(param, options, splitProps);
+    } else {
+      template = param;
+      param = {};
+      $instance = new baseClass(param, template, splitProps);
     }
+  } else {
+    param = setUniqId(param);
 
-    template = param;
-    param = {};
-    return new baseClass(param, template, splitProps);
+    var _uniqId = param.uniqId || param.data.uniqId;
+
+    var _id = param.$$id || param.data.$$id;
+
+    var __key = param.data && param.data.__key;
+
+    if (_uniqId && $$(_uniqId)) {
+      $instance = $$(_uniqId);
+    } else if (_id && $$(_id)) {
+      $instance = $$(_id);
+    } else if (__key && $$(__key)) {
+      $instance = $$(__key);
+    } else {
+      $instance = new baseClass(param, template, splitProps);
+
+      if (__key) {
+        _elements.setElement(__key, $instance);
+      }
+    }
   }
 
-  param = setUniqId(param);
+  if (!$instance.UI) {
+    var _key = param.data && param.data.__key;
 
-  var __uniqId = param.uniqId || param.data.uniqId;
+    $instance = new baseClass(param, template, splitProps, true);
 
-  if (__uniqId && $$(__uniqId)) {
-    return $$(__uniqId);
+    if (_key) {
+      _elements.setElement(_key, $instance);
+    }
   }
 
-  var __id = param.$$id || param.data.$$id;
-
-  if (__id && $$(__id)) {
-    return $$(__id);
-  }
-
-  var __key = param.data && param.data.__key;
-
-  if (__key && $$(__key)) {
-    return $$(__key);
-  }
-
-  var instance = new baseClass(param, template, splitProps);
-
-  if (__key) {
-    _elements.setElement(__key, instance);
-  }
-
-  return instance;
+  return $instance;
 }

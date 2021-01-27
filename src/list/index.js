@@ -188,6 +188,10 @@ const defaultConfig = {
 let defaultBehavior = {
   reset(param, cb){
     let that = this
+    if (lib.isFunction(param)) {
+      cb = param
+      param = null
+    }
     if (this.reactComponentInstance) {
       this.reactComponentInstance.reset({data: []}, function() {
         if (lib.isArray(param)) {
@@ -210,15 +214,16 @@ let defaultBehavior = {
     if (!pay) return
     pay = attachItem(pay, this)
     let $data = this.getData().data
-    let index = -1
-    if (lib.isNumber(query)) {
-      index = query
-    }
-    if (lib.isPlainObject(query)) {
-      index = lib.findIndex($data, query)
-    }
+    let index = this.findIndex(query)
 
-    if (index || index===0) {
+    // if (lib.isNumber(query)) {
+    //   index = query
+    // }
+    // if (lib.isPlainObject(query)) {
+    //   index = lib.findIndex($data, query)
+    // }
+
+    if (index>-1) {
       $data.splice(index, 0, ...pay)
     }
     this.update({data: $data}, cb)
@@ -243,15 +248,15 @@ let defaultBehavior = {
   },
   remove(query, cb){
     let $data = this.getData().data
-    let index = -1
+    let index = this.findIndex(query)
 
-    if (lib.isNumber(query)) {
-      index = query
-    }
+    // if (lib.isNumber(query)) {
+    //   index = query
+    // }
 
-    if (lib.isPlainObject(query)) {
-      index = lib.findIndex($data, query)
-    }
+    // if (lib.isPlainObject(query)) {
+    //   index = lib.findIndex($data, query)
+    // }
 
     if (!query) {
       index = ($data.length-1)
@@ -261,7 +266,7 @@ let defaultBehavior = {
       index = 0
     }
 
-    if (index || index === 0) {
+    if (index > -1) {
       let target = $data.splice(index, 1)
       target.destory&&target.destory()
     }
@@ -487,21 +492,21 @@ let defaultBehavior = {
 
   select(query, cls='active', cb){
     let $data = this.getData().data
-    let index = null
-    if (lib.isNumber(query)) {
-      index = query
-    }
+    let index = this.findIndex(query)
+    // if (lib.isNumber(query)) {
+    //   index = query
+    // }
 
-    if (lib.isPlainObject(query)) {
-      index = lib.findIndex($data, query)
-    }
+    // if (lib.isPlainObject(query)) {
+    //   index = lib.findIndex($data, query)
+    // }
 
     if (lib.isFunction(cls)) {
       cb = cls
       cls = 'active'
     }
 
-    if (lib.isNumber(index)) {
+    if (index > -1) {
       this.forEach(function(item, ii){
         if (ii === index) {
           this.addClass(cls, cb)
@@ -512,6 +517,26 @@ let defaultBehavior = {
         }
       })
     }
+  },
+
+  findIndex(param){
+    let index = -1
+    let $data = this.getData().data
+    if (lib.isNumber(param)){
+      if ($data[param]) index = param
+    }
+
+    if (lib.isPlainObject(param)){
+      return lib.findIndex($data, query)
+    }
+
+    if (lib.isFunction(param)){
+      $data.forEach((item, ii)=>{
+        if (param(item)) index = ii
+      })
+    }
+
+    return index
   }
 
   // didUpdate(){

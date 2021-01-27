@@ -2,6 +2,8 @@ import * as lib from '../../lib'
 import {attrKey, accessKey, eventName, isEvents} from '../../_common'
 
 export function attachItem(pay, context) {
+  let config = (context && context.config )|| {}
+  let itemMethod = config._itemMethod || {}
   let payload = []
   pay = [].concat(pay)
   pay.forEach(it => {
@@ -13,6 +15,7 @@ export function attachItem(pay, context) {
       let iClass = it.itemClass||''
       it.itemClass = iClass ? cClass+' '+iClass : cClass
       it['__key'] = it['__key'] || lib.uniqueId('list_item_')
+      it = Object.assign(it, itemMethod)
       payload.push(it)
     }
   })
@@ -93,6 +96,7 @@ export default function getConfig(opts, context) {
 
   config = {
     data: mydata,
+    _itemMethod: itemMethod,
     ...myoptions,
   }
 

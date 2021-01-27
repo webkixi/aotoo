@@ -50,16 +50,23 @@ function getFunctionComponent(_data, parent, template, splitProps) {
   var selfStateChanged = false;
   var oriData = _data;
   var statusCallback = null;
+  var $ref = parent.ref;
 
-  function BaseFunctionComponent(props, $ref) {
+  function BaseFunctionComponent(props) {
     // 初始化，第一次渲染该组件时
     if (parent.isINmemery === undefined) {
       parent._onload_(props);
     }
 
+    if (parent.uiCount !== 0) {
+      parent.uiCount++;
+    }
+
+    var uiCount = parent.uiCount;
     var propsData = props.data || {};
-    var $data = Object.assign({}, parent.data, propsData);
-    var state = splitProps ? $data : Object.assign({}, $data, props);
+    var $data = Object.assign({}, parent.data, propsData); // let state = splitProps ? $data : Object.assign({}, $data, props);
+
+    var state = Object.assign({}, $data, props);
 
     if (parent.hasMounted === false) {
       oriData = Object.assign({}, state, oriData);
@@ -72,6 +79,10 @@ function getFunctionComponent(_data, parent, template, splitProps) {
 
     var context = {
       reset: function reset(param, cb) {
+        parent.children.forEach(function (it) {
+          return it.destory();
+        });
+        parent.children = [];
         this.setSelfState(param || oriData, cb);
       },
       syncParentData: function syncParentData() {
@@ -131,6 +142,8 @@ function getFunctionComponent(_data, parent, template, splitProps) {
       parent.hooks.emit('sync-state-data', parent.data);
 
       if (parent.uiCount === 0) {
+        parent.uiCount++;
+
         parent._ready_();
       } else {
         parent.didUpdate();
@@ -141,11 +154,13 @@ function getFunctionComponent(_data, parent, template, splitProps) {
           selfStateChanging = false;
           selfStateChanged = true;
         } else {
-          // if (this.uiCount !== parent.uiCount) return
+          if (uiCount !== parent.uiCount) return;
           selfStateChanging = false;
           selfStateChanged = false;
           parent.hasMounted = false;
           parent.isINmemery = true;
+          parent.removeParentChild(); // 清除父级的父级的该实例的子元素
+
           var unLoad = parent.onUnload || parent.componentWillUnmount || parent.detached;
 
           if (lib.isFunction(unLoad)) {
@@ -177,9 +192,10 @@ function getFunctionComponent(_data, parent, template, splitProps) {
     } else {
       return null;
     }
-  }
+  } // return React.forwardRef(BaseFunctionComponent)
 
-  return React.forwardRef(BaseFunctionComponent); // return BaseFunctionComponent
+
+  return BaseFunctionComponent;
 }
 
 module.exports = getFunctionComponent;

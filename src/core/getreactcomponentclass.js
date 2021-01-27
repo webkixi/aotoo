@@ -12,7 +12,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       let propsData = props.data
       // _data = Object.assign({}, _data, propsData)
       _data = Object.assign({}, parent.data, propsData)
-      let myState = splitProps ? _data : Object.assign({}, _data, props);
+      // let myState = splitProps ? _data : Object.assign({}, _data, props);
+      let myState = Object.assign({}, _data, props);
       this.state = myState;
       this.template = template;
       this.selfStateChanging = false
@@ -22,9 +23,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       if (props.id) parent.id = this.id
       this.uiCount = parent.uiCount
 
-      this.ref = React.createRef()
+      this.ref = parent.ref
       this.env = parent
-      parent.ref = this.ref
       parent.reactComponentInstance = this;
       this.setSelfState = this.setSelfState.bind(this)
       this.reset = this.reset.bind(this)
@@ -39,6 +39,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
     // 组件内修改state后，不允许props从外部污染数据
     // reset之后，恢复从props穿透数据渲染
     reset(param, cb){
+      parent.children.forEach(it=>it.destory())
+      parent.children = []
       this.setSelfState((param||this.oriState), cb)
       this.selfStateChanged = false
       selfStateChanged = false
@@ -176,6 +178,7 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       if (this.uiCount !== parent.uiCount) return
       parent.hasMounted = false
       parent.isINmemery = true
+      parent.removeParentChild()  // 清除父级的父级的该实例的子元素
       let unLoad = parent.onUnload || parent.componentWillUnmount || parent.detached
       if (lib.isFunction(unLoad)) {
         unLoad.call(parent)
@@ -187,6 +190,7 @@ function getReactComponentClass(_data, parent, template, splitProps) {
     // componentDidCatch(error, info)
 
     render() {
+      parent.uiCount++
       if (parent.__showStat) {
         let state = lib.cloneDeep(this.state)
         let props = lib.cloneDeep(this.props)

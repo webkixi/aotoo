@@ -98,6 +98,7 @@ var ElementsCollection = /*#__PURE__*/function () {
     key: "delElement",
     value: function delElement(id) {
       this.elements[id] = null;
+      delete this.elements[id];
     }
   }, {
     key: "getElement",

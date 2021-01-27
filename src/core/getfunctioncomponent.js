@@ -22,16 +22,24 @@ function getFunctionComponent(_data, parent, template, splitProps){
   let selfStateChanged = false
   let oriData = _data
   let statusCallback = null
+  let $ref = parent.ref
 
-  function BaseFunctionComponent(props, $ref){
+  function BaseFunctionComponent(props){
     // 初始化，第一次渲染该组件时
     if (parent.isINmemery === undefined) { 
       parent._onload_(props)
     }
 
+    if (parent.uiCount !== 0) {
+      parent.uiCount++
+    }
+
+    let uiCount = parent.uiCount
+
     let propsData = props.data||{}
     let $data = Object.assign({}, parent.data, propsData)
-    let state = splitProps ? $data : Object.assign({}, $data, props);
+    // let state = splitProps ? $data : Object.assign({}, $data, props);
+    let state = Object.assign({}, $data, props);
     if (parent.hasMounted === false) {
       oriData = Object.assign({}, state, oriData)
     }
@@ -40,6 +48,8 @@ function getFunctionComponent(_data, parent, template, splitProps){
 
     let context = {
       reset(param, cb){
+        parent.children.forEach(it=>it.destory())
+        parent.children = []
         this.setSelfState((param||oriData), cb)
       },
       syncParentData(param={}){
@@ -95,6 +105,7 @@ function getFunctionComponent(_data, parent, template, splitProps){
       parent.isINmemery = false;
       parent.hooks.emit('sync-state-data', parent.data)
       if (parent.uiCount === 0) {
+        parent.uiCount++
         parent._ready_()
       } else {
         parent.didUpdate()
@@ -105,11 +116,12 @@ function getFunctionComponent(_data, parent, template, splitProps){
           selfStateChanging = false
           selfStateChanged = true
         } else {
-          // if (this.uiCount !== parent.uiCount) return
+          if (uiCount !== parent.uiCount) return
           selfStateChanging = false
           selfStateChanged = false
           parent.hasMounted = false
           parent.isINmemery = true
+          parent.removeParentChild()  // 清除父级的父级的该实例的子元素
           let unLoad = parent.onUnload || parent.componentWillUnmount || parent.detached
           if (lib.isFunction(unLoad)) {
             unLoad.call(parent)
@@ -137,8 +149,8 @@ function getFunctionComponent(_data, parent, template, splitProps){
       return null
     }
   }
-  return React.forwardRef(BaseFunctionComponent)
-  // return BaseFunctionComponent
+  // return React.forwardRef(BaseFunctionComponent)
+  return BaseFunctionComponent
 }
 
 module.exports = getFunctionComponent

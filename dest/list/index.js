@@ -186,6 +186,11 @@ var defaultBehavior = {
   reset: function reset(param, cb) {
     var that = this;
 
+    if (_core.lib.isFunction(param)) {
+      cb = param;
+      param = null;
+    }
+
     if (this.reactComponentInstance) {
       this.reactComponentInstance.reset({
         data: []
@@ -214,17 +219,14 @@ var defaultBehavior = {
     if (!pay) return;
     pay = (0, _getconfig.attachItem)(pay, this);
     var $data = this.getData().data;
-    var index = -1;
+    var index = this.findIndex(query); // if (lib.isNumber(query)) {
+    //   index = query
+    // }
+    // if (lib.isPlainObject(query)) {
+    //   index = lib.findIndex($data, query)
+    // }
 
-    if (_core.lib.isNumber(query)) {
-      index = query;
-    }
-
-    if (_core.lib.isPlainObject(query)) {
-      index = _core.lib.findIndex($data, query);
-    }
-
-    if (index || index === 0) {
+    if (index > -1) {
       $data.splice.apply($data, [index, 0].concat(_toConsumableArray(pay)));
     }
 
@@ -258,15 +260,12 @@ var defaultBehavior = {
   },
   remove: function remove(query, cb) {
     var $data = this.getData().data;
-    var index = -1;
-
-    if (_core.lib.isNumber(query)) {
-      index = query;
-    }
-
-    if (_core.lib.isPlainObject(query)) {
-      index = _core.lib.findIndex($data, query);
-    }
+    var index = this.findIndex(query); // if (lib.isNumber(query)) {
+    //   index = query
+    // }
+    // if (lib.isPlainObject(query)) {
+    //   index = lib.findIndex($data, query)
+    // }
 
     if (!query) {
       index = $data.length - 1;
@@ -276,7 +275,7 @@ var defaultBehavior = {
       index = 0;
     }
 
-    if (index || index === 0) {
+    if (index > -1) {
       var target = $data.splice(index, 1);
       target.destory && target.destory();
     } // this.children = []
@@ -520,22 +519,19 @@ var defaultBehavior = {
     var cls = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'active';
     var cb = arguments.length > 2 ? arguments[2] : undefined;
     var $data = this.getData().data;
-    var index = null;
-
-    if (_core.lib.isNumber(query)) {
-      index = query;
-    }
-
-    if (_core.lib.isPlainObject(query)) {
-      index = _core.lib.findIndex($data, query);
-    }
+    var index = this.findIndex(query); // if (lib.isNumber(query)) {
+    //   index = query
+    // }
+    // if (lib.isPlainObject(query)) {
+    //   index = lib.findIndex($data, query)
+    // }
 
     if (_core.lib.isFunction(cls)) {
       cb = cls;
       cls = 'active';
     }
 
-    if (_core.lib.isNumber(index)) {
+    if (index > -1) {
       this.forEach(function (item, ii) {
         if (ii === index) {
           this.addClass(cls, cb);
@@ -546,6 +542,26 @@ var defaultBehavior = {
         }
       });
     }
+  },
+  findIndex: function findIndex(param) {
+    var index = -1;
+    var $data = this.getData().data;
+
+    if (_core.lib.isNumber(param)) {
+      if ($data[param]) index = param;
+    }
+
+    if (_core.lib.isPlainObject(param)) {
+      return _core.lib.findIndex($data, query);
+    }
+
+    if (_core.lib.isFunction(param)) {
+      $data.forEach(function (item, ii) {
+        if (param(item)) index = ii;
+      });
+    }
+
+    return index;
   } // didUpdate(){
   //   if (lib.isFunction(this.config.didUpdate)) {
   //     this.config.didUpdate.apply(this, arguments)

@@ -62,9 +62,10 @@ function combineComponent(ORIClass, options, parent, splitProps) {
 
       _this = _super.call(this, props);
 
-      var _data = parent.data || {};
+      var _data = parent.data || {}; // let myState = splitProps ? _data : Object.assign({}, _data, props);
 
-      var myState = splitProps ? _data : Object.assign({}, _data, props);
+
+      var myState = Object.assign({}, _data, props);
       _this.state = Object.assign({}, _this.state, myState);
       _this.selfStateChanging = false;
       _this.selfStateChanged = false;
@@ -95,6 +96,10 @@ function combineComponent(ORIClass, options, parent, splitProps) {
     _createClass(CComponent, [{
       key: "reset",
       value: function reset(param) {
+        parent.children.forEach(function (it) {
+          return it.destory();
+        });
+        parent.children = [];
         this.setSelfState(param || this.oriState);
         this.selfStateChanged = false;
         selfStateChanged = false;
@@ -210,7 +215,8 @@ function combineComponent(ORIClass, options, parent, splitProps) {
       value: function componentWillUnmount() {
         if (this.uiCount !== parent.uiCount) return;
         parent.hasMounted = false;
-        parent.isINmemery = true;
+        parent.isINmemery = true; // parent.removeParentChild()
+
         _get(_getPrototypeOf(CComponent.prototype), "componentWillUnmount", this) && _get(_getPrototypeOf(CComponent.prototype), "componentWillUnmount", this).call(this);
         var unLoad = parent.onUnload || parent.componentWillUnmount || parent.detached;
 
@@ -223,6 +229,8 @@ function combineComponent(ORIClass, options, parent, splitProps) {
     }, {
       key: "render",
       value: function render() {
+        parent.uiCount++;
+
         if (parent.__showStat) {
           var JSX = _get(_getPrototypeOf(CComponent.prototype), "render", this).call(this);
 
@@ -299,9 +307,20 @@ function _setData_() {
     // created生命周期中
     this.data = Object.assign({}, this.data, param);
 
-    if (lib.isfunction(cb)) {
+    if (lib.isFunction(cb)) {
       cb();
     }
+  }
+}
+
+function removeParentChild() {
+  if (this.parentInst && this.parentInst.children.length) {
+    var uniqId = this.uniqId;
+    var tmpAry = [];
+    this.parentInst.forEach(function (child) {
+      if (child.uniqId !== uniqId) tmpAry.push(child);
+    });
+    this.parentInst.children = tmpAry;
   }
 }
 
@@ -390,7 +409,9 @@ var CombineClass = /*#__PURE__*/function () {
 
     Object.defineProperty(this, "uiCount", lib.protectProperty(0)); // 渲染过后把jsx存储在本地
 
-    Object.defineProperty(this, "jsx", lib.protectProperty()); // 小程序组件生命周期 attached, page生命周期 onLoad
+    Object.defineProperty(this, "jsx", lib.protectProperty()); // UI被移除时，移除父级children的引用
+
+    Object.defineProperty(this, "removeParentChild", lib.protectProperty(removeParentChild.bind(this))); // 小程序组件生命周期 attached, page生命周期 onLoad
 
     Object.defineProperty(this, "_onload_", lib.protectProperty(_onload_.bind(this))); // 小程序组件生命周期 ready, page生命周期 onReady
 
@@ -410,13 +431,13 @@ var CombineClass = /*#__PURE__*/function () {
     });
     this.created(); // 小程序组件生命周期 created
 
-    var UI = combineComponent(oriClass, config, this, splitProps);
-
-    this.UI = function (props) {
-      return /*#__PURE__*/React.createElement(UI, props); // that.jsx = that.jsx || <UI {...props} />
-      // // that.jsx = that.jsx ? React.cloneElement(that.jsx, props) : <UI {...props} />
-      // return that.jsx
-    };
+    this.UI = combineComponent(oriClass, config, this, splitProps); // let UI = combineComponent(oriClass, config, this, splitProps);
+    // this.UI = function(props) {
+    //   return <UI {...props} />
+    //   // that.jsx = that.jsx || <UI {...props} />
+    //   // // that.jsx = that.jsx ? React.cloneElement(that.jsx, props) : <UI {...props} />
+    //   // return that.jsx
+    // }
   }
 
   _createClass(CombineClass, [{

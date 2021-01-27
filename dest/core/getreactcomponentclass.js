@@ -53,8 +53,9 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       _this = _super.call(this, props);
       var propsData = props.data; // _data = Object.assign({}, _data, propsData)
 
-      _data = Object.assign({}, parent.data, propsData);
-      var myState = splitProps ? _data : Object.assign({}, _data, props);
+      _data = Object.assign({}, parent.data, propsData); // let myState = splitProps ? _data : Object.assign({}, _data, props);
+
+      var myState = Object.assign({}, _data, props);
       _this.state = myState;
       _this.template = template;
       _this.selfStateChanging = false;
@@ -63,9 +64,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       _this.id = props.id || myState.id;
       if (props.id) parent.id = _this.id;
       _this.uiCount = parent.uiCount;
-      _this.ref = React.createRef();
+      _this.ref = parent.ref;
       _this.env = parent;
-      parent.ref = _this.ref;
       parent.reactComponentInstance = _assertThisInitialized(_this);
       _this.setSelfState = _this.setSelfState.bind(_assertThisInitialized(_this));
       _this.reset = _this.reset.bind(_assertThisInitialized(_this));
@@ -86,6 +86,10 @@ function getReactComponentClass(_data, parent, template, splitProps) {
     _createClass(InnerClass, [{
       key: "reset",
       value: function reset(param, cb) {
+        parent.children.forEach(function (it) {
+          return it.destory();
+        });
+        parent.children = [];
         this.setSelfState(param || this.oriState, cb);
         this.selfStateChanged = false;
         selfStateChanged = false;
@@ -199,6 +203,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
         if (this.uiCount !== parent.uiCount) return;
         parent.hasMounted = false;
         parent.isINmemery = true;
+        parent.removeParentChild(); // 清除父级的父级的该实例的子元素
+
         var unLoad = parent.onUnload || parent.componentWillUnmount || parent.detached;
 
         if (lib.isFunction(unLoad)) {
@@ -210,6 +216,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
     }, {
       key: "render",
       value: function render() {
+        parent.uiCount++;
+
         if (parent.__showStat) {
           var state = lib.cloneDeep(this.state);
           var props = lib.cloneDeep(this.props);

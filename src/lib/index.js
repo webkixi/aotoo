@@ -1,3 +1,21 @@
+import {
+  // attrKey, 
+  // accessKey, 
+  // internalKeys, 
+  eventName, 
+  isEvents, 
+  bindEvents
+} from '../_common/index'
+
+const isEvent = isEvents
+const bindEvent = bindEvents
+
+export {
+  eventName,
+  isEvent,
+  bindEvent
+}
+
 export * from './util'
 
 export {
@@ -28,5 +46,6 @@ export {
   get,
   set,
   find,
-  update
+  update,
+  camelCase
 } from 'lodash'

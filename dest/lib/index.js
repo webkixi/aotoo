@@ -4,6 +4,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var _exportNames = {
+  isEvent: true,
+  bindEvent: true,
+  eventName: true,
   hooks: true,
   strlen: true,
   subcontent: true,
@@ -12,8 +15,15 @@ var _exportNames = {
   get: true,
   set: true,
   find: true,
-  update: true
+  update: true,
+  camelCase: true
 };
+Object.defineProperty(exports, "eventName", {
+  enumerable: true,
+  get: function get() {
+    return _index.eventName;
+  }
+});
 Object.defineProperty(exports, "hooks", {
   enumerable: true,
   get: function get() {
@@ -68,6 +78,15 @@ Object.defineProperty(exports, "update", {
     return _lodash.update;
   }
 });
+Object.defineProperty(exports, "camelCase", {
+  enumerable: true,
+  get: function get() {
+    return _lodash.camelCase;
+  }
+});
+exports.bindEvent = exports.isEvent = void 0;
+
+var _index = require("../_common/index");
 
 var _util = require("./util");
 
@@ -89,3 +108,8 @@ var _string = require("./string");
 var _url = require("./url");
 
 var _lodash = require("lodash");
+
+var isEvent = _index.isEvents;
+exports.isEvent = isEvent;
+var bindEvent = _index.bindEvents;
+exports.bindEvent = bindEvent;

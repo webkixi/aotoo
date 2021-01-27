@@ -8,12 +8,12 @@ import * as lib from "../lib";
 import {attrKey, accessKey, eventName, internalKeys, isEvents, bindEvents} from '../_common/index'
 const context = lib.curContext()
 
-context.React = react
+context.React = context.React || react
 if (lib.isNode()) {
   // context.ReactDOM = null
   // context.ReactDom = null
 } else {
-  context.ReactDOM = reactDom
+  context.ReactDOM = context.ReactDOM || context.ReactDom || reactDom
   context.ReactDom = reactDom
 }
 
@@ -84,14 +84,25 @@ function _setData_(param = {}, cb) {
   } else {
     // created生命周期中
     this.data = Object.assign({}, this.data, param)
-    if (lib.isfunction(cb)) {
+    if (lib.isFunction(cb)) {
       cb()
     }
   }
 }
 
+function removeParentChild(){
+  if (this.parentInst && this.parentInst.children.length) {
+    let uniqId = this.uniqId
+    let tmpAry = []
+    this.parentInst.forEach(child=>{
+      if (child.uniqId !== uniqId) tmpAry.push(child)
+    })
+    this.parentInst.children = tmpAry
+  }
+}
+
 class baseClass {
-  constructor(config={}, template, splitProps) {
+  constructor(config={}, template, splitProps, useConfigComponent) {
     if (!config.data) {
       console.warn('需要指定data数据');
       config.data = {}
@@ -132,6 +143,7 @@ class baseClass {
     this.hooks = lib.hooks(lib.uniqueId('baseClass_'))
     this.children = []
     this.events = null  // data中的event合集
+    this.ref = React.createRef()
     
     // 祖先节点
     if ((this.data.fromComponent || this.data.rootComponent) && 
@@ -174,6 +186,9 @@ class baseClass {
 
     // 渲染过后把jsx存储在本地
     Object.defineProperty(this, "jsx", lib.protectProperty()); 
+
+    // UI被移除时，移除父级children的引用
+    Object.defineProperty(this, "removeParentChild", lib.protectProperty(removeParentChild.bind(this)));
     
     // 小程序组件生命周期 attached, page生命周期 onLoad
     Object.defineProperty(this, "_onload_", lib.protectProperty(_onload_.bind(this)));
@@ -195,12 +210,16 @@ class baseClass {
     });
 
     this.created() // 小程序组件生命周期 created
-    this.UI = getFunctionComponent(this.data, this, template, splitProps)
-    // let UI = getReactComponentClass(this.data, this, template, splitProps);
-    // this.UI = function(props) {
-    //   that.uiCount++
-    //   return <UI {...props} />
-    // }
+    if (useConfigComponent) {
+      this.UI = getReactComponentClass(this.data, this, template, splitProps);
+      // let UI = getReactComponentClass(this.data, this, template, splitProps);
+      // this.UI = function(props) {
+      //   that.uiCount++
+      //   return <UI {...props} />
+      // }
+    } else {
+      this.UI = getFunctionComponent(this.data, this, template, splitProps)
+    }
   }
 
   created(){
@@ -255,10 +274,14 @@ class baseClass {
   }
 
   getData(){
-    if (this.tasks.length || this.taskTimmer) {
-      return lib.cloneDeep(this.taskData)
+    if (lib.isFunction(this.config.getData)) {
+      return this.config.getData.call(this)
+    } else {
+      if (this.tasks.length || this.taskTimmer) {
+        return lib.cloneDeep(this.taskData)
+      }
+      return lib.cloneDeep(this.data)
     }
-    return lib.cloneDeep(this.data)
   }
 
   parent(indentify) {
@@ -322,7 +345,7 @@ class baseClass {
   }
 
   destory(){
-    let __key = this.config.__key || this.config.data.__key
+    let __key = this.config.__key || (this.config.data && this.config.data.__key)
     if (this.$$id) {
       _elements.delElement(this.$$id)
     }
@@ -460,47 +483,55 @@ export default function(param={}, template, splitProps=true) {
   if (React.isValidElement(param)) {
     return wrapClass(param, template)
   }
+  let $instance = null
   if (lib.isFunction(param)) {
     if (lib.isClass(param)) {
       let options = template
       options = setUniqId(options)
-
       let __uniqId = options.uniqId || options.data.uniqId
-      if (__uniqId && $$(__uniqId)) {
-        return $$(__uniqId)
-      }
-
       let __id = options.$$id || options.data.$$id
-      if (__id && $$(__id)) {
-        return $$(__id)
+      if (__uniqId && $$(__uniqId)) {
+        $instance = $$(__uniqId)
       }
-      return new hocClass(param, options, splitProps)
+      else if (__id && $$(__id)) {
+        $instance = $$(__id)
+      }
+      else {
+        $instance = new hocClass(param, options, splitProps)
+      }
+    } else {
+      template = param
+      param = {}
+      $instance = new baseClass(param, template, splitProps)
     }
-    template = param
-    param = {}
-    return new baseClass(param, template, splitProps)
-  }
-  param = setUniqId(param)
-  let __uniqId = param.uniqId || param.data.uniqId
-  if (__uniqId && $$(__uniqId)) {
-    return $$(__uniqId)
-  }
-  
-  let __id = param.$$id || param.data.$$id
-  if (__id && $$(__id)) {
-    return $$(__id)
-  }
+  } else {
+    param = setUniqId(param)
+    let __uniqId = param.uniqId || param.data.uniqId
+    let __id = param.$$id || param.data.$$id
+    let __key = param.data && param.data.__key
 
-  let __key = param.data && param.data.__key
-  if (__key && $$(__key)) {
-    return $$(__key)
+    if (__uniqId && $$(__uniqId)) {
+      $instance = $$(__uniqId)
+    } 
+    else if (__id && $$(__id)) {
+      $instance = $$(__id)
+    }
+    else if (__key && $$(__key)) {
+      $instance = $$(__key)
+    }
+    else {
+      $instance = new baseClass(param, template, splitProps)
+      if (__key) {
+        _elements.setElement(__key, $instance)
+      }
+    }
   }
-
-  let instance = new baseClass(param, template, splitProps)
-  
-  if (__key) {
-    _elements.setElement(__key, instance)
+  if (!$instance.UI) {
+    let __key = param.data && param.data.__key
+    $instance = new baseClass(param, template, splitProps, true)
+    if (__key) {
+      _elements.setElement(__key, $instance)
+    }
   }
-  
-  return instance
+  return $instance
 }

@@ -68,6 +68,7 @@ class ElementsCollection {
   }
   delElement(id) {
     this.elements[id] = null
+    delete this.elements[id]
   }
   getElement(indentify, context) {
     let target = []

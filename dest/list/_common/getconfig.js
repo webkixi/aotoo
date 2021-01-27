@@ -23,6 +23,8 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function attachItem(pay, context) {
+  var config = context && context.config || {};
+  var itemMethod = config._itemMethod || {};
   var payload = [];
   pay = [].concat(pay);
   pay.forEach(function (it) {
@@ -37,6 +39,7 @@ function attachItem(pay, context) {
       var iClass = it.itemClass || '';
       it.itemClass = iClass ? cClass + ' ' + iClass : cClass;
       it['__key'] = it['__key'] || lib.uniqueId('list_item_');
+      it = Object.assign(it, itemMethod);
       payload.push(it);
     }
   });
@@ -119,7 +122,8 @@ function getConfig(opts, context) {
   });
   mydata.data = datas;
   config = _objectSpread({
-    data: mydata
+    data: mydata,
+    _itemMethod: itemMethod
   }, myoptions);
   return config;
 }
