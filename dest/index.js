@@ -74,5 +74,11 @@ function html(jsx) {
   }
 }
 
+_core.default.lib = _core.lib;
+_core.default.$$ = $$;
+_core.default._elements = _core._elements;
+_core.default.ReturnPromiseComponent = _core.ReturnPromiseComponent;
+_core.default.LoadingComponent = _core.ReturnPromiseComponent;
+_core.default.extTemplate = _core.extTemplate;
 var _default = _core.default;
 exports.default = _default;

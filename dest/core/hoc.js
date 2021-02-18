@@ -215,8 +215,8 @@ function combineComponent(ORIClass, options, parent, splitProps) {
       value: function componentWillUnmount() {
         if (this.uiCount !== parent.uiCount) return;
         parent.hasMounted = false;
-        parent.isINmemery = true; // parent.removeParentChild()
-
+        parent.isINmemery = true;
+        parent.removeParentChild();
         _get(_getPrototypeOf(CComponent.prototype), "componentWillUnmount", this) && _get(_getPrototypeOf(CComponent.prototype), "componentWillUnmount", this).call(this);
         var unLoad = parent.onUnload || parent.componentWillUnmount || parent.detached;
 

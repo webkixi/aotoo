@@ -38,4 +38,11 @@ export {
   extTemplate
 }
 
+createComponet.lib = lib
+createComponet.$$ = $$
+createComponet._elements = _elements
+createComponet.ReturnPromiseComponent = ReturnPromiseComponent
+createComponet.LoadingComponent = ReturnPromiseComponent
+createComponet.extTemplate = extTemplate
+
 export default createComponet
