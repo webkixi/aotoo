@@ -92,11 +92,12 @@ class ElementsCollection {
 }
 
 // let _elements = new ElementsCollection()
-
-let memory = {}
+let context = lib.curContext()
+let memory = context.__aotooElementsCollectionInMemory || {}
 export default function(prefix) {
   if (!memory[prefix]) {
     memory[prefix] = new ElementsCollection()
   }
+  context.__aotooElementsCollectionInMemory = memory
   return memory[prefix]
 }

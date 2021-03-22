@@ -130,12 +130,14 @@ var ElementsCollection = /*#__PURE__*/function () {
 }(); // let _elements = new ElementsCollection()
 
 
-var memory = {};
+var context = lib.curContext();
+var memory = context.__aotooElementsCollectionInMemory || {};
 
 function _default(prefix) {
   if (!memory[prefix]) {
     memory[prefix] = new ElementsCollection();
   }
 
+  context.__aotooElementsCollectionInMemory = memory;
   return memory[prefix];
 }
