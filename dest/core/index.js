@@ -54,13 +54,7 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 var context = lib.curContext();
-context.React = context.React || _react.default; // if (lib.isNode()) {
-//   // context.ReactDOM = null
-//   // context.ReactDom = null
-// } else {
-//   context.ReactDOM = context.ReactDOM || context.ReactDom || reactDom
-//   context.ReactDom = reactDom
-// }
+context.React = context.React || _react.default;
 
 var _elements = (0, _elements2.default)('core');
 

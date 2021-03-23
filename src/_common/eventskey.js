@@ -1,5 +1,14 @@
 import * as lib from '../lib'
-const getContextCallback = lib.getContextCallback
+
+function getContextCallback(ctx, f) {
+  if (!f) return
+  if (ctx) {
+    if (ctx[f]) return ctx
+    else {
+      return getContextCallback(ctx.parentInst, f)
+    }
+  }
+}
 
 const ClipboardEvents = [
   'onCopy', 'onCut', 'onPaste'

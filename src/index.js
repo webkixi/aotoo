@@ -13,7 +13,7 @@ export function render(jsx, id, cb){
       root = document.getElementById(id)
     }
     if (typeof ReactDOM === 'undefined') {
-      console.warn('需要引入全局变量ReactDOM');  // react-dom不能多次引用
+      console.warn('需要引入全局变量ReactDOM');
     } else {
       if (lib.isDomElement(root)) {
         ReactDOM.unmountComponentAtNode(root);

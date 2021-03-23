@@ -5,16 +5,6 @@ import {
   isString
 } from "lodash";
 
-export function getContextCallback(ctx, f) {
-  if (!f) return
-  if (ctx) {
-    if (ctx[f]) return ctx
-    else {
-      return getContextCallback(ctx.parentInst, f)
-    }
-  }
-}
-
 export function isPromise (fn) {
   if (!!fn && typeof fn.then === 'function') {
     return true
