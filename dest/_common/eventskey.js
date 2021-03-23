@@ -1,5 +1,7 @@
 "use strict";
 
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -7,8 +9,13 @@ exports.isEvents = isEvents;
 exports.bindEvents = bindEvents;
 exports.eventName = void 0;
 
-var _core = require("../core");
+var lib = _interopRequireWildcard(require("../lib"));
 
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+var getContextCallback = lib.getContextCallback;
 var ClipboardEvents = ['onCopy', 'onCut', 'onPaste']; //中文输入法
 
 var CompositionEvents = ['onCompositionEnd', 'onCompositionStart', 'onCompositionUpdate'];
@@ -56,7 +63,7 @@ function bindEvents(events, context) {
       var curContext = a.curContext || context;
       if (curContext && curContext.hasClass && curContext.hasClass('_disabled')) return; // 无效状态，则不允许事件触发
 
-      var responseContext = (0, _core.getContextCallback)(curContext, functionName);
+      var responseContext = getContextCallback(curContext, functionName);
 
       if (responseContext) {
         e.persist();
@@ -94,12 +101,11 @@ function bindEvents(events, context) {
     };
   }
 
-  _core.lib.forEach(events, function (fun, ii, ky) {
+  lib.forEach(events, function (fun, ii, ky) {
     var evt = fun;
+    var funKey = lib.uniqueId('__on_');
 
-    var funKey = _core.lib.uniqueId('__on_');
-
-    if (_core.lib.isFunction(evt)) {
+    if (lib.isFunction(evt)) {
       if (!evt.funKey) {
         context[funKey] = evt;
         evt = funKey;
@@ -108,8 +114,8 @@ function bindEvents(events, context) {
       }
     }
 
-    if (_core.lib.isString(evt)) {
-      var _lib$urlTOquery = _core.lib.urlTOquery(evt),
+    if (lib.isString(evt)) {
+      var _lib$urlTOquery = lib.urlTOquery(evt),
           url = _lib$urlTOquery.url,
           query = _lib$urlTOquery.query,
           hasQuery = _lib$urlTOquery.hasQuery;
@@ -135,6 +141,5 @@ function bindEvents(events, context) {
       events[ky] = evtFun.bind(context);
     }
   });
-
   return events;
 }

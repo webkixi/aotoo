@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.getContextCallback = getContextCallback;
 exports.isPromise = isPromise;
 exports.isDomElement = isDomElement;
 exports.protectProperty = protectProperty;
@@ -119,6 +120,16 @@ var _md = _interopRequireDefault(require("md5"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function getContextCallback(ctx, f) {
+  if (!f) return;
+
+  if (ctx) {
+    if (ctx[f]) return ctx;else {
+      return getContextCallback(ctx.parentInst, f);
+    }
+  }
+}
 
 function isPromise(fn) {
   if (!!fn && typeof fn.then === 'function') {

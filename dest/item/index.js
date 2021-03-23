@@ -331,4 +331,6 @@ function item() {
 
 var context = _core.lib.curContext();
 
-context.ui_item = item;
+if (!context.ui_item) {
+  context.ui_item = item;
+}

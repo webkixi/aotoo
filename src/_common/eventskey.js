@@ -1,4 +1,5 @@
-import {lib, getContextCallback} from '../core'
+import * as lib from '../lib'
+const getContextCallback = lib.getContextCallback
 
 const ClipboardEvents = [
   'onCopy', 'onCut', 'onPaste'

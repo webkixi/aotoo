@@ -12,10 +12,14 @@ export function render(jsx, id, cb){
     if (lib.isString(id)) {
       root = document.getElementById(id)
     }
-    if (lib.isDomElement(root)) {
-      ReactDOM.unmountComponentAtNode(root);
-      root.innerHTML = '';
-      (typeof noserver === 'undefined'||noserver===true) ? ReactDOM.render(jsx, root, cb) : ReactDOM.hydrate(jsx, root, cb)
+    if (typeof ReactDOM === 'undefined') {
+      console.warn('需要引入全局变量ReactDOM');  // react-dom不能多次引用
+    } else {
+      if (lib.isDomElement(root)) {
+        ReactDOM.unmountComponentAtNode(root);
+        root.innerHTML = '';
+        (typeof noserver === 'undefined'||noserver===true) ? ReactDOM.render(jsx, root, cb) : ReactDOM.hydrate(jsx, root, cb)
+      }
     }
   }
 

@@ -276,4 +276,6 @@ export default function item(options={}) {
 }
 
 let context = lib.curContext()
-context.ui_item = item
+if (!context.ui_item) {
+  context.ui_item = item
+}

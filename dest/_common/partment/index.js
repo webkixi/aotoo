@@ -430,12 +430,15 @@ var globalComponent = {
     return /*#__PURE__*/React.createElement(list.UI, null, props.children);
   }
 };
-context['UI_item'] = globalComponent['ui-item'];
-context['UI_list'] = globalComponent['ui-list'];
-context['Item'] = globalComponent['ui-item'];
-context['List'] = globalComponent['ui-list'];
-context['View'] = View;
-context['Text'] = Text;
+
+if (!context['UI_item']) {
+  context['UI_item'] = globalComponent['ui-item'];
+  context['UI_list'] = globalComponent['ui-list'];
+  context['Item'] = globalComponent['ui-item'];
+  context['List'] = globalComponent['ui-list'];
+  context['View'] = View;
+  context['Text'] = Text;
+}
 
 function extendsTemplate() {
   var otherTemplate = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};

@@ -40,28 +40,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function getListMethod(events) {
-  return (0, _common.bindEvents)(events, this); // const that = this
-  // lib.forEach(events, (fun, ii, ky) => {
-  //   let evt = fun
-  //   if (lib.isFunction(evt)) {
-  //     let funKey = lib.uniqueId('__on_')
-  //     this[funKey] = evt
-  //     evt = funKey
-  //   }
-  //   if (lib.isString(evt)) {
-  //     let {url, query, hasQuery} = lib.urlTOquery(evt)
-  //     let functionName = url
-  //     events[ky] = function(e, param, inst) {
-  //       let responseContext = getContextCallback(that, functionName)
-  //       if (responseContext) {
-  //         responseContext[functionName].call(responseContext, e, query, that)
-  //       } else {
-  //         console.warn('没有找到定义方法:'+ky);  // 定义pager的__fromParent
-  //       }
-  //     }
-  //   }
-  // })
-  // return events
+  return (0, _common.bindEvents)(events, this);
 }
 
 var template = function template(state, props) {
@@ -607,11 +586,13 @@ function list() {
 
 var context = _core.lib.curContext();
 
-context.ui_list = list;
+if (!context.ui_list) {
+  context.ui_list = list;
 
-context.ui_tree = function (options) {
-  if (_core.lib.isPlainObject(options)) {
-    options.mode = 'tree';
-    return list(options);
-  }
-};
+  context.ui_tree = function (options) {
+    if (_core.lib.isPlainObject(options)) {
+      options.mode = 'tree';
+      return list(options);
+    }
+  };
+}

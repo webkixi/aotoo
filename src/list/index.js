@@ -1,8 +1,4 @@
-import createComponet, {
-  $$, 
-  lib, 
-  getContextCallback
-} from '../core'
+import createComponet, { lib } from '../core'
 
 import {
   resetItem,
@@ -32,29 +28,6 @@ import * as partments from '../_common/partment'
 
 function getListMethod(events) {
   return bindEvents(events, this)
-  // const that = this
-  // lib.forEach(events, (fun, ii, ky) => {
-  //   let evt = fun
-  //   if (lib.isFunction(evt)) {
-  //     let funKey = lib.uniqueId('__on_')
-  //     this[funKey] = evt
-  //     evt = funKey
-  //   }
-
-  //   if (lib.isString(evt)) {
-  //     let {url, query, hasQuery} = lib.urlTOquery(evt)
-  //     let functionName = url
-  //     events[ky] = function(e, param, inst) {
-  //       let responseContext = getContextCallback(that, functionName)
-  //       if (responseContext) {
-  //         responseContext[functionName].call(responseContext, e, query, that)
-  //       } else {
-  //         console.warn('没有找到定义方法:'+ky);  // 定义pager的__fromParent
-  //       }
-  //     }
-  //   }
-  // })
-  // return events
 }
 
 const template = function(state, props) {
@@ -582,10 +555,12 @@ export default function list(options={}) {
 }
 
 let context = lib.curContext()
-context.ui_list = list;
-context.ui_tree = function(options){
-  if (lib.isPlainObject(options)) {
-    options.mode = 'tree'
-    return list(options)
+if (!context.ui_list) {
+  context.ui_list = list;
+  context.ui_tree = function(options){
+    if (lib.isPlainObject(options)) {
+      options.mode = 'tree'
+      return list(options)
+    }
   }
 }

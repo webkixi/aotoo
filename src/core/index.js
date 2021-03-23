@@ -1,33 +1,17 @@
 import react from 'react'
-import reactDom from 'react-dom'
+// import reactDom from 'react-dom'  //  多次引用会造成问题
+
 import elementsCollection from './elements'
 import hocClass from './hoc'
 import wrapClass from './wrap'
 import {extendsTemplate} from '../_common/partment'
 import * as lib from "../lib";
 import {attrKey, accessKey, eventName, internalKeys, isEvents, bindEvents} from '../_common/index'
-const context = lib.curContext()
 
+const context = lib.curContext()
 context.React = context.React || react
-if (lib.isNode()) {
-  // context.ReactDOM = null
-  // context.ReactDom = null
-} else {
-  context.ReactDOM = context.ReactDOM || context.ReactDom || reactDom
-  context.ReactDom = reactDom
-}
 
 let _elements = elementsCollection('core')
-
-export function getContextCallback(ctx, f) {
-  if (!f) return
-  if (ctx) {
-    if (ctx[f]) return ctx
-    else {
-      return getContextCallback(ctx.parentInst, f)
-    }
-  }
-}
 
 export function $$(id) {
   return _elements.getElement(id)

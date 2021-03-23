@@ -36,32 +36,7 @@ function getEvents(params, context) {
   });
 
   events = (0, _common.bindEvents)(events, context);
-  return Object.assign(params, events); // let events = {}
-  // lib.forEach(params, (item, ii, k) => {
-  //   if (isEvents(k)) {
-  //     let evt = item
-  //     if (isFunction(evt)) {
-  //       let fun = evt
-  //       let funKey = uniqueId('__on_') + k
-  //       events[k] = funKey
-  //       context[funKey] = fun
-  //       evt = funKey
-  //     }
-  //     if (isString(evt)) {
-  //       let {url, query, hasQuery} = urlTOquery(evt)
-  //       let functionName = url
-  //       events[k] = function(e, param, inst) {
-  //         let responseContext = getContextCallback(context, functionName)
-  //         if (responseContext) {
-  //           responseContext[functionName].call(responseContext, e, query, context)
-  //         } else {
-  //           console.warn('没有找到定义方法:'+k);  // 定义pager的__fromParent
-  //         }
-  //       }
-  //     }
-  //   }
-  // })
-  // return Object.assign(params, events)
+  return Object.assign(params, events);
 }
 
 function parseImg(src) {
@@ -305,29 +280,7 @@ function resetItem(data, context, loop, ky) {
         } else {
           context[funKey] = funs[funKey];
         }
-      } // Object.keys(events).forEach(k=>{
-      //   let evt = events[k]
-      //   if (isFunction(evt)) {
-      //     let fun = evt
-      //     let funKey = uniqueId('__on_') + k
-      //     events[k] = funKey
-      //     context[funKey] = fun
-      //     evt = funKey
-      //   }
-      //   if (isString(evt)) {
-      //     let {url, query, hasQuery} = urlTOquery(evt)
-      //     let functionName = url
-      //     events[k] = function(e, param, inst) {
-      //       let responseContext = getContextCallback(context, functionName)
-      //       if (responseContext) {
-      //         responseContext[functionName].call(responseContext, e, query, context)
-      //       } else {
-      //         console.warn('没有找到定义方法:'+k);  // 定义pager的__fromParent
-      //       }
-      //     }
-      //   }
-      // })
-
+      }
 
       events = (0, _common.bindEvents)(events, context);
 

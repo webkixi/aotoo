@@ -5,7 +5,6 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getContextCallback = getContextCallback;
 exports.$$ = $$;
 exports.ReturnPromiseComponent = ReturnPromiseComponent;
 exports.extTemplate = extTemplate;
@@ -13,8 +12,6 @@ exports.default = _default;
 exports.lib = exports._elements = void 0;
 
 var _react = _interopRequireDefault(require("react"));
-
-var _reactDom = _interopRequireDefault(require("react-dom"));
 
 var _elements2 = _interopRequireDefault(require("./elements"));
 
@@ -57,28 +54,17 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 var context = lib.curContext();
-context.React = context.React || _react.default;
-
-if (lib.isNode()) {// context.ReactDOM = null
-  // context.ReactDom = null
-} else {
-  context.ReactDOM = context.ReactDOM || context.ReactDom || _reactDom.default;
-  context.ReactDom = _reactDom.default;
-}
+context.React = context.React || _react.default; // if (lib.isNode()) {
+//   // context.ReactDOM = null
+//   // context.ReactDom = null
+// } else {
+//   context.ReactDOM = context.ReactDOM || context.ReactDom || reactDom
+//   context.ReactDom = reactDom
+// }
 
 var _elements = (0, _elements2.default)('core');
 
 exports._elements = _elements;
-
-function getContextCallback(ctx, f) {
-  if (!f) return;
-
-  if (ctx) {
-    if (ctx[f]) return ctx;else {
-      return getContextCallback(ctx.parentInst, f);
-    }
-  }
-}
 
 function $$(id) {
   return _elements.getElement(id);
