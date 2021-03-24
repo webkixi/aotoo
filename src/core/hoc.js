@@ -230,7 +230,7 @@ function removeParentChild(){
   if (this.parentInst && this.parentInst.children.length) {
     let uniqId = this.uniqId
     let tmpAry = []
-    this.parentInst.forEach(child=>{
+    this.parentInst.children.forEach(child=>{
       if (child.uniqId !== uniqId) tmpAry.push(child)
     })
     this.parentInst.children = tmpAry

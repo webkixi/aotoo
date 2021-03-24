@@ -317,7 +317,7 @@ function removeParentChild() {
   if (this.parentInst && this.parentInst.children.length) {
     var uniqId = this.uniqId;
     var tmpAry = [];
-    this.parentInst.forEach(function (child) {
+    this.parentInst.children.forEach(function (child) {
       if (child.uniqId !== uniqId) tmpAry.push(child);
     });
     this.parentInst.children = tmpAry;

@@ -78,7 +78,7 @@ function removeParentChild(){
   if (this.parentInst && this.parentInst.children.length) {
     let uniqId = this.uniqId
     let tmpAry = []
-    this.parentInst.forEach(child=>{
+    this.parentInst.children.forEach(child=>{
       if (child.uniqId !== uniqId) tmpAry.push(child)
     })
     this.parentInst.children = tmpAry
@@ -471,45 +471,83 @@ export default function(param={}, template, splitProps=true) {
   if (lib.isFunction(param)) {
     if (lib.isClass(param)) {
       let options = template
-      options = setUniqId(options)
-      let __uniqId = options.uniqId || options.data.uniqId
       let __id = options.$$id || options.data.$$id
-      if (__uniqId && $$(__uniqId)) {
-        $instance = $$(__uniqId)
-      }
-      else if (__id && $$(__id)) {
+      if (__id) {
         $instance = $$(__id)
       }
-      else {
-        $instance = new hocClass(param, options, splitProps)
+
+      let __uniqId = options.uniqId || options.data.uniqId
+      if (__uniqId && !$instance) {
+        $instance = $$(__uniqId)
       }
+
+      if (!$instance) {
+        $instance = new hocClass(param, options, splitProps)
+      } else {
+        if ($instance.parentInst) {
+          let isExist = false;
+          ($instance.parentInst.children || []).forEach(child=>{
+            if (child.uniqId === $instance.uniqId) isExist = true
+          })
+          if (!isExist) {
+            $instance.parentInst.children.push($instance)
+          }
+        }
+      }
+
+      // options = setUniqId(options)
+      // let __uniqId = options.uniqId || options.data.uniqId
+      // if (__uniqId && $$(__uniqId)) {
+      //   $instance = $$(__uniqId)
+      // }
+      // else if (__id && $$(__id)) {
+      //   $instance = $$(__id)
+      // }
+      // else {
+      //   $instance = new hocClass(param, options, splitProps)
+      // }
     } else {
       template = param
       param = {}
       $instance = new baseClass(param, template, splitProps)
     }
   } else {
-    param = setUniqId(param)
-    let __uniqId = param.uniqId || param.data.uniqId
-    let __id = param.$$id || param.data.$$id
-    let __key = param.data && param.data.__key
 
-    if (__uniqId && $$(__uniqId)) {
-      $instance = $$(__uniqId)
-    } 
-    else if (__id && $$(__id)) {
-      $instance = $$(__id)
-    }
-    else if (__key && $$(__key)) {
+    let __key = param.data && param.data.__key
+    if (__key) {
       $instance = $$(__key)
     }
-    else {
+    
+    let __id = param.$$id || param.data.$$id
+    if (__id && !$instance) {
+      $instance = $$(__id)
+    }
+
+    // param = setUniqId(param)
+    let __uniqId = param.uniqId || param.data.uniqId
+    if (__uniqId && !$instance) {
+      $instance = $$(__uniqId)
+    } 
+
+    if (!$instance) {
       $instance = new baseClass(param, template, splitProps)
+      // __id 和 __uniqId会在实例生成时自动保存
       if (__key) {
         _elements.setElement(__key, $instance)
       }
+    } else {
+      if ($instance.parentInst) {
+        let isExist = false;
+        ($instance.parentInst.children || []).forEach(child=>{
+          if (child.uniqId === $instance.uniqId) isExist = true
+        })
+        if (!isExist) {
+          $instance.parentInst.children.push($instance)
+        }
+      }
     }
   }
+  
   if (!$instance.UI) {
     let __key = param.data && param.data.__key
     $instance = new baseClass(param, template, splitProps, true)

@@ -513,10 +513,10 @@ var defaultBehavior = {
     if (index > -1) {
       this.forEach(function (item, ii) {
         if (ii === index) {
-          this.addClass(cls, cb);
+          item.addClass(cls, cb);
         } else {
-          if (this.hasClass(cls)) {
-            this.removeClass(cls);
+          if (item.hasClass(cls)) {
+            item.removeClass(cls);
           }
         }
       });

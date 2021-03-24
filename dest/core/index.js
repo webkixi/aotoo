@@ -129,7 +129,7 @@ function removeParentChild() {
   if (this.parentInst && this.parentInst.children.length) {
     var uniqId = this.uniqId;
     var tmpAry = [];
-    this.parentInst.forEach(function (child) {
+    this.parentInst.children.forEach(function (child) {
       if (child.uniqId !== uniqId) tmpAry.push(child);
     });
     this.parentInst.children = tmpAry;
@@ -605,44 +605,85 @@ function _default() {
   if (lib.isFunction(param)) {
     if (lib.isClass(param)) {
       var options = template;
-      options = setUniqId(options);
-
-      var __uniqId = options.uniqId || options.data.uniqId;
 
       var __id = options.$$id || options.data.$$id;
 
-      if (__uniqId && $$(__uniqId)) {
-        $instance = $$(__uniqId);
-      } else if (__id && $$(__id)) {
+      if (__id) {
         $instance = $$(__id);
-      } else {
-        $instance = new _hoc.default(param, options, splitProps);
       }
+
+      var __uniqId = options.uniqId || options.data.uniqId;
+
+      if (__uniqId && !$instance) {
+        $instance = $$(__uniqId);
+      }
+
+      if (!$instance) {
+        $instance = new _hoc.default(param, options, splitProps);
+      } else {
+        if ($instance.parentInst) {
+          var isExist = false;
+          ($instance.parentInst.children || []).forEach(function (child) {
+            if (child.uniqId === $instance.uniqId) isExist = true;
+          });
+
+          if (!isExist) {
+            $instance.parentInst.children.push($instance);
+          }
+        }
+      } // options = setUniqId(options)
+      // let __uniqId = options.uniqId || options.data.uniqId
+      // if (__uniqId && $$(__uniqId)) {
+      //   $instance = $$(__uniqId)
+      // }
+      // else if (__id && $$(__id)) {
+      //   $instance = $$(__id)
+      // }
+      // else {
+      //   $instance = new hocClass(param, options, splitProps)
+      // }
+
     } else {
       template = param;
       param = {};
       $instance = new baseClass(param, template, splitProps);
     }
   } else {
-    param = setUniqId(param);
+    var __key = param.data && param.data.__key;
 
-    var _uniqId = param.uniqId || param.data.uniqId;
+    if (__key) {
+      $instance = $$(__key);
+    }
 
     var _id = param.$$id || param.data.$$id;
 
-    var __key = param.data && param.data.__key;
-
-    if (_uniqId && $$(_uniqId)) {
-      $instance = $$(_uniqId);
-    } else if (_id && $$(_id)) {
+    if (_id && !$instance) {
       $instance = $$(_id);
-    } else if (__key && $$(__key)) {
-      $instance = $$(__key);
-    } else {
-      $instance = new baseClass(param, template, splitProps);
+    } // param = setUniqId(param)
+
+
+    var _uniqId = param.uniqId || param.data.uniqId;
+
+    if (_uniqId && !$instance) {
+      $instance = $$(_uniqId);
+    }
+
+    if (!$instance) {
+      $instance = new baseClass(param, template, splitProps); // __id 和 __uniqId会在实例生成时自动保存
 
       if (__key) {
         _elements.setElement(__key, $instance);
+      }
+    } else {
+      if ($instance.parentInst) {
+        var _isExist = false;
+        ($instance.parentInst.children || []).forEach(function (child) {
+          if (child.uniqId === $instance.uniqId) _isExist = true;
+        });
+
+        if (!_isExist) {
+          $instance.parentInst.children.push($instance);
+        }
       }
     }
   }
