@@ -500,7 +500,7 @@ let defaultBehavior = {
     }
 
     if (lib.isPlainObject(param)){
-      return lib.findIndex($data, query)
+      return lib.findIndex($data, param)
     }
 
     if (lib.isFunction(param)){

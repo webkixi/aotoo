@@ -531,7 +531,7 @@ var defaultBehavior = {
     }
 
     if (_core.lib.isPlainObject(param)) {
-      return _core.lib.findIndex($data, query);
+      return _core.lib.findIndex($data, param);
     }
 
     if (_core.lib.isFunction(param)) {
