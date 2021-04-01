@@ -5,20 +5,6 @@ import {
   isString
 } from "lodash";
 
-export function uuid(prefix, len) {
-  const mydate = new Date()
-  const randomNum = mydate.getDay() + mydate.getHours() + mydate.getMinutes() + mydate.getSeconds() + mydate.getMilliseconds() + Math.round(Math.random() * 10000);
-  const uuid = (prefix || 'uuid') + md5(randomNum)
-  if (len && typeof len == 'number' && len > 6) {
-    const remainder = len - 5
-    const pre = uuid.substr(0, 5)
-    const aft = uuid.substr(uuid.length - remainder)
-    return pre + aft
-  } else {
-    return uuid
-  }
-}
-
 export function isPromise (fn) {
   if (!!fn && typeof fn.then === 'function') {
     return true
@@ -166,6 +152,24 @@ export function isClass(obj) {
 import _md5 from "md5";
 
 export const md5 = _md5;
+
+export function uuid(prefix, len) {
+  if (typeof prefix === "number") {
+    len = prefix
+    prefix = null
+  }
+  const mydate = new Date()
+  const randomNum = mydate.getDay() + mydate.getHours() + mydate.getMinutes() + mydate.getSeconds() + mydate.getMilliseconds() + Math.round(Math.random() * 10000);
+  const uuid = (prefix || 'uuid') + md5(randomNum)
+  if (len && typeof len == 'number' && len > 6) {
+    const remainder = len - 5
+    const pre = uuid.substr(0, 5)
+    const aft = uuid.substr(uuid.length - remainder)
+    return pre + aft
+  } else {
+    return uuid
+  }
+}
 
 export {
   uniqueId,
