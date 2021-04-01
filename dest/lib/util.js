@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.uuid = uuid;
 exports.isPromise = isPromise;
 exports.isDomElement = isDomElement;
 exports.protectProperty = protectProperty;
@@ -119,6 +120,21 @@ var _md = _interopRequireDefault(require("md5"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function uuid(prefix, len) {
+  var mydate = new Date();
+  var randomNum = mydate.getDay() + mydate.getHours() + mydate.getMinutes() + mydate.getSeconds() + mydate.getMilliseconds() + Math.round(Math.random() * 10000);
+  var uuid = (prefix || 'uuid') + md5(randomNum);
+
+  if (len && typeof len == 'number' && len > 6) {
+    var remainder = len - 5;
+    var pre = uuid.substr(0, 5);
+    var aft = uuid.substr(uuid.length - remainder);
+    return pre + aft;
+  } else {
+    return uuid;
+  }
+}
 
 function isPromise(fn) {
   if (!!fn && typeof fn.then === 'function') {
