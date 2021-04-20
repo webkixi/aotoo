@@ -37,8 +37,8 @@ function useState(od) {
       setData = _React$useState2[1];
 
   React.useEffect(function () {
-    cbRef.current && cbRef.current(data);
-  }, [data]);
+    cbRef.current && cbRef.current(od);
+  }, [od]);
   return [data, function (d, callback) {
     cbRef.current = callback;
     setData(d);

@@ -56,10 +56,9 @@ const template = function(state, props) {
       } else {
         item = {text: item}
       }
-    } else {
-      if (lib.isPlainObject(select) && lib.isPlainObject(item)){
-        select = lib.findIndex([item], select)
-      }
+    }
+    if (lib.isPlainObject(select) && lib.isPlainObject(item)){
+      select = lib.findIndex([item], select)
     }
 
     if (select !== -1 && ii === select && lib.isPlainObject(item)) {

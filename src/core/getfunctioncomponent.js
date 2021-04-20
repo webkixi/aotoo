@@ -8,8 +8,8 @@ function useState (od) {
   const [data, setData] = React.useState(od);
 
   React.useEffect(() => {
-    cbRef.current && cbRef.current(data);
-  }, [data]);
+    cbRef.current && cbRef.current(od);
+  }, [od]);
 
   return [data, function (d, callback) {
     cbRef.current = callback;

@@ -19,21 +19,33 @@ export function $$(id) {
 
 export function ReturnPromiseComponent(props){
   let rendered = false
+  let content = props.content
+  
   let [value, setValue] = React.useState(
     <View className={'ui-loading '+(props.loadingClass||'')}/>
   )
 
   React.useEffect(()=>{
     rendered = true
-    props.content.then(value=>{
-      if (rendered) {
-        setValue(value)
-      }
-    })
+    if (props.content.then) {
+      props.content.then(value=>{
+        if (rendered) {
+          if (value.UI) {
+            setValue(<value.UI />)  
+          } else {
+            setValue(value)
+          }
+        }
+      })
+    } 
     return function(){
       rendered = false
     }
   })
+
+  if (React.isValidElement(content)){
+    return content
+  }
   
   return (
     <>
@@ -62,17 +74,40 @@ function _ready_(params) {
 }
 
 function _setData_(param = {}, cb) {
-  // if (this.reactComponentInstance && this.hasMounted) {
-  if (this.reactComponentInstance) {
-    this.reactComponentInstance.setSelfState(param, cb);
-  } else {
-    // created生命周期中
-    this.data = Object.assign({}, this.data, param)
-    if (lib.isFunction(cb)) {
-      cb()
+  const that = this
+  if (this.hasMounted) {
+    if (this.reactComponentInstance) {
+      this.reactComponentInstance.setSelfState(param, cb);
+    } else {
+      // created生命周期中
+      this.data = Object.assign({}, this.data, param)
+      if (lib.isFunction(cb)) {
+        cb()
+      }
     }
+  } else {
+    let waitingData = this.hooks.getItem('waiting-for-mounted-state-data') || {}
+    waitingData = Object.assign({}, waitingData, param)
+    this.hooks.setItem('waiting-for-mounted-state-data', waitingData)
+    this.hooks.on('component-has-mounted', function(){
+      that.hooks.delete('waiting-for-mounted-state-data')
+      _setData_.call(that, waitingData, cb)
+    })
   }
 }
+
+// function _setData_(param = {}, cb) {
+//   // if (this.reactComponentInstance && this.hasMounted) {
+//   if (this.reactComponentInstance) {
+//     this.reactComponentInstance.setSelfState(param, cb);
+//   } else {
+//     // created生命周期中
+//     this.data = Object.assign({}, this.data, param)
+//     if (lib.isFunction(cb)) {
+//       cb()
+//     }
+//   }
+// }
 
 function removeParentChild(){
   if (this.parentInst && this.parentInst.children.length) {
@@ -241,14 +276,6 @@ class baseClass {
     }
   }
 
-  ready(){
-    let config = this.config
-    let myready = config.onReady || config.ready || config.__ready
-    if (lib.isFunction(myready)) { // 小程序组件生命周期 ready / Pager的onReady
-      myready.call(this)
-    }
-  }
-
   detached(){
     let config = this.config
     let mydetached = config.onUnload || config.detached || config.componentWillUnmount
@@ -310,6 +337,16 @@ class baseClass {
     if (lib.isFunction(this.config.didUpdate)) {
       this.config.didUpdate.call(this, prevProps, prevState, snapshot)
     }
+    this.hooks.fire('component-has-mounted', {}, this)
+  }
+
+  ready(){
+    let config = this.config
+    let myready = config.onReady || config.ready || config.__ready
+    if (lib.isFunction(myready)) { // 小程序组件生命周期 ready / Pager的onReady
+      myready.call(this)
+    }
+    this.hooks.fire('component-has-mounted', {}, this)
   }
 
   reset(param, cb){
@@ -550,7 +587,8 @@ export default function(param={}, template, splitProps=true) {
   
   if (!$instance.UI) {
     let __key = param.data && param.data.__key
-    $instance = new baseClass(param, template, splitProps, true)
+    // $instance = new baseClass(param, template, splitProps, true)
+    $instance = new baseClass(param, template, splitProps)
     if (__key) {
       _elements.setElement(__key, $instance)
     }

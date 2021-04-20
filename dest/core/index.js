@@ -66,6 +66,7 @@ function $$(id) {
 
 function ReturnPromiseComponent(props) {
   var rendered = false;
+  var content = props.content;
 
   var _React$useState = React.useState( /*#__PURE__*/React.createElement(View, {
     className: 'ui-loading ' + (props.loadingClass || '')
@@ -76,15 +77,28 @@ function ReturnPromiseComponent(props) {
 
   React.useEffect(function () {
     rendered = true;
-    props.content.then(function (value) {
-      if (rendered) {
-        setValue(value);
-      }
-    });
+
+    if (props.content.then) {
+      props.content.then(function (value) {
+        if (rendered) {
+          if (value.UI) {
+            setValue( /*#__PURE__*/React.createElement(value.UI, null));
+          } else {
+            setValue(value);
+          }
+        }
+      });
+    }
+
     return function () {
       rendered = false;
     };
   });
+
+  if (React.isValidElement(content)) {
+    return content;
+  }
+
   return /*#__PURE__*/React.createElement(React.Fragment, null, value);
 }
 
@@ -111,19 +125,42 @@ function _ready_(params) {
 function _setData_() {
   var param = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   var cb = arguments.length > 1 ? arguments[1] : undefined;
+  var that = this;
 
-  // if (this.reactComponentInstance && this.hasMounted) {
-  if (this.reactComponentInstance) {
-    this.reactComponentInstance.setSelfState(param, cb);
-  } else {
-    // created生命周期中
-    this.data = Object.assign({}, this.data, param);
+  if (this.hasMounted) {
+    if (this.reactComponentInstance) {
+      this.reactComponentInstance.setSelfState(param, cb);
+    } else {
+      // created生命周期中
+      this.data = Object.assign({}, this.data, param);
 
-    if (lib.isFunction(cb)) {
-      cb();
+      if (lib.isFunction(cb)) {
+        cb();
+      }
     }
+  } else {
+    var waitingData = this.hooks.getItem('waiting-for-mounted-state-data') || {};
+    waitingData = Object.assign({}, waitingData, param);
+    this.hooks.setItem('waiting-for-mounted-state-data', waitingData);
+    this.hooks.on('component-has-mounted', function () {
+      that.hooks.delete('waiting-for-mounted-state-data');
+
+      _setData_.call(that, waitingData, cb);
+    });
   }
-}
+} // function _setData_(param = {}, cb) {
+//   // if (this.reactComponentInstance && this.hasMounted) {
+//   if (this.reactComponentInstance) {
+//     this.reactComponentInstance.setSelfState(param, cb);
+//   } else {
+//     // created生命周期中
+//     this.data = Object.assign({}, this.data, param)
+//     if (lib.isFunction(cb)) {
+//       cb()
+//     }
+//   }
+// }
+
 
 function removeParentChild() {
   if (this.parentInst && this.parentInst.children.length) {
@@ -313,17 +350,6 @@ var baseClass = /*#__PURE__*/function () {
       }
     }
   }, {
-    key: "ready",
-    value: function ready() {
-      var config = this.config;
-      var myready = config.onReady || config.ready || config.__ready;
-
-      if (lib.isFunction(myready)) {
-        // 小程序组件生命周期 ready / Pager的onReady
-        myready.call(this);
-      }
-    }
-  }, {
     key: "detached",
     value: function detached() {
       var config = this.config;
@@ -395,6 +421,21 @@ var baseClass = /*#__PURE__*/function () {
       if (lib.isFunction(this.config.didUpdate)) {
         this.config.didUpdate.call(this, prevProps, prevState, snapshot);
       }
+
+      this.hooks.fire('component-has-mounted', {}, this);
+    }
+  }, {
+    key: "ready",
+    value: function ready() {
+      var config = this.config;
+      var myready = config.onReady || config.ready || config.__ready;
+
+      if (lib.isFunction(myready)) {
+        // 小程序组件生命周期 ready / Pager的onReady
+        myready.call(this);
+      }
+
+      this.hooks.fire('component-has-mounted', {}, this);
     }
   }, {
     key: "reset",
@@ -689,9 +730,10 @@ function _default() {
   }
 
   if (!$instance.UI) {
-    var _key = param.data && param.data.__key;
+    var _key = param.data && param.data.__key; // $instance = new baseClass(param, template, splitProps, true)
 
-    $instance = new baseClass(param, template, splitProps, true);
+
+    $instance = new baseClass(param, template, splitProps);
 
     if (_key) {
       _elements.setElement(_key, $instance);

@@ -78,10 +78,10 @@ var template = function template(state, props) {
           text: item
         };
       }
-    } else {
-      if (_core.lib.isPlainObject(select) && _core.lib.isPlainObject(item)) {
-        select = _core.lib.findIndex([item], select);
-      }
+    }
+
+    if (_core.lib.isPlainObject(select) && _core.lib.isPlainObject(item)) {
+      select = _core.lib.findIndex([item], select);
     }
 
     if (select !== -1 && ii === select && _core.lib.isPlainObject(item)) {
