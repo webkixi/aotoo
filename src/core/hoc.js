@@ -380,6 +380,13 @@ class CombineClass {
     }
   }
 
+  didUpdate(prevProps, prevState, snapshot) {
+    const customDidUpdate = this.config.didUpdate || this.config.__ready
+    if (lib.isFunction(customDidUpdate)) {
+      customDidUpdate.call(this, prevProps, prevState, snapshot)
+    }
+  }
+
   ready(){
     let config = this.config
     let myready = config.onReady || config.ready || config.__ready
@@ -438,12 +445,6 @@ class CombineClass {
       } else {
         return this.getData().attr
       }
-    }
-  }
-
-  didUpdate(prevProps, prevState, snapshot) {
-    if (lib.isFunction(this.config.didUpdate)) {
-      this.config.didUpdate.call(this, prevProps, prevState, snapshot)
     }
   }
 

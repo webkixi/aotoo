@@ -334,8 +334,9 @@ class baseClass {
   }
 
   didUpdate(prevProps, prevState, snapshot) {
-    if (lib.isFunction(this.config.didUpdate)) {
-      this.config.didUpdate.call(this, prevProps, prevState, snapshot)
+    const customDidUpdate = this.config.didUpdate || this.config.__ready
+    if (lib.isFunction(customDidUpdate)) {
+      customDidUpdate.call(this, prevProps, prevState, snapshot)
     }
     this.hooks.fire('component-has-mounted', {}, this)
   }

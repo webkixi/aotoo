@@ -484,6 +484,15 @@ var CombineClass = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "didUpdate",
+    value: function didUpdate(prevProps, prevState, snapshot) {
+      var customDidUpdate = this.config.didUpdate || this.config.__ready;
+
+      if (lib.isFunction(customDidUpdate)) {
+        customDidUpdate.call(this, prevProps, prevState, snapshot);
+      }
+    }
+  }, {
     key: "ready",
     value: function ready() {
       var config = this.config;
@@ -554,13 +563,6 @@ var CombineClass = /*#__PURE__*/function () {
         } else {
           return this.getData().attr;
         }
-      }
-    }
-  }, {
-    key: "didUpdate",
-    value: function didUpdate(prevProps, prevState, snapshot) {
-      if (lib.isFunction(this.config.didUpdate)) {
-        this.config.didUpdate.call(this, prevProps, prevState, snapshot);
       }
     }
   }, {
