@@ -33,13 +33,21 @@ export function UIitem(props) {
   return <item.UI />
 }
 
-function View(props) {
+function Vview(props) {
+  if (lib.isReactNative()) {
+    // 需要指定React Native的全局的JSX标签
+    return <View {...props}>{props.children}</View>
+  }
   return (
     <div {...props}>{props.children}</div>
   )
 }
 
-function Text(props) {
+function Ttext(props) {
+  if (lib.isReactNative()) {
+    // 需要指定React Native的全局的JSX标签
+    return <Text {...props}>{props.children}</Text>
+  }
   return <span {...props}>{props.children}</span>
 }
 
@@ -71,7 +79,7 @@ function Title(_props) {
   let titleStyle = state.titleStyle || property.titleStyle || undefined
   
   if (lib.isString(data) || lib.isNumber(data)) {
-    return <Text className="htitle">{data}</Text>
+    return <Ttext className="htitle">{data}</Ttext>
   }
 
   if (React.isValidElement(data)) {
@@ -99,9 +107,9 @@ function Title(_props) {
     })
 
     return (
-      <View className={'htitles '+ titleClass} style={titleStyle}>
+      <Vview className={'htitles '+ titleClass} style={titleStyle}>
         {tmpAry}
-      </View>
+      </Vview>
     )
   }
 }
@@ -135,9 +143,9 @@ function Img(_props) {
       }
     })
     return (
-      <View className={'himgs '+ imgClass} style={imgStyle}>
+      <Vview className={'himgs '+ imgClass} style={imgStyle}>
         {props}
-      </View>
+      </Vview>
     )
   }
 
@@ -162,9 +170,9 @@ function Body(_props) {
     })
 
     return (
-      <View className={'hbody '+ bodyClass} style={bodyStyle}>
+      <Vview className={'hbody '+ bodyClass} style={bodyStyle}>
         {tmpAry}
-      </View>
+      </Vview>
     )
   }
 }
@@ -185,9 +193,9 @@ function Footer(_props) {
     })
 
     return (
-      <View className={'hfooter '+ footerClass} style={footerStyle}>
+      <Vview className={'hfooter '+ footerClass} style={footerStyle}>
         {tmpAry}
-      </View>
+      </Vview>
     )
   }
 }
@@ -208,9 +216,9 @@ function Li(_props) {
     })
 
     return (
-      <View className={'ul '+ liClass} style={liStyle}>
+      <Vview className={'ul '+ liClass} style={liStyle}>
         {tmpAry}
-      </View>
+      </Vview>
     )
   }
 }
@@ -324,8 +332,10 @@ if (!context['UI_item']) {
   context['UI_list'] = globalComponent['ui-list']
   context['Item'] = globalComponent['ui-item']
   context['List'] = globalComponent['ui-list']
-  context['View'] = View
-  context['Text'] = Text
+  if (!lib.isReactNative()) {
+    context['View'] = Vview
+    context['Text'] = Ttext
+  }
 }
 
 export function extendsTemplate(otherTemplate={}){

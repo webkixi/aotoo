@@ -51,11 +51,19 @@ function UIitem(props) {
   return /*#__PURE__*/React.createElement(item.UI, null);
 }
 
-function View(props) {
+function Vview(props) {
+  if (lib.isReactNative()) {
+    return /*#__PURE__*/React.createElement(View, props, props.children);
+  }
+
   return /*#__PURE__*/React.createElement("div", props, props.children);
 }
 
-function Text(props) {
+function Ttext(props) {
+  if (lib.isReactNative()) {
+    return /*#__PURE__*/React.createElement(Text, props, props.children);
+  }
+
   return /*#__PURE__*/React.createElement("span", props, props.children);
 }
 
@@ -93,7 +101,7 @@ function Title(_props) {
   var titleStyle = state.titleStyle || property.titleStyle || undefined;
 
   if (lib.isString(data) || lib.isNumber(data)) {
-    return /*#__PURE__*/React.createElement(Text, {
+    return /*#__PURE__*/React.createElement(Ttext, {
       className: "htitle"
     }, data);
   }
@@ -122,7 +130,7 @@ function Title(_props) {
         itemClass: 't-item ' + (it.itemClass || '')
       });
     });
-    return /*#__PURE__*/React.createElement(View, {
+    return /*#__PURE__*/React.createElement(Vview, {
       className: 'htitles ' + titleClass,
       style: titleStyle
     }, tmpAry);
@@ -155,7 +163,7 @@ function Img(_props) {
         return /*#__PURE__*/React.createElement(Img, pic);
       }
     });
-    return /*#__PURE__*/React.createElement(View, {
+    return /*#__PURE__*/React.createElement(Vview, {
       className: 'himgs ' + imgClass,
       style: imgStyle
     }, props);
@@ -181,7 +189,7 @@ function Body(_props) {
         itemClass: 'body-item ' + (item.itemClass || '')
       });
     });
-    return /*#__PURE__*/React.createElement(View, {
+    return /*#__PURE__*/React.createElement(Vview, {
       className: 'hbody ' + bodyClass,
       style: bodyStyle
     }, tmpAry);
@@ -205,7 +213,7 @@ function Footer(_props) {
         itemClass: 'footer-item ' + (item.itemClass || '')
       });
     });
-    return /*#__PURE__*/React.createElement(View, {
+    return /*#__PURE__*/React.createElement(Vview, {
       className: 'hfooter ' + footerClass,
       style: footerStyle
     }, tmpAry);
@@ -229,7 +237,7 @@ function Li(_props) {
         itemClass: 'li-item ' + (item.itemClass || '')
       });
     });
-    return /*#__PURE__*/React.createElement(View, {
+    return /*#__PURE__*/React.createElement(Vview, {
       className: 'ul ' + liClass,
       style: liStyle
     }, tmpAry);
@@ -436,8 +444,11 @@ if (!context['UI_item']) {
   context['UI_list'] = globalComponent['ui-list'];
   context['Item'] = globalComponent['ui-item'];
   context['List'] = globalComponent['ui-list'];
-  context['View'] = View;
-  context['Text'] = Text;
+
+  if (!lib.isReactNative()) {
+    context['View'] = Vview;
+    context['Text'] = Ttext;
+  }
 }
 
 function extendsTemplate() {
