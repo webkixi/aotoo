@@ -53,30 +53,50 @@ function formatImg(props, context) {
       props.img = Object.assign({}, props.img, tmp)
     }
   }
-  if (isArray(img)) {
-    props.img = img.map(pic => {
-      if (isString(pic)) {
-        let obj = parseImg(pic)
-        return { src: obj.url, ...obj.query }
-      }
-      if (isObject(pic)) {
-        let obj = parseImg(img.src)
-        if (obj) {
-          let tmp = { src: obj.url, ...obj.query }
-          pic = Object.assign({}, props.img, tmp)
-        }
-        return pic
-      }
+  if (isNumber(img)) {
+    props.img = { src: img }
+  }
+  
+  if (lib.isArray(img)) {
+    props.img = img.map(pic=>{
+      let tmp = formatImg({img: pic}, context)
+      return tmp.img
     })
+    // props.img = img.map(pic => {
+    //   if (isString(pic)) {
+    //     let obj = parseImg(pic)
+    //     return { src: obj.url, ...obj.query }
+    //   }
+    //   if (isObject(pic)) {
+    //     let obj = parseImg(img.src)
+    //     if (obj) {
+    //       let tmp = { src: obj.url, ...obj.query }
+    //       pic = Object.assign({}, props.img, tmp)
+    //     }
+    //     return pic
+    //   }
+    // })
   }
 
   if (lib.isPlainObject(props.img)) {
     props.img = getEvents(props.img, context)
+    if (lib.isReactNative()) {
+      if (props.img.src) {
+        if (isNumber(props.img.src)) {
+          props.img.source = props.img.src
+        } else {
+          props.img.source = {
+            uri: props.img.src||''
+          }; 
+        }
+        delete props.img.src;
+      }
+    }
   }
 
-  if (lib.isArray(props.img)) {
-    props.img = props.img.map(pic => getEvents(pic, context))
-  }
+  // if (lib.isArray(props.img)) {
+  //   props.img = props.img.map(pic => getEvents(pic, context))
+  // }
 
   return props
 }

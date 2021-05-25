@@ -11,7 +11,9 @@ export const attrKey = [
 
   'src', 'type', 'typeOptions', 'data', 'mode', 'attr',
   'fromComponent', 'rootComponent', '__fromParent', 'uniqId', '__sort', '__key', 'key',
-  'methods', 'itemMethod'
+  'methods', 'itemMethod',
+
+  'animatedStyle'  // rn animated.view的样式
 ]
 
 export const accessKey = [

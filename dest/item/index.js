@@ -31,7 +31,262 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+var curContext = _core.lib.curContext();
+
 var subClassNames = ['hb-item', 'hf-item', 'hdot-item', 'li-item'];
+
+function rnTemplate(state, props, clsNmae) {
+  var attr = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+  var myTemplate = arguments.length > 4 ? arguments[4] : undefined;
+  var thisContext = this;
+  var events = this.events;
+  var animatedStyle = state.animatedStyle; // rn animated.view 样式
+
+  if (typeof animatedStyle === 'function') {
+    animatedStyle = animatedStyle.call(thisContext);
+  }
+
+  var children = /*#__PURE__*/React.createElement(View, _extends({
+    id: state.id,
+    key: state.__key,
+    className: clsNmae,
+    style: state.itemStyle
+  }, attr), /*#__PURE__*/React.createElement(React.Fragment, null, myTemplate, props.children));
+  var GRE = curContext.globalRNelements;
+  var PanResponder = GRE.PanResponder;
+  var Animated = GRE.Animated; // onClick  TouchableOpacity
+  // onPress  TouchableHighlight
+  // tap 
+  // aim 
+  // touchstart
+  // touchmove
+  // touchend
+  // touchcancel
+  // longpress
+  // longaim
+
+  var target = children;
+  var helperTapEventsType = ['onClick', 'onPress', 'onMouseDown'];
+  var customTouchEventsType = ['onTouchStart', 'onTouchEnd', 'onTouchMove', 'onTouchCancel'];
+
+  if (GRE.TouchableOpacity) {
+    var dealCustomTapEvent = function dealCustomTapEvent(eventKey, callback, otherCallback) {
+      var eventFunContext = callback.context;
+      var startRep = {};
+
+      if (eventKey === 'tap' || eventKey === 'longpress') {
+        startRep = {
+          onStartShouldSetPanResponder: function onStartShouldSetPanResponder(evt, gestureState) {
+            return true;
+          }
+        };
+      }
+
+      if (eventKey === 'aim' || eventKey === 'longaim') {
+        startRep = {
+          onStartShouldSetPanResponderCapture: function onStartShouldSetPanResponderCapture(evt, gestureState) {
+            return true;
+          }
+        };
+      }
+
+      var attributsResponder = PanResponder.create(_objectSpread(_objectSpread({}, startRep), {}, {
+        onPanResponderGrant: function onPanResponderGrant(evt, gestureState) {
+          // 手指接触后
+          clearTimeout(longpressTimeId);
+
+          if (typeof otherCallback === 'function') {
+            // longpress longaim
+            longpressTimeId = setTimeout(function () {
+              longpressDone = true;
+              otherCallback.call(thisContext, evt, gestureState);
+            }, 600);
+          }
+        },
+        onPanResponderRelease: function onPanResponderRelease(evt, gestureState) {
+          // 手指释放
+          if (!longpressTimeId) {
+            callback.call(thisContext, evt, gestureState);
+          } else {
+            clearTimeout(longpressTimeId);
+
+            if (!longpressDone) {
+              callback.call(thisContext, evt, gestureState);
+            }
+
+            longpressDone = false;
+          }
+        }
+      }));
+      return attributsResponder.panHandlers;
+    };
+
+    var dealCustomTouchEvent = function dealCustomTouchEvent() {
+      var touchEvents = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+      var touchstartItem = null;
+      var touchmoveItem = null;
+      var touchendItem = null;
+      var touchcancelItem = null;
+      var startRep = {
+        onStartShouldSetPanResponder: function onStartShouldSetPanResponder(evt, gestureState) {
+          return true;
+        }
+      };
+      touchEvents.forEach(function (item) {
+        var evtKey = item[0];
+        var evtFun = item[1];
+
+        if (evtKey === 'onTouchStart') {
+          touchstartItem = item;
+
+          startRep.onMoveShouldSetPanResponder = function (evt, gestureState) {
+            return true;
+          };
+        }
+
+        if (evtKey === 'onTouchMove') {
+          // const evtResult = evtFun.call(thisContext)
+          // touchmoveItem = evtResult ? evtResult : item
+          if (_core.lib.isPlainObject(item[1])) {
+            item[1] = function () {
+              return item[1];
+            };
+          }
+
+          touchmoveItem = item;
+
+          startRep.onMoveShouldSetPanResponder = function (evt, gestureState) {
+            return true;
+          };
+        }
+
+        if (evtKey === 'onTouchEnd') {
+          touchendItem = item;
+        }
+
+        if (evtKey === 'onTouchCancel') {
+          touchcancelItem = item;
+        }
+      });
+      var attributsResponder = PanResponder.create(_objectSpread(_objectSpread({}, startRep), {}, {
+        onPanResponderGrant: function onPanResponderGrant(evt, gestureState) {
+          if (touchstartItem) {
+            clearTimeout(longpressTimeId);
+            longpressDone = false;
+            var evtFun = touchstartItem[1];
+
+            if (typeof evtFun === 'function') {
+              evtFun.call(thisContext, evt, gestureState);
+            }
+          }
+        },
+        onPanResponderMove: touchmoveItem[1].call(thisContext) || function (evt, gestureState) {
+          if (touchmoveItem) {
+            var evtFun = touchmoveItem[1];
+
+            if (typeof evtFun === 'function') {
+              evtFun.call(thisContext, evt, gestureState);
+            }
+          }
+
+          if (touchcancelItem) {
+            var _evtFun = touchcancelItem[1];
+
+            if (typeof _evtFun === 'function') {
+              _evtFun.call(thisContext, evt, gestureState);
+            }
+          }
+        },
+        onPanResponderRelease: function onPanResponderRelease(evt, gestureState) {
+          if (touchendItem) {
+            var evtFun = touchendItem[1];
+
+            if (typeof evtFun === 'function') {
+              evtFun.call(thisContext, evt, gestureState);
+            }
+          }
+        }
+      }));
+      return attributsResponder.panHandlers;
+    };
+
+    var longpressTimeId = null;
+    var longpressDone = false;
+    helperTapEventsType.forEach(function (evk) {
+      if (events[evk]) {
+        var eventFun = events[evk];
+        var eventOriKey = eventFun.__oriEventKey__;
+        var _context = eventFun.context;
+
+        if (evk === 'onClick') {
+          if (eventOriKey) {
+            // tap, aim会转换key名为onClick
+            var otherCallback = null;
+
+            if (events['onMouseDown'] && events['onMouseDown'].__oriEventKey__) {
+              otherCallback = events['onMouseDown'];
+            }
+
+            var pressResponder = dealCustomTapEvent(eventOriKey, eventFun, otherCallback);
+            target = React.cloneElement(target, pressResponder);
+          } else {
+            var TouchableOpacity = GRE.TouchableOpacity;
+            target = /*#__PURE__*/React.createElement(TouchableOpacity, {
+              onPress: events[evk]
+            }, target);
+          }
+
+          if (animatedStyle) {
+            target = /*#__PURE__*/React.createElement(Animated.View, {
+              style: animatedStyle
+            }, target);
+          }
+        }
+
+        if (evk === 'onPress') {
+          var TouchableHighlight = GRE.TouchableHighlight;
+          target = /*#__PURE__*/React.createElement(TouchableHighlight, {
+            onPress: events[evk]
+          }, target);
+        }
+
+        if (evk === 'onMouseDown') {
+          if (eventOriKey === 'longpress') {
+            if (events['onPress'] || events['onClick'] && !events['onClick'].__oriEventKey__) {
+              target = React.cloneElement(target, {
+                onLongPress: events[evk]
+              });
+            } else {
+              var longPressResponder = dealCustomTapEvent(eventOriKey, eventFun);
+
+              if (!events['onClick']) {
+                target = React.cloneElement(target, longPressResponder);
+              }
+            }
+          }
+        }
+      }
+    }); // touch事件
+
+    var touchEvents = [];
+    var touchResponder = {};
+    customTouchEventsType.forEach(function (evk) {
+      if (events[evk]) {
+        var eventFun = events[evk];
+        touchEvents.push([evk, eventFun]);
+      }
+    });
+
+    if (touchEvents.length) {
+      touchResponder = dealCustomTouchEvent(touchEvents);
+      target = /*#__PURE__*/React.createElement(Animated.View, _extends({
+        style: animatedStyle
+      }, touchResponder), target);
+    }
+
+    return target;
+  }
+}
 
 var template = function template(state, props) {
   var events = this.events;
@@ -70,6 +325,10 @@ var template = function template(state, props) {
         clsNmae = propsClassName;
       }
     });
+  }
+
+  if (_core.lib.isReactNative() && curContext.globalRNelements) {
+    return rnTemplate.call(this, state, props, clsNmae, attr, myTemplate);
   }
 
   return /*#__PURE__*/React.createElement(View, _extends({

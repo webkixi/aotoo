@@ -54,6 +54,9 @@ var template = function template(state, props) {
 
   var data = state.data;
   var select = state.select || -1;
+  if (typeof type === 'string') type = {
+    is: type
+  };
   var attr = {};
   Object.keys(_attr).forEach(function (ky) {
     var $ky = ky;
@@ -102,12 +105,33 @@ var template = function template(state, props) {
   });
 
   if (mode === 'list') {
-    items = items.map(function (item) {
-      var it = ui_item(item);
-      return /*#__PURE__*/React.createElement(it.UI, {
-        key: item.__key
+    if (type.is === 'flat') {
+      if (_core.lib.isReactNative()) {
+        if (typeof globalRNelements !== 'undefined') {
+          var FlatList = globalRNelements.FlatList;
+          type.data = type.data || items;
+
+          type.keyExtractor = type.keyExtractor || function (item) {
+            return item.__key;
+          };
+
+          type.renderItem = type.renderItem || function (_ref) {
+            var item = _ref.item;
+            var it = ui_item(item);
+            return /*#__PURE__*/React.createElement(it.UI, null);
+          };
+
+          items = /*#__PURE__*/React.createElement(FlatList, type);
+        }
+      }
+    } else {
+      items = items.map(function (item) {
+        var it = ui_item(item);
+        return /*#__PURE__*/React.createElement(it.UI, {
+          key: item.__key
+        });
       });
-    });
+    }
   }
 
   if (mode === 'tree') {

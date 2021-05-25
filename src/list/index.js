@@ -38,6 +38,8 @@ const template = function(state, props) {
   let data = state.data
   let select = state.select || -1
 
+  if (typeof type === 'string') type = {is: type}
+
   let attr = {}
   Object.keys(_attr).forEach(ky=>{
     let $ky = ky
@@ -76,10 +78,27 @@ const template = function(state, props) {
   })
 
   if (mode === 'list') {
-    items = items.map(item => {
-      let it = ui_item(item)
-      return <it.UI key={item.__key}/>
-    })
+    if (type.is === 'flat') {
+      if (lib.isReactNative()) {
+        if (typeof globalRNelements !== 'undefined') {
+          const FlatList = globalRNelements.FlatList
+          type.data = type.data || items
+          type.keyExtractor = type.keyExtractor || ((item) => item.__key)
+          type.renderItem = type.renderItem || (({item}) => {
+            let it = ui_item(item)
+            return <it.UI />
+          })
+          items = (
+            <FlatList {...type} />
+          )
+        }
+      }
+    } else {
+      items = items.map(item => {
+        let it = ui_item(item)
+        return <it.UI key={item.__key}/>
+      })
+    }
   }
 
   if (mode === 'tree') {

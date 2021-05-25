@@ -1,7 +1,5 @@
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -9,11 +7,19 @@ exports.isEvents = isEvents;
 exports.bindEvents = bindEvents;
 exports.eventName = void 0;
 
-var lib = _interopRequireWildcard(require("../lib"));
+var _util = require("../lib/util");
 
-function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function _getRequireWildcardCache() { return cache; }; return cache; }
+var _url = require("../lib/url");
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+// import * as lib from '../lib'
+var lib = {
+  isReactNative: _util.isReactNative,
+  forEach: _util.forEach,
+  uniqueId: _util.uniqueId,
+  isFunction: _util.isFunction,
+  isString: _util.isString,
+  urlTOquery: _url.urlTOquery
+};
 
 function getContextCallback(ctx, f) {
   if (!f) return;
@@ -43,10 +49,11 @@ var WheelEvents = ['onWheel'];
 var MediaEvents = ['onAbort', 'onCanPlay', 'onCanPlayThrough', 'onDurationChange', 'onEmptied', 'onEncrypted', 'onEnded', 'onError', 'onLoadedData', 'onLoadedMetadata', 'onLoadStart', 'onPause', 'onPlay', 'onPlaying', 'onProgress', 'onRateChange', 'onSeeked', 'onSeeking', 'onStalled', 'onSuspend', 'onTimeUpdate', 'onVolumeChange', 'onWaiting'];
 var AnimationEvents = ['onAnimationStart', 'onAnimationEnd', 'onAnimationIteration'];
 var TransitionEvents = ['onTransitionEnd'];
-var OtherEvents = ['onToggle']; // 仿小程序事件
+var OtherEvents = ['onToggle'];
+var RNEvents = ['onPress']; // 仿小程序事件
 
 var minipEvents = ['tap', 'aim', 'longpress', 'longtap', 'catchtap', 'touchstart', 'touchmove', 'touchcancel', 'touchend', 'catchlongpress', 'catchlongtap', 'catchtouchstart', 'catchtouchmove', 'catchtouchcancel', 'catchtouchend'];
-var eventName = [].concat(ClipboardEvents, CompositionEvents, KeyboardEvents, FocusEvents, FormEvents, ImageEvents, MouseEvents, PointerEvents, SelectionEvents, TouchEvents, UIEvents, WheelEvents, MediaEvents, AnimationEvents, TransitionEvents, OtherEvents);
+var eventName = [].concat(ClipboardEvents, CompositionEvents, KeyboardEvents, FocusEvents, FormEvents, ImageEvents, MouseEvents, PointerEvents, SelectionEvents, TouchEvents, UIEvents, WheelEvents, MediaEvents, AnimationEvents, TransitionEvents, RNEvents, OtherEvents);
 exports.eventName = eventName;
 
 function isEvents(key) {
@@ -67,43 +74,55 @@ function isEvents(key) {
 
 
 function bindEvents(events, context) {
-  function eventFunction(funKey, functionName, myquery, ky) {
-    return function a(e, param, inst) {
+  function eventFunction(funKey, functionName) {
+    var myquery = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    var ky = arguments.length > 3 ? arguments[3] : undefined;
+    return function a(e, rn_gestureState) {
       var curContext = a.curContext || context;
+
+      if (rn_gestureState) {
+        myquery.gestureState = rn_gestureState;
+      }
+
       if (curContext && curContext.hasClass && curContext.hasClass('_disabled')) return; // 无效状态，则不允许事件触发
 
       var responseContext = getContextCallback(curContext, functionName);
 
       if (responseContext) {
-        e.persist();
+        if (!lib.isReactNative()) {
+          e.persist();
 
-        if (ky === 'aim' || ky.indexOf('catch') === 0) {
-          e.stopPropagation();
-          e.preventDefault();
-        }
+          if (ky === 'aim' || ky.indexOf('catch') === 0) {
+            e.stopPropagation();
+            e.preventDefault();
+          }
 
-        if (ky.indexOf('longpress') > -1) {
-          var step = function step(timestamp) {
-            if (start === undefined) start = timestamp;
-            var elapsed = timestamp - start;
+          if (ky.indexOf('longpress') > -1) {
+            var step = function step(timestamp) {
+              if (start === undefined) start = timestamp;
+              var elapsed = timestamp - start;
 
-            if (elapsed < 300) {
-              // 在两秒后停止动画
-              window.requestAnimationFrame(step);
-            } else {
-              var _rightContext = responseContext === curContext ? responseContext.parentInst ? responseContext.parentInst : responseContext : responseContext;
+              if (elapsed < 300) {
+                // 在两秒后停止动画
+                longpressId = window.requestAnimationFrame(step);
+              } else {
+                window.cancelAnimationFrame(longpressId);
 
-              responseContext[functionName].call(_rightContext, e, myquery, curContext);
-            }
-          };
+                var _rightContext = responseContext === curContext ? responseContext.parentInst ? responseContext.parentInst : responseContext : responseContext;
 
-          var start;
-          window.requestAnimationFrame(step);
-          return;
+                responseContext[functionName].call(_rightContext, e, myquery, curContext);
+              }
+            };
+
+            var start;
+            var longpressId;
+            longpressId = window.requestAnimationFrame(step);
+            return;
+          }
         }
 
         var rightContext = responseContext === curContext ? responseContext.parentInst ? responseContext.parentInst : responseContext : responseContext;
-        responseContext[functionName].call(rightContext, e, myquery, curContext);
+        return responseContext[functionName].call(rightContext, e, myquery, curContext);
       } else {
         console.warn('没有找到定义方法:' + functionName); // 定义pager的__fromParent
       }
@@ -131,10 +150,10 @@ function bindEvents(events, context) {
 
       var functionName = url;
       var evtFun = eventFunction(funKey, functionName, query, ky);
-      evtFun.funKey = funKey;
+      var oky = '';
 
       if (minipEvents.indexOf(ky) > -1) {
-        var oky = ky;
+        oky = ky;
         if (ky.indexOf('aim') > -1) ky = 'onClick';
         if (ky.indexOf('tap') > -1) ky = 'onClick';
         if (ky.indexOf('catchtap') > -1) ky = 'onClick';
@@ -144,10 +163,17 @@ function bindEvents(events, context) {
         if (ky.indexOf('touchcancel') > -1) ky = 'onTouchCancel';
         if (ky.indexOf('longpress') > -1) ky = 'onMouseDown';
         if (ky.indexOf('longtap') > -1) ky = 'onLongTap';
-        delete events[oky];
       }
 
       events[ky] = evtFun.bind(context);
+
+      if (oky) {
+        events[ky].__oriEventKey__ = oky;
+        delete events[oky];
+      }
+
+      events[ky].funKey = funKey;
+      events[ky].context = context;
     }
   });
   return events;

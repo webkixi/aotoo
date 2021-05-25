@@ -6,7 +6,240 @@ import getConfig from "./_common/getconfig";
 // import * as partments from '../_common/partment'
 import partments from '../_common/partment'
 
+const curContext = lib.curContext()
 const subClassNames = ['hb-item', 'hf-item', 'hdot-item', 'li-item']
+
+function rnTemplate(state, props, clsNmae, attr={}, myTemplate){
+  const thisContext = this
+  let events = this.events
+  let animatedStyle = state.animatedStyle  // rn animated.view 样式
+  if (typeof animatedStyle === 'function') {
+    animatedStyle = animatedStyle.call(thisContext)
+  }
+
+  const children = (
+    <View 
+      id={state.id}
+      key={state.__key}
+      className={clsNmae}
+      style={state.itemStyle}
+      {...attr}
+    >
+      <React.Fragment>
+        {myTemplate}
+        {props.children}
+      </React.Fragment>
+    </View>
+  )
+
+  const GRE = curContext.globalRNelements
+  const PanResponder = GRE.PanResponder
+  const Animated = GRE.Animated
+
+  // onClick  TouchableOpacity
+  // onPress  TouchableHighlight
+  // tap 
+  // aim 
+  // touchstart
+  // touchmove
+  // touchend
+  // touchcancel
+  // longpress
+  // longaim
+  
+  let   target = children
+  const helperTapEventsType = ['onClick', 'onPress', 'onMouseDown']
+  const customTouchEventsType = ['onTouchStart', 'onTouchEnd', 'onTouchMove', 'onTouchCancel']
+  if (GRE.TouchableOpacity) {
+    let longpressTimeId = null
+    let longpressDone = false
+
+    function dealCustomTapEvent(eventKey, callback, otherCallback) {
+      const eventFunContext = callback.context
+      let   startRep = {}
+      if (eventKey === 'tap' || eventKey === 'longpress') {
+        startRep = {
+          onStartShouldSetPanResponder: (evt, gestureState) => true
+        }
+      }
+      if (eventKey === 'aim' || eventKey === 'longaim') {
+        startRep = {
+          onStartShouldSetPanResponderCapture: (evt, gestureState) => true
+        }
+      }
+
+      const attributsResponder = PanResponder.create({
+        ...startRep,
+        onPanResponderGrant: (evt, gestureState) => {
+          // 手指接触后
+          clearTimeout(longpressTimeId)
+          if (typeof otherCallback === 'function') {  // longpress longaim
+            longpressTimeId = setTimeout(() => {
+              longpressDone = true
+              otherCallback.call(thisContext, evt, gestureState)
+            }, 600);
+          }
+        },
+        onPanResponderRelease: (evt, gestureState) =>{
+          // 手指释放
+          if (!longpressTimeId) {
+            callback.call(thisContext, evt, gestureState)
+          } else {
+            clearTimeout(longpressTimeId)
+            if (!longpressDone) {
+              callback.call(thisContext, evt, gestureState)
+            }
+            longpressDone = false
+          }
+        }
+      })
+
+      return attributsResponder.panHandlers
+    }
+
+    function dealCustomTouchEvent(touchEvents=[]) {
+      let touchstartItem = null
+      let touchmoveItem = null
+      let touchendItem = null
+      let touchcancelItem = null
+      let startRep = {
+        onStartShouldSetPanResponder: (evt, gestureState) => true
+      }
+
+      touchEvents.forEach(item=>{
+        const evtKey = item[0]
+        const evtFun = item[1]
+        if (evtKey === 'onTouchStart') {
+          touchstartItem = item
+          startRep.onMoveShouldSetPanResponder = (evt, gestureState) => true
+        }
+        if (evtKey === 'onTouchMove') {
+          // const evtResult = evtFun.call(thisContext)
+          // touchmoveItem = evtResult ? evtResult : item
+          if (lib.isPlainObject(item[1])) {
+            item[1] = function(){
+              return item[1]
+            }
+          }
+          touchmoveItem = item
+          startRep.onMoveShouldSetPanResponder = (evt, gestureState) => true
+        }
+        if (evtKey === 'onTouchEnd') {
+          touchendItem = item
+        }
+        if (evtKey === 'onTouchCancel') {
+          touchcancelItem = item
+        }
+      })
+
+      const attributsResponder = PanResponder.create({
+        ...startRep,
+        onPanResponderGrant: (evt, gestureState) => {
+          if (touchstartItem) {
+            clearTimeout(longpressTimeId)
+            longpressDone = false
+            const evtFun = touchstartItem[1]
+            if (typeof evtFun === 'function') {
+              evtFun.call(thisContext, evt, gestureState)
+            }
+          }
+        },
+
+        onPanResponderMove: touchmoveItem[1].call(thisContext) ||  ((evt, gestureState) => {
+          if (touchmoveItem) {
+            const evtFun = touchmoveItem[1]
+            if (typeof evtFun === 'function') {
+              evtFun.call(thisContext, evt, gestureState)
+            }
+          }
+          if (touchcancelItem) {
+            const evtFun = touchcancelItem[1]
+            if (typeof evtFun === 'function') {
+              evtFun.call(thisContext, evt, gestureState)
+            }
+          }
+        }),
+
+        onPanResponderRelease: (evt, gestureState) =>{
+          if (touchendItem) {
+            const evtFun = touchendItem[1]
+            if (typeof evtFun === 'function') {
+              evtFun.call(thisContext, evt, gestureState)
+            }
+          }
+        }
+      })
+
+
+      return attributsResponder.panHandlers
+    }
+
+    helperTapEventsType.forEach(evk=>{
+      if (events[evk]) {
+        const eventFun = events[evk]
+        const eventOriKey = eventFun.__oriEventKey__
+        const context = eventFun.context
+        if (evk === 'onClick') {
+          if (eventOriKey) {  // tap, aim会转换key名为onClick
+            let otherCallback = null
+            if (events['onMouseDown'] && events['onMouseDown'].__oriEventKey__) {
+              otherCallback = events['onMouseDown']
+            }
+            const pressResponder = dealCustomTapEvent(eventOriKey, eventFun, otherCallback)
+            target = React.cloneElement(target, pressResponder)
+          } else {
+            const TouchableOpacity = GRE.TouchableOpacity
+            target = <TouchableOpacity onPress={events[evk]} >{target}</TouchableOpacity>
+          }
+          if (animatedStyle) {
+            target = (
+              <Animated.View style={animatedStyle}>
+                {target}
+              </Animated.View>
+            )
+          }
+        }
+        if (evk === 'onPress') {
+          const TouchableHighlight = GRE.TouchableHighlight
+          target = <TouchableHighlight onPress={events[evk]} >{target}</TouchableHighlight>
+        }
+        if (evk === 'onMouseDown') {
+          if (eventOriKey === 'longpress') {
+            if (events['onPress'] || (events['onClick'] && !events['onClick'].__oriEventKey__)) {
+              target = React.cloneElement(target, {onLongPress: events[evk]})
+            } else {
+              const longPressResponder = dealCustomTapEvent(eventOriKey, eventFun)
+              if (!events['onClick']) {
+                target = React.cloneElement(target, longPressResponder)
+              }
+            }
+          }
+        }
+      }
+    })
+
+    // touch事件
+    const touchEvents = []
+    let   touchResponder = {}
+    customTouchEventsType.forEach(evk=>{
+      if (events[evk]) {
+        const eventFun = events[evk]
+        touchEvents.push([evk, eventFun])
+      }
+    })
+    if (touchEvents.length) {
+      touchResponder = dealCustomTouchEvent(touchEvents)
+      target = (
+        <Animated.View style={ animatedStyle } {...touchResponder}>
+          {target}
+        </Animated.View>
+      )
+    }
+
+    return target
+  }
+}
+
 const template = function(state, props) {
 
   let events = this.events
@@ -44,6 +277,10 @@ const template = function(state, props) {
         clsNmae = propsClassName
       }
     })
+  }
+
+  if (lib.isReactNative() && curContext.globalRNelements) {
+    return rnTemplate.call(this, state, props, clsNmae, attr, myTemplate)
   }
 
   return (

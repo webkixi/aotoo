@@ -78,41 +78,54 @@ function formatImg(props, context) {
     }
   }
 
-  if ((0, _lib.isArray)(img)) {
+  if ((0, _lib.isNumber)(img)) {
+    props.img = {
+      src: img
+    };
+  }
+
+  if (_core.lib.isArray(img)) {
     props.img = img.map(function (pic) {
-      if ((0, _lib.isString)(pic)) {
-        var _obj2 = parseImg(pic);
-
-        return _objectSpread({
-          src: _obj2.url
-        }, _obj2.query);
-      }
-
-      if ((0, _lib.isObject)(pic)) {
-        var _obj3 = parseImg(img.src);
-
-        if (_obj3) {
-          var _tmp = _objectSpread({
-            src: _obj3.url
-          }, _obj3.query);
-
-          pic = Object.assign({}, props.img, _tmp);
-        }
-
-        return pic;
-      }
-    });
+      var tmp = formatImg({
+        img: pic
+      }, context);
+      return tmp.img;
+    }); // props.img = img.map(pic => {
+    //   if (isString(pic)) {
+    //     let obj = parseImg(pic)
+    //     return { src: obj.url, ...obj.query }
+    //   }
+    //   if (isObject(pic)) {
+    //     let obj = parseImg(img.src)
+    //     if (obj) {
+    //       let tmp = { src: obj.url, ...obj.query }
+    //       pic = Object.assign({}, props.img, tmp)
+    //     }
+    //     return pic
+    //   }
+    // })
   }
 
   if (_core.lib.isPlainObject(props.img)) {
     props.img = getEvents(props.img, context);
-  }
 
-  if (_core.lib.isArray(props.img)) {
-    props.img = props.img.map(function (pic) {
-      return getEvents(pic, context);
-    });
-  }
+    if (_core.lib.isReactNative()) {
+      if (props.img.src) {
+        if ((0, _lib.isNumber)(props.img.src)) {
+          props.img.source = props.img.src;
+        } else {
+          props.img.source = {
+            uri: props.img.src || ''
+          };
+        }
+
+        delete props.img.src;
+      }
+    }
+  } // if (lib.isArray(props.img)) {
+  //   props.img = props.img.map(pic => getEvents(pic, context))
+  // }
+
 
   return props;
 } // 处理url

@@ -149,9 +149,15 @@ function Img(_props) {
     )
   }
 
-  return (
-    <img {...props} />
-  )
+  if (lib.isReactNative()) {
+    return (
+      <Image {...props} />
+    )
+  } else {
+    return (
+      <img {...props} />
+    )
+  }
 }
 
 function Body(_props) {

@@ -1,12 +1,60 @@
-# aotoo
+# AOTOO
 
-aotoo是一个react的封装库，将react组件js实例化  
-
-在一些小型的项目，不需要引入redux等状态库，使用ao2封装原生react组件(自定义)生成JS对象，通过定义内部的属性和方法，来更新状态
+一个react的封装库，将react组件封装成JS对象。
 
 [GITHUB源码](https://www.github.com/webkixi/aotoo)
+[中文文档](http://www.agzgz.com)
 
-## INSTALL
+## LOG
+
+2021.5.25 支持react native(需要aotoo-hub环境)，或者在全局中加入以下变量  
+
+```js
+import aotoo, {lib} from "@aotoo/aotoo"
+import { 
+  Text, 
+  View, 
+  PanResponder,
+  TouchableHighlight,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Animated,
+  Easing,
+  Button,
+  Image,
+  FlatList
+} from 'react-native';
+const {useRef, useEffect, useState} = React
+const context = lib.curContext()
+context.aotoo = aotoo
+context.Text = Text
+context.View = View
+context.Image = Image
+context.Button = Button
+context.useRef = useRef
+context.useEffect = useEffect
+context.useState = useState
+context.globalRNelements = {
+  lib,
+  PanResponder,
+  TouchableHighlight,
+  TouchableOpacity,
+  Animated,
+  Easing,
+  TouchableWithoutFeedback,
+  Button,
+  FlatList
+}
+```
+
+## 其他相关类库  
+
+`@aotoo/react-cell`: 一套标准的容器组件，方便自定义各种表单组件
+`@aotoo/react-pager`: 基于react, aotoo的前端路由(仿小程序)，可支持SEO  
+`@aotoo/aotoo-koa-server`: 基于aotoo的server端类库，融合到aotoo-hub中使用，不支持独立使用  
+`aotoo-cli`: 命令行工具，用于安装完整的大前端环境，包括编译，输出，部署等等  
+
+## INSTALL AOTOO
 
 ```bash
 yarn add @aotoo/aotoo
@@ -14,7 +62,9 @@ yarn add @aotoo/aotoo
 npm install @aotoo/aotoo
 ```
 
-## USAGE 1 计数器
+## DEMO 1  
+
+封装REACT组件的计数器
 
 封装react原生组件，并曝露api方法以方便外部修改组件状态  
 下例是一个简单的计数器组件，为react原生组件添加了属性和api方法，其中api暴露给外部使用，如下例中的button按钮通过暴露的increase方法设置组件计数
@@ -57,7 +107,9 @@ function Container() {
 ReactDOM.render(<Container />, document.getElementById('root'))
 ```
 
-## USAGE 2 配置化计数器组件
+## DEMO 2  
+
+配置化计数器组件
 
 封装配置，并生成js对象及曝露该对象的api方法  
 参考微信小程序组件的设计，使用配置化生成react组件，并对外曝露相关api方法  

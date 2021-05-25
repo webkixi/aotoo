@@ -53,6 +53,7 @@ function UIitem(props) {
 
 function Vview(props) {
   if (lib.isReactNative()) {
+    // 需要指定React Native的全局的JSX标签
     return /*#__PURE__*/React.createElement(View, props, props.children);
   }
 
@@ -61,6 +62,7 @@ function Vview(props) {
 
 function Ttext(props) {
   if (lib.isReactNative()) {
+    // 需要指定React Native的全局的JSX标签
     return /*#__PURE__*/React.createElement(Text, props, props.children);
   }
 
@@ -169,7 +171,11 @@ function Img(_props) {
     }, props);
   }
 
-  return /*#__PURE__*/React.createElement("img", props);
+  if (lib.isReactNative()) {
+    return /*#__PURE__*/React.createElement(Image, props);
+  } else {
+    return /*#__PURE__*/React.createElement("img", props);
+  }
 }
 
 function Body(_props) {
