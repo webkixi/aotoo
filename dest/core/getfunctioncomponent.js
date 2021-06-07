@@ -77,7 +77,18 @@ function getFunctionComponent(_data, parent, template, splitProps) {
         status = _useState2[0],
         setStatus = _useState2[1];
 
+    var _useState3 = useState(parent.__showStat),
+        _useState4 = _slicedToArray(_useState3, 2),
+        showStat = _useState4[0],
+        setShowstat = _useState4[1];
+
     var context = {
+      show: function show(cb) {
+        setShowstat(true, cb);
+      },
+      hide: function hide(cb) {
+        setShowstat(false, cb);
+      },
       reset: function reset(param, cb) {
         parent.children.forEach(function (it) {
           return it.destory();
@@ -170,7 +181,7 @@ function getFunctionComponent(_data, parent, template, splitProps) {
       };
     }); // }, [status])
 
-    if (parent.__showStat) {
+    if (showStat) {
       var cloneState = lib.cloneDeep(status);
       var cloneProps = lib.cloneDeep(props);
       var JSX = template.call(parent, cloneState, cloneProps, $ref);

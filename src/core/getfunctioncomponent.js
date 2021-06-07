@@ -45,8 +45,15 @@ function getFunctionComponent(_data, parent, template, splitProps){
     }
 
     const [status, setStatus] = useState(state);
+    const [showStat, setShowstat] = useState(parent.__showStat);
 
     let context = {
+      show(cb){
+        setShowstat(true, cb)
+      },
+      hide(cb){
+        setShowstat(false, cb)
+      },
       reset(param, cb){
         parent.children.forEach(it=>it.destory())
         parent.children = []
@@ -131,7 +138,7 @@ function getFunctionComponent(_data, parent, template, splitProps){
     })
     // }, [status])
     
-    if (parent.__showStat) {
+    if (showStat) {
       let cloneState = lib.cloneDeep(status)
       let cloneProps = lib.cloneDeep(props)
       let JSX = template.call(parent, cloneState, cloneProps, $ref)

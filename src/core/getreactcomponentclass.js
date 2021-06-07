@@ -13,7 +13,7 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       // _data = Object.assign({}, _data, propsData)
       _data = Object.assign({}, parent.data, propsData)
       // let myState = splitProps ? _data : Object.assign({}, _data, props);
-      let myState = Object.assign({}, _data, props);
+      let myState = Object.assign({}, _data, props, {showStat: parent.__showStat});
       this.state = myState;
       this.template = template;
       this.selfStateChanging = false
@@ -34,6 +34,18 @@ function getReactComponentClass(_data, parent, template, splitProps) {
         parent._onload_(this.props)
       }
       this.syncParentData(this.props);
+    }
+
+    show(cb){
+      if (parent.hasMounted) {
+        this.setState({showStat: true}, cb)
+      }
+    }
+
+    hide(cb){
+      if (parent.hasMounted) {
+        this.setState({showStat: false}, cb)
+      }
     }
 
     // 组件内修改state后，不允许props从外部污染数据
@@ -191,7 +203,8 @@ function getReactComponentClass(_data, parent, template, splitProps) {
 
     render() {
       parent.uiCount++
-      if (parent.__showStat) {
+      // if (parent.__showStat) {
+      if (this.state.showStat) {
         let state = lib.cloneDeep(this.state)
         let props = lib.cloneDeep(this.props)
         let JSX = template.call(parent, state, props, this.ref)

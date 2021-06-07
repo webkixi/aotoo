@@ -450,13 +450,15 @@ var baseClass = /*#__PURE__*/function () {
     }
   }, {
     key: "show",
-    value: function show() {
+    value: function show(cb) {
       this.__showStat = true;
+      this.reactComponentInstance && this.reactComponentInstance.show(cb);
     }
   }, {
     key: "hide",
-    value: function hide() {
+    value: function hide(cb) {
       this.__showStat = false;
+      this.reactComponentInstance && this.reactComponentInstance.hide(cb);
     }
   }, {
     key: "destory",

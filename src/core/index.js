@@ -358,12 +358,14 @@ class baseClass {
     }
   }
 
-  show(){
+  show(cb){
     this.__showStat = true
+    this.reactComponentInstance && this.reactComponentInstance.show(cb)
   }
 
-  hide(){
+  hide(cb){
     this.__showStat = false
+    this.reactComponentInstance && this.reactComponentInstance.hide(cb)
   }
 
   destory(){

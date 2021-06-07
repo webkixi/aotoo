@@ -55,7 +55,9 @@ function getReactComponentClass(_data, parent, template, splitProps) {
 
       _data = Object.assign({}, parent.data, propsData); // let myState = splitProps ? _data : Object.assign({}, _data, props);
 
-      var myState = Object.assign({}, _data, props);
+      var myState = Object.assign({}, _data, props, {
+        showStat: parent.__showStat
+      });
       _this.state = myState;
       _this.template = template;
       _this.selfStateChanging = false;
@@ -79,11 +81,29 @@ function getReactComponentClass(_data, parent, template, splitProps) {
       _this.syncParentData(_this.props);
 
       return _this;
-    } // 组件内修改state后，不允许props从外部污染数据
-    // reset之后，恢复从props穿透数据渲染
-
+    }
 
     _createClass(InnerClass, [{
+      key: "show",
+      value: function show(cb) {
+        if (parent.hasMounted) {
+          this.setState({
+            showStat: true
+          }, cb);
+        }
+      }
+    }, {
+      key: "hide",
+      value: function hide(cb) {
+        if (parent.hasMounted) {
+          this.setState({
+            showStat: false
+          }, cb);
+        }
+      } // 组件内修改state后，不允许props从外部污染数据
+      // reset之后，恢复从props穿透数据渲染
+
+    }, {
       key: "reset",
       value: function reset(param, cb) {
         parent.children.forEach(function (it) {
@@ -216,9 +236,9 @@ function getReactComponentClass(_data, parent, template, splitProps) {
     }, {
       key: "render",
       value: function render() {
-        parent.uiCount++;
+        parent.uiCount++; // if (parent.__showStat) {
 
-        if (parent.__showStat) {
+        if (this.state.showStat) {
           var state = lib.cloneDeep(this.state);
           var props = lib.cloneDeep(this.props);
           var JSX = template.call(parent, state, props, this.ref); // if (lib.isFunction(JSX.then)) {
